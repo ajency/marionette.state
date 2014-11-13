@@ -21,7 +21,14 @@
 ) this, (root, Backbone, _, Marionette) ->
 	"use strict"
 
-	# @include ../marionette-state.coffee
+	VERSION = '0.1.0'
+	
+	Marionette.State = Marionette.Object.extend
+		
+		version : VERSION
+	
+		initialize : (options = {})->
+			
 	
 	
 	Marionette.State

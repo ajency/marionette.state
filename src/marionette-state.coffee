@@ -1,3 +1,8 @@
-State = null
+VERSION = '0.1.0'
 
-class Marionette.State extends Marionette.Object
+Marionette.State = Marionette.Object.extend
+	
+	version : VERSION
+
+	initialize : (options = {})->
+		

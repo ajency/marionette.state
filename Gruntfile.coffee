@@ -1,6 +1,3 @@
-
-_ = require 'underscore'
-
 module.exports = (grunt) ->
 
 	require("load-grunt-tasks") grunt
@@ -30,7 +27,7 @@ module.exports = (grunt) ->
 				files: [
 					"src/**/*.coffee"
 				]
-				tasks: ["preprocess:dev", "coffee:app"]
+				tasks: ["preprocess:dev", "coffee:dev"]
 
 
 	grunt.registerTask "dev", [
