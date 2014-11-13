@@ -1,0 +1,33 @@
+{
+  "name": "marionette-state",
+  "version": "0.1.0",
+  "description": "State based routing for marionette js applications",
+  "main": "dist/marionette-state.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://surajair@github.com/surajair/marionette-state.git"
+  },
+  "keywords": [
+    "MarionetteJS",
+    "ui-router",
+    "state",
+    "routing",
+    "state",
+    "machine"
+  ],
+  "author": "Suraj Air <surajair@live.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/surajair/marionette-state/issues"
+  },
+  "homepage": "https://github.com/surajair/marionette-state",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-coffee": "^0.12.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-preprocess": "^4.0.0"
+  }
+}
