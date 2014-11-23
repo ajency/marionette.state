@@ -30,5 +30,4 @@
 		initialize : (options = {})->
 			
 	
-	
 	Marionette.State
