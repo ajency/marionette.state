@@ -17,14 +17,58 @@
   }
 })(this, function(root, Backbone, _, Marionette) {
   "use strict";
-  var VERSION;
-  VERSION = '0.1.0';
-  Marionette.State = Marionette.Object.extend({
-    version: VERSION,
-    initialize: function(options) {
+  _.extend(Marionette.Application.prototype, {
+    start: function(options) {
+      var _possibleRegions;
       if (options == null) {
         options = {};
       }
+      _possibleRegions = $('[ui-region]').each((function(_this) {
+        return function(index, region) {
+          var regionName;
+          regionName = $(region).attr('ui-region');
+          if (_.isEmpty(regionName)) {
+            regionName = 'dynamicRegion';
+          } else {
+            regionName = "" + regionName + "Region";
+          }
+          return _this._regionManager.addRegion(regionName, {
+            selector: $(region)
+          });
+        };
+      })(this));
+      this.triggerMethod('before:start', options);
+      this._initCallbacks.run(options, this);
+      return this.triggerMethod('start', options);
+    }
+  });
+  _.extend(Marionette.LayoutView.prototype, {
+    render: function() {
+      this._ensureViewIsIntact();
+      if (this._firstRender) {
+        this._firstRender = false;
+      } else {
+        this._reInitializeRegions();
+      }
+      Marionette.ItemView.prototype.render.apply(this, arguments);
+      this._identifyRegions();
+      return this;
+    },
+    _identifyRegions: function() {
+      return this.$el.find('[ui-region]').each((function(_this) {
+        return function(index, region) {
+          var regionName;
+          regionName = $(region).attr('ui-region');
+          if (_.isEmpty(regionName)) {
+            regionName = 'dynamicRegion';
+          } else {
+            regionName = "" + regionName + "Region";
+          }
+          return _this.addRegion(regionName, {
+            selector: $(region)
+          });
+        };
+      })(this));
     }
   });
   return Marionette.State;
