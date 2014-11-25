@@ -1,40 +1,5 @@
-var clearCurrentUser, setCurrentUser,
-  __hasProp = {}.hasOwnProperty,
+var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-window.FB = {
-  login: function() {},
-  api: function(url, cb) {
-    return cb({
-      email: 'someemail@mail.com'
-    });
-  }
-};
-
-window.APIURL = 'http://localhost/project/wp-api';
-
-setCurrentUser = function() {
-  var userData;
-  userData = {
-    ID: 1,
-    user_name: 'admin',
-    user_email: 'admin@mailinator.com',
-    caps: {
-      edit_post: true,
-      read_others_post: false
-    }
-  };
-  return window.currentUser.set(userData);
-};
-
-clearCurrentUser = function() {
-  return window.currentUser.clear();
-};
-
-beforeEach(function() {
-  this.setFixtures = setFixtures;
-  return this.loadFixtures = loadFixtures;
-});
 
 afterEach(function() {
   window.location.hash = '';
@@ -79,5 +44,29 @@ describe('Marionette.LayoutView on render', function() {
   return it('must identify regions based on ui-region', function() {
     expect(layoutView.dynamicRegion).toEqual(jasmine.any(Marionette.Region));
     return expect(layoutView.namedRegion).toEqual(jasmine.any(Marionette.Region));
+  });
+});
+
+describe('Marionette.States', function() {
+  return describe('when the routes are configured and the controller exists', function() {
+    beforeEach(function() {
+      var StateRouter, currentUser;
+      currentUser = jasmine.createSpy('currentUser');
+      this.LoginCtrl = jasmine.createSpy('LoginCtrl');
+      StateRouter = Marionette.AppStates.extend({
+        appStates: {
+          'login': {
+            cap: 'can_login',
+            url: '/login'
+          }
+        }
+      });
+      this.route = new StateRouter;
+      Backbone.history.start();
+      return this.route.navigate('/login', true);
+    });
+    return it('must call the LoginCtrl controller ', function() {
+      return expect(this.LoginCtrl).toHaveBeenCalled();
+    });
   });
 });

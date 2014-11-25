@@ -1,3 +1,6 @@
+var __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
 (function(root, factory) {
   var Backbone, Marionette, _;
   Backbone = void 0;
@@ -71,5 +74,31 @@
       })(this));
     }
   });
+  Marionette.AppStates = (function(_super) {
+    __extends(AppStates, _super);
+
+    function AppStates(options) {
+      if (options == null) {
+        options = {};
+      }
+      AppStates.__super__.constructor.call(this, options);
+      this.appStates = Marionette.getOption(this, 'appStates');
+      this.processStates(this.appStates);
+      this.on('route', this._processState, this);
+    }
+
+    AppStates.prototype._processRoute = function(name, args) {
+      return console.log(name, args);
+    };
+
+    AppStates.prototype.processStates = function(states) {
+      return _.each(states, function(state) {
+        return console.log(state);
+      });
+    };
+
+    return AppStates;
+
+  })(Backbone.Router);
   return Marionette.State;
 });

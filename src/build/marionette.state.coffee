@@ -21,6 +21,7 @@
 ) this, (root, Backbone, _, Marionette) ->
 	"use strict"
 
-	# @include ../marionette.state.coffee
+	# @include ../marionette.region.coffee
+	# @include ../marionette.states.coffee
 	
 	Marionette.State

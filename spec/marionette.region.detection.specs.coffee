@@ -1,8 +1,3 @@
-afterEach ->
-	window.location.hash = ''
-	Backbone.history.stop()
-	Backbone.history.handlers.length = 0
-
 describe 'Marionette.Application on before start', ->
 
 	app = null
@@ -33,26 +28,3 @@ describe 'Marionette.LayoutView on render', ->
 		expect(layoutView.dynamicRegion).toEqual jasmine.any Marionette.Region
 		expect(layoutView.namedRegion).toEqual jasmine.any Marionette.Region
 
-
-describe 'Marionette.States', ->
-
-	describe 'when the routes are configured and the controller exists', ->
-
-		beforeEach ->
-			currentUser = jasmine.createSpy 'currentUser'
-			@LoginCtrl = jasmine.createSpy 'LoginCtrl'
-			StateRouter = Marionette.AppStates.extend
-							appStates :
-								'login' :
-									cap : 'can_login'
-									url : '/login'
-
-			@route = new StateRouter
-			Backbone.history.start()
-			@route.navigate('/login', true)
-
-		it 'must call the LoginCtrl controller ', ->
-			expect(@LoginCtrl).toHaveBeenCalled()
-
-
-	
