@@ -86,6 +86,26 @@ class Marionette.AppStates extends Backbone.Router
 		stateModel = window.statesCollection.get name
 		stateModel.set 'status', 'active'
 
+		if stateModel.has('views') and false is stateModel.get 'parent' 
+			
+			views = stateModel.get 'views'
+			_.each views, (value, key)=>
+				ctrl = value['ctrl']
+				if _.isUndefined window[ctrl]
+					throw new Marionette.Error
+							message : 'Controller not defined. Define a controller at window.' + ctrl
+
+				if key is ''
+					_region = @app.dynamicRegion
+				else
+					_region = @app["#{key}Region"]
+
+				new window[ctrl]
+					region : _region
+					stateParams : args
+
+			return
+
 		# get controller
 		ctrl = stateModel.get 'ctrl'
 		if _.isUndefined window[ctrl]

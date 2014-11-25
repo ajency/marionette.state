@@ -25,6 +25,8 @@ describe 'Process a state on route event',->
 		window.location.hash = ''
 		Backbone.history.stop()
 		Backbone.history.handlers.length = 0
+		statesCollection.set []
+
 
 
 	it 'must call _processState with args', ->
@@ -51,6 +53,8 @@ describe 'When processing state with no parent', ->
 
 	afterEach ->
 		window['StateOneCtrl'] = Marionette.Controller.extend()
+		statesCollection.set []
+
 
 	it 'must make the state active', ->
 		expect(@state1.isActive()).toBe true
@@ -63,6 +67,49 @@ describe 'When processing state with no parent', ->
 			region : @app.dynamicRegion
 			stateParams : [null]
 		expect(window.StateOneCtrl).toHaveBeenCalledWith data
+
+
+describe 'When processing state with no parent and more then 1 view', ->
+
+	beforeEach ->
+		setFixtures '<div ui-region></div><div ui-region="name"></div>'
+		@app = new Marionette.Application
+		window['SomeCtrl'] =  Marionette.Controller.extend()
+		window['SomeNameCtrl'] =  Marionette.Controller.extend()
+		spyOn(window, 'SomeCtrl')
+		spyOn(window, 'SomeNameCtrl')
+		States = Marionette.AppStates.extend
+					appStates : 
+						'stateOne' : 
+							url : '/stateOneUrl'
+							views : 
+								"" : ctrl : 'SomeCtrl'
+								'name' : ctrl : 'SomeNameCtrl'
+
+		@app.addInitializer =>
+			@router = new States app : @app
+			Backbone.history.start()
+			@router.navigate '/stateOneUrl', true
+
+		@app.start()
+		@state1 = statesCollection.get 'stateOne'
+
+	afterEach ->
+		statesCollection.set []
+
+	it 'must run SomeCtrl in dynamic region', ->
+		data = 
+			region : @app.dynamicRegion
+			stateParams : [null]
+		expect(window.SomeCtrl).toHaveBeenCalledWith data
+
+	it 'must run SomeNameCtrl in app.nameRegion', ->
+		data = 
+			region : @app.nameRegion
+			stateParams : [null]
+		expect(window.SomeNameCtrl).toHaveBeenCalledWith data
+
+
 
 
 

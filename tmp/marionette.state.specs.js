@@ -260,7 +260,8 @@ describe('Process a state on route event', function() {
   afterEach(function() {
     window.location.hash = '';
     Backbone.history.stop();
-    return Backbone.history.handlers.length = 0;
+    Backbone.history.handlers.length = 0;
+    return statesCollection.set([]);
   });
   return it('must call _processState with args', function() {
     expect(this.router._processState).toHaveBeenCalled();
@@ -296,7 +297,8 @@ describe('When processing state with no parent', function() {
     return this.state1 = statesCollection.get('stateOne');
   });
   afterEach(function() {
-    return window['StateOneCtrl'] = Marionette.Controller.extend();
+    window['StateOneCtrl'] = Marionette.Controller.extend();
+    return statesCollection.set([]);
   });
   it('must make the state active', function() {
     return expect(this.state1.isActive()).toBe(true);
@@ -311,5 +313,62 @@ describe('When processing state with no parent', function() {
       stateParams: [null]
     };
     return expect(window.StateOneCtrl).toHaveBeenCalledWith(data);
+  });
+});
+
+describe('When processing state with no parent and more then 1 view', function() {
+  beforeEach(function() {
+    var States;
+    setFixtures('<div ui-region></div><div ui-region="name"></div>');
+    this.app = new Marionette.Application;
+    window['SomeCtrl'] = Marionette.Controller.extend();
+    window['SomeNameCtrl'] = Marionette.Controller.extend();
+    spyOn(window, 'SomeCtrl');
+    spyOn(window, 'SomeNameCtrl');
+    States = Marionette.AppStates.extend({
+      appStates: {
+        'stateOne': {
+          url: '/stateOneUrl',
+          views: {
+            "": {
+              ctrl: 'SomeCtrl'
+            },
+            'name': {
+              ctrl: 'SomeNameCtrl'
+            }
+          }
+        }
+      }
+    });
+    this.app.addInitializer((function(_this) {
+      return function() {
+        _this.router = new States({
+          app: _this.app
+        });
+        Backbone.history.start();
+        return _this.router.navigate('/stateOneUrl', true);
+      };
+    })(this));
+    this.app.start();
+    return this.state1 = statesCollection.get('stateOne');
+  });
+  afterEach(function() {
+    return statesCollection.set([]);
+  });
+  it('must run SomeCtrl in dynamic region', function() {
+    var data;
+    data = {
+      region: this.app.dynamicRegion,
+      stateParams: [null]
+    };
+    return expect(window.SomeCtrl).toHaveBeenCalledWith(data);
+  });
+  return it('must run SomeNameCtrl in app.nameRegion', function() {
+    var data;
+    data = {
+      region: this.app.nameRegion,
+      stateParams: [null]
+    };
+    return expect(window.SomeNameCtrl).toHaveBeenCalledWith(data);
   });
 });

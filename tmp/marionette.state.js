@@ -196,12 +196,36 @@ var __hasProp = {}.hasOwnProperty,
     }
 
     AppStates.prototype._processState = function(name, args) {
-      var ctrl, stateModel, _region;
+      var ctrl, stateModel, views, _region;
       if (args == null) {
         args = [];
       }
       stateModel = window.statesCollection.get(name);
       stateModel.set('status', 'active');
+      if (stateModel.has('views') && false === stateModel.get('parent')) {
+        views = stateModel.get('views');
+        _.each(views, (function(_this) {
+          return function(value, key) {
+            var ctrl, _region;
+            ctrl = value['ctrl'];
+            if (_.isUndefined(window[ctrl])) {
+              throw new Marionette.Error({
+                message: 'Controller not defined. Define a controller at window.' + ctrl
+              });
+            }
+            if (key === '') {
+              _region = _this.app.dynamicRegion;
+            } else {
+              _region = _this.app["" + key + "Region"];
+            }
+            return new window[ctrl]({
+              region: _region,
+              stateParams: args
+            });
+          };
+        })(this));
+        return;
+      }
       ctrl = stateModel.get('ctrl');
       if (_.isUndefined(window[ctrl])) {
         throw new Marionette.Error({
