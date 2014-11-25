@@ -3,3 +3,4 @@
 #@include marionette.states.spec.coffee
 #@include state.register.spec.coffee
 #@include processstate.spec.coffee
+#@include processchildstate.spec.coffee

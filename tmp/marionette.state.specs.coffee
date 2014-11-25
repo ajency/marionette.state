@@ -4,7 +4,11 @@ afterEach ->
 	Backbone.history.handlers.length = 0
 
 window['StateOneCtrl'] = Marionette.Controller.extend()
+window['StateTwoCtrl'] = Marionette.Controller.extend()
+window['StateThreeCtrl'] = Marionette.Controller.extend()
 window['StateFourCtrl'] = Marionette.Controller.extend()
+window['State1Ctrl'] = Marionette.Controller.extend()
+window['State2Ctrl'] = Marionette.Controller.extend()
 
 describe 'Marionette.Application on before start', ->
 
@@ -234,8 +238,6 @@ describe 'Process a state on route event',->
 		Backbone.history.handlers.length = 0
 		statesCollection.set []
 
-
-
 	it 'must call _processState with args', ->
 		expect(@router._processState).toHaveBeenCalled()
 		expect(-> @router._processState 'stateOne' ).toThrow()
@@ -316,21 +318,46 @@ describe 'When processing state with no parent and more then 1 view', ->
 			stateParams : [null]
 		expect(window.SomeNameCtrl).toHaveBeenCalledWith data
 
+describe 'Process a child state',->
 
+	beforeEach ->
+		setFixture '<div ui-region></div>'
+		@app = new Marionette.Application
+		@app.addRegions
+			dynamicRegion : $('[ui-region')
+			
+		States = Marionette.AppStates.extend
+						appStates : 
+							'stateOne' : 
+								url : '/stateOneUrl'
+							'stateTwo' : 
+								url : '/stateTwoUrl'
+								parent : 'stateOne'
+							'stateThree' : 
+								url : '/stateThreeUrl'
+								parent : 'stateTwo'
+							'stateFour' : 
+								url : '/someurl/:id'
+								parent : 'stateThree'
+								views : 
+									'region1@stateThree' : ctrl : 'State1Ctrl'
+									'region2@stateThree' : ctrl : 'State2Ctrl'
 
+		@router = new States app : @app
 
+	afterEach ->
+		@router = null
+		Backbone.history.stop()
+		statesCollection.set []
 
+	describe 'when processing child state without views', ->
 
+		beforeEach ->
+			spyOn(window, 'StateOneCtrl')
+			Backbone.history.start()
+			@router.navigate '/stateOneUrl/stateTwoUrl', true
 
-
-
-
-
-
-
-
-
-
-
+		it 'must run parent state first', ->
+			expect(window.StateOneCtrl).toHaveBeenCalled()
 
 

@@ -9,7 +9,15 @@ afterEach(function() {
 
 window['StateOneCtrl'] = Marionette.Controller.extend();
 
+window['StateTwoCtrl'] = Marionette.Controller.extend();
+
+window['StateThreeCtrl'] = Marionette.Controller.extend();
+
 window['StateFourCtrl'] = Marionette.Controller.extend();
+
+window['State1Ctrl'] = Marionette.Controller.extend();
+
+window['State2Ctrl'] = Marionette.Controller.extend();
 
 describe('Marionette.Application on before start', function() {
   var app;
@@ -370,5 +378,61 @@ describe('When processing state with no parent and more then 1 view', function()
       stateParams: [null]
     };
     return expect(window.SomeNameCtrl).toHaveBeenCalledWith(data);
+  });
+});
+
+describe('Process a child state', function() {
+  beforeEach(function() {
+    var States;
+    setFixture('<div ui-region></div>');
+    this.app = new Marionette.Application;
+    this.app.addRegions({
+      dynamicRegion: $('[ui-region')
+    });
+    States = Marionette.AppStates.extend({
+      appStates: {
+        'stateOne': {
+          url: '/stateOneUrl'
+        },
+        'stateTwo': {
+          url: '/stateTwoUrl',
+          parent: 'stateOne'
+        },
+        'stateThree': {
+          url: '/stateThreeUrl',
+          parent: 'stateTwo'
+        },
+        'stateFour': {
+          url: '/someurl/:id',
+          parent: 'stateThree',
+          views: {
+            'region1@stateThree': {
+              ctrl: 'State1Ctrl'
+            },
+            'region2@stateThree': {
+              ctrl: 'State2Ctrl'
+            }
+          }
+        }
+      }
+    });
+    return this.router = new States({
+      app: this.app
+    });
+  });
+  afterEach(function() {
+    this.router = null;
+    Backbone.history.stop();
+    return statesCollection.set([]);
+  });
+  return describe('when processing child state without views', function() {
+    beforeEach(function() {
+      spyOn(window, 'StateOneCtrl');
+      Backbone.history.start();
+      return this.router.navigate('/stateOneUrl/stateTwoUrl', true);
+    });
+    return it('must run parent state first', function() {
+      return expect(window.StateOneCtrl).toHaveBeenCalled();
+    });
   });
 });

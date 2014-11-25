@@ -80,6 +80,9 @@
 		isActive : ->
 			@get('status') is 'active'
 	
+		isChildState : ->
+			@get('parent') isnt false
+	
 	
 	class Marionette.StatesCollection extends Backbone.Collection
 		model : Marionette.State
@@ -153,46 +156,69 @@
 	
 		_processState : (name, args = [])->
 			stateModel = window.statesCollection.get name
-			stateModel.set 'status', 'active'
+			if stateModel.isChildState()
+				@_processChildState name, args
+			else
+				stateModel.set 'status', 'active'
+				if stateModel.has('views') and false is stateModel.get 'parent' 
+					
+					views = stateModel.get 'views'
+					_.each views, (value, key)=>
+						ctrl = value['ctrl']
+						if _.isUndefined window[ctrl]
+							throw new Marionette.Error
+									message : 'Controller not defined. Define a controller at window.' + ctrl
 	
-			if stateModel.has('views') and false is stateModel.get 'parent' 
-				
-				views = stateModel.get 'views'
-				_.each views, (value, key)=>
-					ctrl = value['ctrl']
-					if _.isUndefined window[ctrl]
-						throw new Marionette.Error
-								message : 'Controller not defined. Define a controller at window.' + ctrl
+						if key is ''
+							_region = @app.dynamicRegion
+						else
+							_region = @app["#{key}Region"]
 	
-					if key is ''
-						_region = @app.dynamicRegion
-					else
-						_region = @app["#{key}Region"]
+						new window[ctrl]
+							region : _region
+							stateParams : args
 	
-					new window[ctrl]
+					return
+	
+				# get controller
+				ctrl = stateModel.get 'ctrl'
+				if _.isUndefined window[ctrl]
+					throw new Marionette.Error
+							message : 'Controller not defined. Define a controller at window.' + ctrl
+	
+				# get the region to run controller
+				if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
+					throw new Marionette.Error
+							message : 'Dynamic region not defined for app'
+	
+				if false is stateModel.get 'parent' 
+					_region = @app.dynamicRegion
+	
+				new window[ctrl]
 						region : _region
 						stateParams : args
 	
-				return
 	
+		_processChildState : (name, args)->
+			stateModel = window.statesCollection.get name
+			parentState = window.statesCollection.get stateModel.get 'parent'
 			# get controller
-			ctrl = stateModel.get 'ctrl'
+			ctrl = parentState.get 'ctrl'
 			if _.isUndefined window[ctrl]
 				throw new Marionette.Error
 						message : 'Controller not defined. Define a controller at window.' + ctrl
 	
 			# get the region to run controller
-			if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
+			if false is parentState.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
 				throw new Marionette.Error
 						message : 'Dynamic region not defined for app'
 	
-			if false is stateModel.get 'parent' 
+			if false is parentState.get 'parent' 
 				_region = @app.dynamicRegion
 	
 			new window[ctrl]
 					region : _region
 					stateParams : args
-	
 	
 	
 	

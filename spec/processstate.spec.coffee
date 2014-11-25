@@ -27,8 +27,6 @@ describe 'Process a state on route event',->
 		Backbone.history.handlers.length = 0
 		statesCollection.set []
 
-
-
 	it 'must call _processState with args', ->
 		expect(@router._processState).toHaveBeenCalled()
 		expect(-> @router._processState 'stateOne' ).toThrow()
@@ -108,22 +106,3 @@ describe 'When processing state with no parent and more then 1 view', ->
 			region : @app.nameRegion
 			stateParams : [null]
 		expect(window.SomeNameCtrl).toHaveBeenCalledWith data
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
