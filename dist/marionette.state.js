@@ -95,6 +95,10 @@ var __hasProp = {}.hasOwnProperty,
       return this.get('status') === 'active';
     };
 
+    State.prototype.isChildState = function() {
+      return this.get('parent') !== false;
+    };
+
     return State;
 
   })(Backbone.Model);
@@ -192,15 +196,30 @@ var __hasProp = {}.hasOwnProperty,
           return true;
         });
       }, this);
-      this.on('route', this._processState, this);
+      this.on('route', this._processOnRouteState, this);
     }
 
-    AppStates.prototype._processState = function(name, args) {
-      var ctrl, stateModel, views, _region;
+    AppStates.prototype._processOnRouteState = function(name, args) {
+      var stateModel;
       if (args == null) {
         args = [];
       }
       stateModel = window.statesCollection.get(name);
+      if (stateModel.isChildState()) {
+        return this._processChildState(stateModel, args);
+      } else {
+        return this._processState(stateModel, args);
+      }
+    };
+
+    AppStates.prototype._processChildState = function(stateModel, args) {
+      var parentState;
+      parentState = window.statesCollection.get(stateModel.get('parent'));
+      return this._processOnRouteState(parentState.get('name'), args);
+    };
+
+    AppStates.prototype._processState = function(stateModel, args) {
+      var ctrl, views, _region;
       stateModel.set('status', 'active');
       if (stateModel.has('views') && false === stateModel.get('parent')) {
         views = stateModel.get('views');
