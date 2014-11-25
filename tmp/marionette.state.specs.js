@@ -9,6 +9,8 @@ afterEach(function() {
 
 window['StateOneCtrl'] = Marionette.Controller.extend();
 
+window['StateFourCtrl'] = Marionette.Controller.extend();
+
 describe('Marionette.Application on before start', function() {
   var app;
   app = null;
@@ -72,7 +74,9 @@ describe('Marionette.States', function() {
           }
         }
       });
-      return this.states = new States;
+      return this.states = new States({
+        app: new Marionette.Application
+      });
     });
     it('must run addState on collection', function() {
       return expect(statesCollection.addState).toHaveBeenCalledWith('stateName', {
@@ -100,7 +104,9 @@ describe('Marionette.States', function() {
           }
         }
       });
-      this.states = new States;
+      this.states = new States({
+        app: new Marionette.Application
+      });
       this.state1 = statesCollection.get('stateOne');
       return this.state2 = statesCollection.get('stateTwo');
     });
@@ -134,7 +140,9 @@ describe('Marionette.States', function() {
           }
         }
       });
-      this.states = new States;
+      this.states = new States({
+        app: new Marionette.Application
+      });
       this.state1 = statesCollection.get('stateOne');
       this.state2 = statesCollection.get('stateTwo');
       this.state3 = statesCollection.get('stateThree');
@@ -165,7 +173,9 @@ describe('Marionette.States', function() {
           }
         }
       });
-      this.states = new States;
+      this.states = new States({
+        app: new Marionette.Application
+      });
       this.state1 = statesCollection.get('stateOne');
       this.state2 = statesCollection.get('stateTwo');
       return this.state3 = statesCollection.get('stateThree');
@@ -204,7 +214,9 @@ describe('Registering a state with Backbone.Router', function() {
         }
       }
     });
-    this.states = new States;
+    this.states = new States({
+      app: new Marionette.Application
+    });
     this.state1 = statesCollection.get('stateOne');
     this.state2 = statesCollection.get('stateTwo');
     this.state3 = statesCollection.get('stateThree');
@@ -239,7 +251,9 @@ describe('Process a state on route event', function() {
       }
     });
     spyOn(States.prototype, '_processState').and.callThrough();
-    this.router = new States;
+    this.router = new States({
+      app: new Marionette.Application
+    });
     Backbone.history.start();
     return this.router.navigate('/stateOneUrl/someurl/100', true);
   });
@@ -249,13 +263,18 @@ describe('Process a state on route event', function() {
     return Backbone.history.handlers.length = 0;
   });
   return it('must call _processState with args', function() {
-    return expect(this.router._processState).toHaveBeenCalled();
+    expect(this.router._processState).toHaveBeenCalled();
+    return expect(function() {
+      return this.router._processState('stateOne');
+    }).toThrow();
   });
 });
 
 describe('When processing state with no parent', function() {
   beforeEach(function() {
     var States;
+    setFixtures('<div ui-region></div>');
+    this.app = new Marionette.Application;
     spyOn(window, 'StateOneCtrl');
     States = Marionette.AppStates.extend({
       appStates: {
@@ -264,9 +283,16 @@ describe('When processing state with no parent', function() {
         }
       }
     });
-    this.router = new States;
-    Backbone.history.start();
-    this.router.navigate('/stateOneUrl', true);
+    this.app.addInitializer((function(_this) {
+      return function() {
+        _this.router = new States({
+          app: _this.app
+        });
+        Backbone.history.start();
+        return _this.router.navigate('/stateOneUrl', true);
+      };
+    })(this));
+    this.app.start();
     return this.state1 = statesCollection.get('stateOne');
   });
   afterEach(function() {
@@ -275,7 +301,12 @@ describe('When processing state with no parent', function() {
   it('must make the state active', function() {
     return expect(this.state1.isActive()).toBe(true);
   });
-  return it('must run StateOneCtrl controller', function() {
+  it('must run StateOneCtrl controller', function() {
     return expect(window.StateOneCtrl).toHaveBeenCalled();
+  });
+  return it('must run StateOneCtrl with region', function() {
+    return expect(window.StateOneCtrl).toHaveBeenCalledWith({
+      region: this.app.dynamicRegion
+    });
   });
 });

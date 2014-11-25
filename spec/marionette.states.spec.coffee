@@ -18,7 +18,7 @@ describe 'Marionette.States', ->
 								url : '/stateUrl'
 							'stateTwo' : 
 								url : '/stateTwoUrl'
-			@states = new States
+			@states = new States app : new Marionette.Application
 
 		
 		it 'must run addState on collection', ->
@@ -41,7 +41,7 @@ describe 'Marionette.States', ->
 								url : '/stateTwoUrl'
 								ctrl : 'CustomCtrl'
 								
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 
@@ -69,7 +69,7 @@ describe 'Marionette.States', ->
 								url : '/someurl/:id'
 								parent : 'stateOne'
 
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 			@state3 = statesCollection.get 'stateThree'
@@ -96,7 +96,7 @@ describe 'Marionette.States', ->
 								url : '/stateThreeUrl'
 								parent : 'stateTwo'
 
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 			@state3 = statesCollection.get 'stateThree'

@@ -176,6 +176,12 @@ var __hasProp = {}.hasOwnProperty,
         options = {};
       }
       AppStates.__super__.constructor.call(this, options);
+      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
+        throw new Marionette.Error({
+          message: 'Application instance needed'
+        });
+      }
+      this.app = options.app;
       this.appStates = Marionette.getOption(this, 'appStates');
       states = [];
       _.map(this.appStates, function(stateDef, stateName) {
@@ -190,13 +196,26 @@ var __hasProp = {}.hasOwnProperty,
     }
 
     AppStates.prototype._processState = function(name, args) {
-      var ctrl, stateModel;
+      var ctrl, stateModel, _region;
       stateModel = window.statesCollection.get(name);
       stateModel.set('status', 'active');
       ctrl = stateModel.get('ctrl');
-      if (!_.isUndefined(window[ctrl])) {
-        return new window[ctrl];
+      if (_.isUndefined(window[ctrl])) {
+        throw new Marionette.Error({
+          message: 'Controller not defined. Define a controller at window.' + ctrl
+        });
       }
+      if (false === stateModel.get('parent') && (this.app.dynamicRegion instanceof Marionette.Region) !== true) {
+        throw new Marionette.Error({
+          message: 'Dynamic region not defined for app'
+        });
+      }
+      if (false === stateModel.get('parent')) {
+        _region = this.app.dynamicRegion;
+      }
+      return new window[ctrl]({
+        region: _region
+      });
     };
 
     return AppStates;

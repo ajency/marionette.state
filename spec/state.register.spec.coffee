@@ -19,7 +19,7 @@ describe 'Registering a state with Backbone.Router', ->
 								url : '/someurl/:id'
 								parent : 'stateOne'
 
-		@states = new States
+		@states = new States app : new Marionette.Application
 		@state1 = statesCollection.get 'stateOne'
 		@state2 = statesCollection.get 'stateTwo'
 		@state3 = statesCollection.get 'stateThree'

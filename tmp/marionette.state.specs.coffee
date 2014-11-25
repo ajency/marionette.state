@@ -4,6 +4,7 @@ afterEach ->
 	Backbone.history.handlers.length = 0
 
 window['StateOneCtrl'] = Marionette.Controller.extend()
+window['StateFourCtrl'] = Marionette.Controller.extend()
 
 describe 'Marionette.Application on before start', ->
 
@@ -56,7 +57,7 @@ describe 'Marionette.States', ->
 								url : '/stateUrl'
 							'stateTwo' : 
 								url : '/stateTwoUrl'
-			@states = new States
+			@states = new States app : new Marionette.Application
 
 		
 		it 'must run addState on collection', ->
@@ -79,7 +80,7 @@ describe 'Marionette.States', ->
 								url : '/stateTwoUrl'
 								ctrl : 'CustomCtrl'
 								
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 
@@ -107,7 +108,7 @@ describe 'Marionette.States', ->
 								url : '/someurl/:id'
 								parent : 'stateOne'
 
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 			@state3 = statesCollection.get 'stateThree'
@@ -134,7 +135,7 @@ describe 'Marionette.States', ->
 								url : '/stateThreeUrl'
 								parent : 'stateTwo'
 
-			@states = new States
+			@states = new States app : new Marionette.Application
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 			@state3 = statesCollection.get 'stateThree'
@@ -182,7 +183,7 @@ describe 'Registering a state with Backbone.Router', ->
 								url : '/someurl/:id'
 								parent : 'stateOne'
 
-		@states = new States
+		@states = new States app : new Marionette.Application
 		@state1 = statesCollection.get 'stateOne'
 		@state2 = statesCollection.get 'stateTwo'
 		@state3 = statesCollection.get 'stateThree'
@@ -215,7 +216,7 @@ describe 'Process a state on route event',->
 
 		spyOn(States::,'_processState').and.callThrough()
 
-		@router = new States
+		@router = new States app : new Marionette.Application
 		Backbone.history.start()
 		@router.navigate '/stateOneUrl/someurl/100', true
 
@@ -227,20 +228,24 @@ describe 'Process a state on route event',->
 
 	it 'must call _processState with args', ->
 		expect(@router._processState).toHaveBeenCalled()
+		expect(-> @router._processState 'stateOne' ).toThrow()
 
 describe 'When processing state with no parent', ->
 
 	beforeEach ->
+		setFixtures '<div ui-region></div>'
+		@app = new Marionette.Application
 		
 		spyOn(window, 'StateOneCtrl')
 		States = Marionette.AppStates.extend
 					appStates : 
 						'stateOne' : 
 							url : '/stateOneUrl'
-
-		@router = new States
-		Backbone.history.start()
-		@router.navigate '/stateOneUrl', true
+		@app.addInitializer =>
+			@router = new States app : @app
+			Backbone.history.start()
+			@router.navigate '/stateOneUrl', true
+		@app.start()
 		@state1 = statesCollection.get 'stateOne'
 
 	afterEach ->
@@ -251,6 +256,9 @@ describe 'When processing state with no parent', ->
 
 	it 'must run StateOneCtrl controller', ->
 		expect(window.StateOneCtrl).toHaveBeenCalled()
+
+	it 'must run StateOneCtrl with region', ->
+		expect(window.StateOneCtrl).toHaveBeenCalledWith region : @app.dynamicRegion
 
 
 

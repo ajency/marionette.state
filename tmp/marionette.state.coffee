@@ -134,6 +134,12 @@
 	
 		constructor : (options = {})->
 			super options
+			if not options.app or ( options.app instanceof Marionette.Application isnt true)
+				throw new Marionette.Error
+						message : 'Application instance needed'
+	
+			{@app} = options
+	
 			@appStates = Marionette.getOption @, 'appStates'
 			states = []
 			_.map @appStates, (stateDef, stateName)->
@@ -151,8 +157,20 @@
 	
 			# get controller
 			ctrl = stateModel.get 'ctrl'
-			if not _.isUndefined window[ctrl]
-				new window[ctrl]
+			if _.isUndefined window[ctrl]
+				throw new Marionette.Error
+						message : 'Controller not defined. Define a controller at window.' + ctrl
+	
+			# get the region to run controller
+			if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
+				throw new Marionette.Error
+						message : 'Dynamic region not defined for app'
+	
+			if false is stateModel.get 'parent' 
+				_region = @app.dynamicRegion
+	
+			new window[ctrl]
+					region : _region
 	
 	
 	
