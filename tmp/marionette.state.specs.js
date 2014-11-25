@@ -81,7 +81,7 @@ describe('Marionette.States', function() {
       return expect(statesCollection.length).toBe(2);
     });
   });
-  return describe('polyfilling state model', function() {
+  return describe('state controller', function() {
     beforeEach(function() {
       var States;
       States = Marionette.AppStates.extend({
@@ -91,7 +91,7 @@ describe('Marionette.States', function() {
           },
           'stateTwo': {
             url: '/stateTwoUrl',
-            parent: 'stateOne'
+            ctrl: 'CustomCtrl'
           }
         }
       });
@@ -99,9 +99,15 @@ describe('Marionette.States', function() {
       this.state1 = statesCollection.get('stateOne');
       return this.state2 = statesCollection.get('stateTwo');
     });
-    return it('must have controller property defined', function() {
+    afterEach(function() {
+      return statesCollection.set([]);
+    });
+    it('must have controller property defined even if not specified', function() {
       expect(this.state1.has('ctrl')).toBeTruthy();
       return expect(this.state1.get('ctrl')).toEqual('StateOneCtrl');
+    });
+    return it('must override the default behavior if ctrl is provided', function() {
+      return expect(this.state2.get('ctrl')).toEqual('CustomCtrl');
     });
   });
 });
