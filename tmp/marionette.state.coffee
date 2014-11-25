@@ -151,7 +151,7 @@
 	
 			@on 'route', @_processState, @
 	
-		_processState : (name, args)->
+		_processState : (name, args = [])->
 			stateModel = window.statesCollection.get name
 			stateModel.set 'status', 'active'
 	
@@ -171,6 +171,7 @@
 	
 			new window[ctrl]
 					region : _region
+					stateParams : args
 	
 	
 	

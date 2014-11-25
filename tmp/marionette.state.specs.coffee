@@ -145,7 +145,7 @@ describe 'Marionette.States', ->
 			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
 			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
 
-	# describe 'state region', ->
+	# describe 'state views', ->
 
 	# 	beforeEach ->
 	# 		setFixtures '<div ui-region>Region</div>'
@@ -153,14 +153,22 @@ describe 'Marionette.States', ->
 	# 		@app.start()
 	# 		States = Marionette.AppStates.extend
 	# 					appStates : 
-	# 						'stateOne' : 
-	# 							url : '/stateOneUrl'
+	# 						'state1' : 
+	# 							url : '/state1url'
+	# 						'state2' : 
+	# 							url : '/state2url'
+	# 							parent : 'state1'
+	# 							views : 
+	# 								'@state1' : ctrl : 'SomeCtrl'
+	# 								'regionname@state1' : ctrl : 'SomeOtherCtrl'
 
-	# 		@states = new States
+
+
+	# 		@states = new States app : new Marionette.Application
 	# 		@state1 = statesCollection.get 'stateOne'
 
 	# 	it 'must have Application dynamic region as its region', ->
-	# 		expect(@state1.get 'region').toBe @app.dymanicRegion 
+	# 		expect(@state1.get 'views').toBe 
 
 describe 'Registering a state with Backbone.Router', ->
 	
@@ -258,7 +266,10 @@ describe 'When processing state with no parent', ->
 		expect(window.StateOneCtrl).toHaveBeenCalled()
 
 	it 'must run StateOneCtrl with region', ->
-		expect(window.StateOneCtrl).toHaveBeenCalledWith region : @app.dynamicRegion
+		data = 
+			region : @app.dynamicRegion
+			stateParams : [null]
+		expect(window.StateOneCtrl).toHaveBeenCalledWith data
 
 
 

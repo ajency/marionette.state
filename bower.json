@@ -30,11 +30,11 @@
     "tests"
   ],
   "dependencies": {
-    "mustache": "~0.8.2",
     "underscore": "~1.7.0",
     "jquery": "~2.1.1",
     "backbone": "~1.1.2",
-    "backbone.marionette": "~2.2.2"
+    "backbone.marionette": "~2.2.2",
+    "handlebars": "~2.0.0"
   },
   "devDependencies": {
     "jasmine-jquery": "~2.0.5",

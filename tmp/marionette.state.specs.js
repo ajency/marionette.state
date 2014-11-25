@@ -305,8 +305,11 @@ describe('When processing state with no parent', function() {
     return expect(window.StateOneCtrl).toHaveBeenCalled();
   });
   return it('must run StateOneCtrl with region', function() {
-    return expect(window.StateOneCtrl).toHaveBeenCalledWith({
-      region: this.app.dynamicRegion
-    });
+    var data;
+    data = {
+      region: this.app.dynamicRegion,
+      stateParams: [null]
+    };
+    return expect(window.StateOneCtrl).toHaveBeenCalledWith(data);
   });
 });

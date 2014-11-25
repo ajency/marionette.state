@@ -82,7 +82,7 @@ class Marionette.AppStates extends Backbone.Router
 
 		@on 'route', @_processState, @
 
-	_processState : (name, args)->
+	_processState : (name, args = [])->
 		stateModel = window.statesCollection.get name
 		stateModel.set 'status', 'active'
 
@@ -102,6 +102,7 @@ class Marionette.AppStates extends Backbone.Router
 
 		new window[ctrl]
 				region : _region
+				stateParams : args
 
 
 

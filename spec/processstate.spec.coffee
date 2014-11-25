@@ -59,7 +59,10 @@ describe 'When processing state with no parent', ->
 		expect(window.StateOneCtrl).toHaveBeenCalled()
 
 	it 'must run StateOneCtrl with region', ->
-		expect(window.StateOneCtrl).toHaveBeenCalledWith region : @app.dynamicRegion
+		data = 
+			region : @app.dynamicRegion
+			stateParams : [null]
+		expect(window.StateOneCtrl).toHaveBeenCalledWith data
 
 
 
