@@ -48,23 +48,60 @@ describe('Marionette.LayoutView on render', function() {
 });
 
 describe('Marionette.States', function() {
-  return describe('when the routes are configured and the controller exists', function() {
+  describe('States collection', function() {
+    return it('must exists', function() {
+      return expect(window.statesCollection).toEqual(jasmine.any(Marionette.StatesCollection));
+    });
+  });
+  describe('adding states', function() {
     beforeEach(function() {
-      var StateRouter;
-      this.LoginCtrl = jasmine.createSpy('LoginCtrl');
-      StateRouter = Marionette.AppStates.extend({
+      var States;
+      spyOn(statesCollection, 'addState').and.callThrough();
+      States = Marionette.AppStates.extend({
         appStates: {
-          'login': {
-            url: 'login'
+          'stateName': {
+            url: '/stateUrl'
+          },
+          'stateTwo': {
+            url: '/stateTwoUrl'
           }
         }
       });
-      this.route = new StateRouter;
-      Backbone.history.start();
-      return this.route.navigate('login', true);
+      return this.states = new States;
     });
-    return it('must call the LoginCtrl controller ', function() {
-      return expect(this.LoginCtrl).toHaveBeenCalled();
+    it('must run addState on collection', function() {
+      return expect(statesCollection.addState).toHaveBeenCalledWith('stateName', {
+        url: '/stateUrl'
+      });
+    });
+    it('must create a StateModel instance in collection', function() {
+      return expect(statesCollection.get('stateName')).toEqual(jasmine.any(Marionette.State));
+    });
+    return it('must have two models in collection', function() {
+      return expect(statesCollection.length).toBe(2);
+    });
+  });
+  return describe('polyfilling state model', function() {
+    beforeEach(function() {
+      var States;
+      States = Marionette.AppStates.extend({
+        appStates: {
+          'stateOne': {
+            url: '/stateOneUrl'
+          },
+          'stateTwo': {
+            url: '/stateTwoUrl',
+            parent: 'stateOne'
+          }
+        }
+      });
+      this.states = new States;
+      this.state1 = statesCollection.get('stateOne');
+      return this.state2 = statesCollection.get('stateTwo');
+    });
+    return it('must have controller property defined', function() {
+      expect(this.state1.has('ctrl')).toBeTruthy();
+      return expect(this.state1.get('ctrl')).toEqual('StateOneCtrl');
     });
   });
 });

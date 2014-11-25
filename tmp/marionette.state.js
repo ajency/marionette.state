@@ -1,6 +1,5 @@
 var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 (function(root, factory) {
   var Backbone, Marionette, _;
@@ -75,6 +74,56 @@ var __hasProp = {}.hasOwnProperty,
       })(this));
     }
   });
+  Marionette.State = (function(_super) {
+    __extends(State, _super);
+
+    function State() {
+      return State.__super__.constructor.apply(this, arguments);
+    }
+
+    State.prototype.idAttribute = 'name';
+
+    State.prototype.defaults = function() {
+      return {
+        ctrl: ''
+      };
+    };
+
+    return State;
+
+  })(Backbone.Model);
+  Marionette.StatesCollection = (function(_super) {
+    __extends(StatesCollection, _super);
+
+    function StatesCollection() {
+      return StatesCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    StatesCollection.prototype.model = Marionette.State;
+
+    StatesCollection.prototype.addState = function(name, definition) {
+      var data, model;
+      data = {
+        name: name
+      };
+      _.defaults(data, definition);
+      this.add(data);
+      model = this.get(name);
+      if (_.isEmpty(model.get('ctrl'))) {
+        return model.set('ctrl', "" + (this.sentenceCase(name)) + "Ctrl");
+      }
+    };
+
+    StatesCollection.prototype.sentenceCase = function(name) {
+      return name.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1);
+      });
+    };
+
+    return StatesCollection;
+
+  })(Backbone.Collection);
+  window.statesCollection = new Marionette.StatesCollection;
   Marionette.AppStates = (function(_super) {
     __extends(AppStates, _super);
 
@@ -84,29 +133,10 @@ var __hasProp = {}.hasOwnProperty,
       }
       AppStates.__super__.constructor.call(this, options);
       this.appStates = Marionette.getOption(this, 'appStates');
-      this.processStates(this.appStates);
-      this.on('route', this._processState, this);
+      _.map(this.appStates, function(stateDef, stateName) {
+        return statesCollection.addState(stateName, stateDef);
+      });
     }
-
-    AppStates.prototype._processRoute = function(name, args) {
-      return console.log(name, args);
-    };
-
-    AppStates.prototype.processStates = function(states) {
-      return _.each(states, (function(_this) {
-        return function(stateDef, stateName) {
-          return _this.route(stateDef['url'], stateName, _.bind(_this._stateCallback, {
-            def: stateDef
-          }));
-        };
-      })(this));
-    };
-
-    AppStates.prototype._stateCallback = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return console.log(this.def['url']);
-    };
 
     return AppStates;
 
