@@ -1,10 +1,12 @@
 
 class Marionette.State extends Backbone.Model
+
 	idAttribute : 'name'
 
 	defaults : ->
 		ctrl : ''
 		parent : false
+		status : 'inactive'
 
 
 class Marionette.StatesCollection extends Backbone.Collection
@@ -31,7 +33,7 @@ class Marionette.StatesCollection extends Backbone.Collection
 		if false isnt stateModel.get 'parent'
 			computeUrl stateModel
 
-		stateModel.set 'computed_url', computedUrl
+		stateModel.set 'computed_url', computedUrl.substring 1 # remove first '/'
 
 		# state URL array
 		urlArray = []
@@ -47,6 +49,7 @@ class Marionette.StatesCollection extends Backbone.Collection
 			urlToArray stateModel
 
 		stateModel.set 'url_array', urlArray.reverse()
+		stateModel
 
 	sentenceCase : (name)->
 		name.replace /\w\S*/g, (txt)->
@@ -59,5 +62,23 @@ class Marionette.AppStates extends Backbone.Router
 	constructor : (options = {})->
 		super options
 		@appStates = Marionette.getOption @, 'appStates'
+		states = []
 		_.map @appStates, (stateDef, stateName)->
-			statesCollection.addState stateName, stateDef
+			states.push statesCollection.addState stateName, stateDef
+
+		_.each states, (state)->
+			@route state.get('computed_url'), state.get('name'), -> return true
+		, @
+
+		@on 'route', @_processState, @
+
+	_processState : (name, args)->
+		stateModel = window.statesCollection.get name
+		console.log stateModel.get 'computed_url'
+
+
+
+
+
+
+

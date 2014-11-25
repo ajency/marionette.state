@@ -139,10 +139,10 @@ describe('Marionette.States', function() {
       return this.state4 = statesCollection.get('stateFour');
     });
     return it('must append to parent url to generate state url', function() {
-      expect(this.state1.get('computed_url')).toBe('/stateOneUrl');
-      expect(this.state2.get('computed_url')).toBe('/stateOneUrl/stateTwoUrl');
-      expect(this.state3.get('computed_url')).toBe('/stateOneUrl/stateTwoUrl/stateThreeUrl');
-      return expect(this.state4.get('computed_url')).toBe('/stateOneUrl/someurl/:id');
+      expect(this.state1.get('computed_url')).toBe('stateOneUrl');
+      expect(this.state2.get('computed_url')).toBe('stateOneUrl/stateTwoUrl');
+      expect(this.state3.get('computed_url')).toBe('stateOneUrl/stateTwoUrl/stateThreeUrl');
+      return expect(this.state4.get('computed_url')).toBe('stateOneUrl/someurl/:id');
     });
   });
   return describe('state url array', function() {
@@ -173,5 +173,75 @@ describe('Marionette.States', function() {
       expect(this.state2.get('url_array')).toEqual(['/stateOneUrl', '/stateTwoUrl']);
       return expect(this.state3.get('url_array')).toEqual(['/stateOneUrl', '/stateTwoUrl', '/stateThreeUrl']);
     });
+  });
+});
+
+describe('Registering a state with Backbone.Router', function() {
+  afterEach(function() {
+    return statesCollection.set([]);
+  });
+  beforeEach(function() {
+    var States;
+    this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
+    States = Marionette.AppStates.extend({
+      appStates: {
+        'stateOne': {
+          url: '/stateOneUrl'
+        },
+        'stateTwo': {
+          url: '/stateTwoUrl',
+          parent: 'stateOne'
+        },
+        'stateThree': {
+          url: '/stateThreeUrl',
+          parent: 'stateTwo'
+        },
+        'stateFour': {
+          url: '/someurl/:id',
+          parent: 'stateOne'
+        }
+      }
+    });
+    this.states = new States;
+    this.state1 = statesCollection.get('stateOne');
+    this.state2 = statesCollection.get('stateTwo');
+    this.state3 = statesCollection.get('stateThree');
+    return this.state4 = statesCollection.get('stateFour');
+  });
+  return it('must call Backbone.Router.onRoute function', function() {
+    expect(this.routeSpy).toHaveBeenCalledWith(this.state1.get('computed_url'), 'stateOne', jasmine.any(Function));
+    return expect(this.routeSpy).toHaveBeenCalledWith(this.state4.get('computed_url'), 'stateFour', jasmine.any(Function));
+  });
+});
+
+describe('process a state on route event', function() {
+  beforeEach(function() {
+    var States;
+    States = Marionette.AppStates.extend({
+      appStates: {
+        'stateOne': {
+          url: '/stateOneUrl'
+        },
+        'stateTwo': {
+          url: '/stateTwoUrl',
+          parent: 'stateOne'
+        },
+        'stateThree': {
+          url: '/stateThreeUrl',
+          parent: 'stateTwo'
+        },
+        'stateFour': {
+          url: '/someurl/:id',
+          parent: 'stateOne'
+        }
+      }
+    });
+    this.router = new States;
+    spyOn(Marionette.AppStates.prototype, '_processState').and.callThrough();
+    Backbone.history.start();
+    return this.router.navigate('/stateOneUrl/someurl/:id', true);
+  });
+  return it('must call _processState with args', function() {
+    return expect(this.router._processState).toHaveBeenCalled();
   });
 });

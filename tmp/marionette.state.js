@@ -86,7 +86,8 @@ var __hasProp = {}.hasOwnProperty,
     State.prototype.defaults = function() {
       return {
         ctrl: '',
-        parent: false
+        parent: false,
+        status: 'inactive'
       };
     };
 
@@ -131,7 +132,7 @@ var __hasProp = {}.hasOwnProperty,
       if (false !== stateModel.get('parent')) {
         computeUrl(stateModel);
       }
-      stateModel.set('computed_url', computedUrl);
+      stateModel.set('computed_url', computedUrl.substring(1));
       urlArray = [];
       urlArray.push(stateModel.get('url'));
       urlToArray = (function(_this) {
@@ -148,7 +149,8 @@ var __hasProp = {}.hasOwnProperty,
       if (false !== stateModel.get('parent')) {
         urlToArray(stateModel);
       }
-      return stateModel.set('url_array', urlArray.reverse());
+      stateModel.set('url_array', urlArray.reverse());
+      return stateModel;
     };
 
     StatesCollection.prototype.sentenceCase = function(name) {
@@ -165,15 +167,29 @@ var __hasProp = {}.hasOwnProperty,
     __extends(AppStates, _super);
 
     function AppStates(options) {
+      var states;
       if (options == null) {
         options = {};
       }
       AppStates.__super__.constructor.call(this, options);
       this.appStates = Marionette.getOption(this, 'appStates');
+      states = [];
       _.map(this.appStates, function(stateDef, stateName) {
-        return statesCollection.addState(stateName, stateDef);
+        return states.push(statesCollection.addState(stateName, stateDef));
       });
+      _.each(states, function(state) {
+        return this.route(state.get('computed_url'), state.get('name'), function() {
+          return true;
+        });
+      }, this);
+      this.on('route', this._processState, this);
     }
+
+    AppStates.prototype._processState = function(name, args) {
+      var stateModel;
+      stateModel = window.statesCollection.get(name);
+      return console.log(stateModel.get('computed_url'));
+    };
 
     return AppStates;
 

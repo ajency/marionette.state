@@ -76,10 +76,10 @@ describe 'Marionette.States', ->
 			@state4 = statesCollection.get 'stateFour'
 
 		it 'must append to parent url to generate state url', ->
-			expect(@state1.get 'computed_url').toBe '/stateOneUrl'
-			expect(@state2.get 'computed_url').toBe '/stateOneUrl/stateTwoUrl'
-			expect(@state3.get 'computed_url').toBe '/stateOneUrl/stateTwoUrl/stateThreeUrl'
-			expect(@state4.get 'computed_url').toBe '/stateOneUrl/someurl/:id'
+			expect(@state1.get 'computed_url').toBe 'stateOneUrl'
+			expect(@state2.get 'computed_url').toBe 'stateOneUrl/stateTwoUrl'
+			expect(@state3.get 'computed_url').toBe 'stateOneUrl/stateTwoUrl/stateThreeUrl'
+			expect(@state4.get 'computed_url').toBe 'stateOneUrl/someurl/:id'
 
 	
 	describe 'state url array', ->
@@ -102,6 +102,6 @@ describe 'Marionette.States', ->
 			@state3 = statesCollection.get 'stateThree'
 
 		it 'must append to parent url to generate state url', ->
-			expect(@state1.get('url_array')).toEqual ['/stateOneUrl']
+			expect(@state1.get 'url_array').toEqual ['/stateOneUrl']
 			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
 			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
