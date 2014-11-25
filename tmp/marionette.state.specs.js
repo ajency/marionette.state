@@ -48,6 +48,9 @@ describe('Marionette.LayoutView on render', function() {
 });
 
 describe('Marionette.States', function() {
+  afterEach(function() {
+    return statesCollection.set([]);
+  });
   describe('States collection', function() {
     return it('must exists', function() {
       return expect(window.statesCollection).toEqual(jasmine.any(Marionette.StatesCollection));
@@ -81,7 +84,7 @@ describe('Marionette.States', function() {
       return expect(statesCollection.length).toBe(2);
     });
   });
-  return describe('state controller', function() {
+  describe('state controller', function() {
     beforeEach(function() {
       var States;
       States = Marionette.AppStates.extend({
@@ -99,15 +102,76 @@ describe('Marionette.States', function() {
       this.state1 = statesCollection.get('stateOne');
       return this.state2 = statesCollection.get('stateTwo');
     });
-    afterEach(function() {
-      return statesCollection.set([]);
-    });
     it('must have controller property defined even if not specified', function() {
       expect(this.state1.has('ctrl')).toBeTruthy();
       return expect(this.state1.get('ctrl')).toEqual('StateOneCtrl');
     });
     return it('must override the default behavior if ctrl is provided', function() {
       return expect(this.state2.get('ctrl')).toEqual('CustomCtrl');
+    });
+  });
+  describe('state computed url', function() {
+    beforeEach(function() {
+      var States;
+      States = Marionette.AppStates.extend({
+        appStates: {
+          'stateOne': {
+            url: '/stateOneUrl'
+          },
+          'stateTwo': {
+            url: '/stateTwoUrl',
+            parent: 'stateOne'
+          },
+          'stateThree': {
+            url: '/stateThreeUrl',
+            parent: 'stateTwo'
+          },
+          'stateFour': {
+            url: '/someurl/:id',
+            parent: 'stateOne'
+          }
+        }
+      });
+      this.states = new States;
+      this.state1 = statesCollection.get('stateOne');
+      this.state2 = statesCollection.get('stateTwo');
+      this.state3 = statesCollection.get('stateThree');
+      return this.state4 = statesCollection.get('stateFour');
+    });
+    return it('must append to parent url to generate state url', function() {
+      expect(this.state1.get('computed_url')).toBe('/stateOneUrl');
+      expect(this.state2.get('computed_url')).toBe('/stateOneUrl/stateTwoUrl');
+      expect(this.state3.get('computed_url')).toBe('/stateOneUrl/stateTwoUrl/stateThreeUrl');
+      return expect(this.state4.get('computed_url')).toBe('/stateOneUrl/someurl/:id');
+    });
+  });
+  return describe('state url array', function() {
+    beforeEach(function() {
+      var States;
+      States = Marionette.AppStates.extend({
+        appStates: {
+          'stateOne': {
+            url: '/stateOneUrl'
+          },
+          'stateTwo': {
+            url: '/stateTwoUrl',
+            parent: 'stateOne'
+          },
+          'stateThree': {
+            url: '/stateThreeUrl',
+            parent: 'stateTwo'
+          }
+        }
+      });
+      this.states = new States;
+      this.state1 = statesCollection.get('stateOne');
+      this.state2 = statesCollection.get('stateTwo');
+      return this.state3 = statesCollection.get('stateThree');
+    });
+    return it('must append to parent url to generate state url', function() {
+      expect(this.state1.get('url_array')).toEqual(['/stateOneUrl']);
+      expect(this.state2.get('url_array')).toEqual(['/stateOneUrl', '/stateTwoUrl']);
+      return expect(this.state3.get('url_array')).toEqual(['/stateOneUrl', '/stateTwoUrl', '/stateThreeUrl']);
     });
   });
 });

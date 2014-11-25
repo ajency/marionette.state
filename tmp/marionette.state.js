@@ -85,7 +85,8 @@ var __hasProp = {}.hasOwnProperty,
 
     State.prototype.defaults = function() {
       return {
-        ctrl: ''
+        ctrl: '',
+        parent: false
       };
     };
 
@@ -102,16 +103,52 @@ var __hasProp = {}.hasOwnProperty,
     StatesCollection.prototype.model = Marionette.State;
 
     StatesCollection.prototype.addState = function(name, definition) {
-      var data, model;
+      var computeUrl, computedUrl, data, stateModel, urlArray, urlToArray;
+      if (definition == null) {
+        definition = {};
+      }
       data = {
         name: name
       };
       _.defaults(data, definition);
       this.add(data);
-      model = this.get(name);
-      if (_.isEmpty(model.get('ctrl'))) {
-        return model.set('ctrl', "" + (this.sentenceCase(name)) + "Ctrl");
+      stateModel = this.get(name);
+      if (_.isEmpty(stateModel.get('ctrl'))) {
+        stateModel.set('ctrl', "" + (this.sentenceCase(name)) + "Ctrl");
       }
+      computedUrl = stateModel.get('url');
+      computeUrl = (function(_this) {
+        return function(state) {
+          var parent, parentState;
+          parent = state.get('parent');
+          parentState = _this.get(parent);
+          computedUrl = "" + (parentState.get('url')) + computedUrl;
+          if (false !== parentState.get('parent')) {
+            return computeUrl(parentState);
+          }
+        };
+      })(this);
+      if (false !== stateModel.get('parent')) {
+        computeUrl(stateModel);
+      }
+      stateModel.set('computed_url', computedUrl);
+      urlArray = [];
+      urlArray.push(stateModel.get('url'));
+      urlToArray = (function(_this) {
+        return function(state) {
+          var parent, parentState;
+          parent = state.get('parent');
+          parentState = _this.get(parent);
+          urlArray.push(parentState.get('url'));
+          if (false !== parentState.get('parent')) {
+            return urlToArray(parentState);
+          }
+        };
+      })(this);
+      if (false !== stateModel.get('parent')) {
+        urlToArray(stateModel);
+      }
+      return stateModel.set('url_array', urlArray.reverse());
     };
 
     StatesCollection.prototype.sentenceCase = function(name) {

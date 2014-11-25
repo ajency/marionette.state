@@ -36,6 +36,9 @@ describe 'Marionette.LayoutView on render', ->
 
 describe 'Marionette.States', ->
 
+	afterEach ->
+			statesCollection.set []
+
 	describe 'States collection', ->
 
 		it 'must exists', ->
@@ -53,6 +56,7 @@ describe 'Marionette.States', ->
 								url : '/stateTwoUrl'
 			@states = new States
 
+		
 		it 'must run addState on collection', ->
 			expect(statesCollection.addState).toHaveBeenCalledWith 'stateName', url : '/stateUrl'
 
@@ -77,9 +81,6 @@ describe 'Marionette.States', ->
 			@state1 = statesCollection.get 'stateOne'
 			@state2 = statesCollection.get 'stateTwo'
 
-		afterEach ->
-			statesCollection.set []
-
 		it 'must have controller property defined even if not specified', ->
 			expect(@state1.has 'ctrl').toBeTruthy()
 			expect(@state1.get 'ctrl').toEqual 'StateOneCtrl'
@@ -87,7 +88,56 @@ describe 'Marionette.States', ->
 		it 'must override the default behavior if ctrl is provided', ->
 			expect(@state2.get 'ctrl').toEqual 'CustomCtrl'
 
-			
+	describe 'state computed url', ->
+
+		beforeEach ->
+			States = Marionette.AppStates.extend
+						appStates : 
+							'stateOne' : 
+								url : '/stateOneUrl'
+							'stateTwo' : 
+								url : '/stateTwoUrl'
+								parent : 'stateOne'
+							'stateThree' : 
+								url : '/stateThreeUrl'
+								parent : 'stateTwo'
+							'stateFour' : 
+								url : '/someurl/:id'
+								parent : 'stateOne'
+
+			@states = new States
+			@state1 = statesCollection.get 'stateOne'
+			@state2 = statesCollection.get 'stateTwo'
+			@state3 = statesCollection.get 'stateThree'
+			@state4 = statesCollection.get 'stateFour'
+
+		it 'must append to parent url to generate state url', ->
+			expect(@state1.get 'computed_url').toBe '/stateOneUrl'
+			expect(@state2.get 'computed_url').toBe '/stateOneUrl/stateTwoUrl'
+			expect(@state3.get 'computed_url').toBe '/stateOneUrl/stateTwoUrl/stateThreeUrl'
+			expect(@state4.get 'computed_url').toBe '/stateOneUrl/someurl/:id'
 
 	
-	
+	describe 'state url array', ->
+
+		beforeEach ->
+			States = Marionette.AppStates.extend
+						appStates : 
+							'stateOne' : 
+								url : '/stateOneUrl'
+							'stateTwo' : 
+								url : '/stateTwoUrl'
+								parent : 'stateOne'
+							'stateThree' : 
+								url : '/stateThreeUrl'
+								parent : 'stateTwo'
+
+			@states = new States
+			@state1 = statesCollection.get 'stateOne'
+			@state2 = statesCollection.get 'stateTwo'
+			@state3 = statesCollection.get 'stateThree'
+
+		it 'must append to parent url to generate state url', ->
+			expect(@state1.get('url_array')).toEqual ['/stateOneUrl']
+			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
+			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
