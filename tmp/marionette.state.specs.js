@@ -7,6 +7,8 @@ afterEach(function() {
   return Backbone.history.handlers.length = 0;
 });
 
+window['StateOneCtrl'] = Marionette.Controller.extend();
+
 describe('Marionette.Application on before start', function() {
   var app;
   app = null;
@@ -214,7 +216,7 @@ describe('Registering a state with Backbone.Router', function() {
   });
 });
 
-describe('process a state on route event', function() {
+describe('Process a state on route event', function() {
   beforeEach(function() {
     var States;
     States = Marionette.AppStates.extend({
@@ -236,12 +238,44 @@ describe('process a state on route event', function() {
         }
       }
     });
+    spyOn(States.prototype, '_processState').and.callThrough();
     this.router = new States;
-    spyOn(Marionette.AppStates.prototype, '_processState').and.callThrough();
     Backbone.history.start();
-    return this.router.navigate('/stateOneUrl/someurl/:id', true);
+    return this.router.navigate('/stateOneUrl/someurl/100', true);
+  });
+  afterEach(function() {
+    window.location.hash = '';
+    Backbone.history.stop();
+    return Backbone.history.handlers.length = 0;
   });
   return it('must call _processState with args', function() {
     return expect(this.router._processState).toHaveBeenCalled();
+  });
+});
+
+describe('When processing state with no parent', function() {
+  beforeEach(function() {
+    var States;
+    spyOn(window, 'StateOneCtrl');
+    States = Marionette.AppStates.extend({
+      appStates: {
+        'stateOne': {
+          url: '/stateOneUrl'
+        }
+      }
+    });
+    this.router = new States;
+    Backbone.history.start();
+    this.router.navigate('/stateOneUrl', true);
+    return this.state1 = statesCollection.get('stateOne');
+  });
+  afterEach(function() {
+    return window['StateOneCtrl'] = Marionette.Controller.extend();
+  });
+  it('must make the state active', function() {
+    return expect(this.state1.isActive()).toBe(true);
+  });
+  return it('must run StateOneCtrl controller', function() {
+    return expect(window.StateOneCtrl).toHaveBeenCalled();
   });
 });

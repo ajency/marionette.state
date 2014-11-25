@@ -8,6 +8,9 @@ class Marionette.State extends Backbone.Model
 		parent : false
 		status : 'inactive'
 
+	isActive : ->
+		@get('status') is 'active'
+
 
 class Marionette.StatesCollection extends Backbone.Collection
 	model : Marionette.State
@@ -49,6 +52,7 @@ class Marionette.StatesCollection extends Backbone.Collection
 			urlToArray stateModel
 
 		stateModel.set 'url_array', urlArray.reverse()
+		
 		stateModel
 
 	sentenceCase : (name)->
@@ -74,8 +78,12 @@ class Marionette.AppStates extends Backbone.Router
 
 	_processState : (name, args)->
 		stateModel = window.statesCollection.get name
-		console.log stateModel.get 'computed_url'
+		stateModel.set 'status', 'active'
 
+		# get controller
+		ctrl = stateModel.get 'ctrl'
+		if not _.isUndefined window[ctrl]
+			new window[ctrl]
 
 
 

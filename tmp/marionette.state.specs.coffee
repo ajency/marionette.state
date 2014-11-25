@@ -3,6 +3,8 @@ afterEach ->
 	Backbone.history.stop()
 	Backbone.history.handlers.length = 0
 
+window['StateOneCtrl'] = Marionette.Controller.extend()
+
 describe 'Marionette.Application on before start', ->
 
 	app = null
@@ -142,6 +144,23 @@ describe 'Marionette.States', ->
 			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
 			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
 
+	# describe 'state region', ->
+
+	# 	beforeEach ->
+	# 		setFixtures '<div ui-region>Region</div>'
+	# 		@app = new Marionette.Application
+	# 		@app.start()
+	# 		States = Marionette.AppStates.extend
+	# 					appStates : 
+	# 						'stateOne' : 
+	# 							url : '/stateOneUrl'
+
+	# 		@states = new States
+	# 		@state1 = statesCollection.get 'stateOne'
+
+	# 	it 'must have Application dynamic region as its region', ->
+	# 		expect(@state1.get 'region').toBe @app.dymanicRegion 
+
 describe 'Registering a state with Backbone.Router', ->
 	
 	afterEach ->
@@ -174,7 +193,10 @@ describe 'Registering a state with Backbone.Router', ->
 		expect(@routeSpy).toHaveBeenCalledWith @state4.get('computed_url'), 'stateFour', jasmine.any Function
 
 
-describe 'process a state on route event',->
+
+		
+
+describe 'Process a state on route event',->
 
 	beforeEach ->
 		States = Marionette.AppStates.extend
@@ -190,10 +212,59 @@ describe 'process a state on route event',->
 							'stateFour' : 
 								url : '/someurl/:id'
 								parent : 'stateOne'
+
+		spyOn(States::,'_processState').and.callThrough()
+
 		@router = new States
-		spyOn(Marionette.AppStates::,'_processState').and.callThrough()
 		Backbone.history.start()
-		@router.navigate '/stateOneUrl/someurl/:id', true
+		@router.navigate '/stateOneUrl/someurl/100', true
+
+	afterEach ->
+		window.location.hash = ''
+		Backbone.history.stop()
+		Backbone.history.handlers.length = 0
+
 
 	it 'must call _processState with args', ->
 		expect(@router._processState).toHaveBeenCalled()
+
+describe 'When processing state with no parent', ->
+
+	beforeEach ->
+		
+		spyOn(window, 'StateOneCtrl')
+		States = Marionette.AppStates.extend
+					appStates : 
+						'stateOne' : 
+							url : '/stateOneUrl'
+
+		@router = new States
+		Backbone.history.start()
+		@router.navigate '/stateOneUrl', true
+		@state1 = statesCollection.get 'stateOne'
+
+	afterEach ->
+		window['StateOneCtrl'] = Marionette.Controller.extend()
+
+	it 'must make the state active', ->
+		expect(@state1.isActive()).toBe true
+
+	it 'must run StateOneCtrl controller', ->
+		expect(window.StateOneCtrl).toHaveBeenCalled()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

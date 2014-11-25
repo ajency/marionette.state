@@ -91,6 +91,10 @@ var __hasProp = {}.hasOwnProperty,
       };
     };
 
+    State.prototype.isActive = function() {
+      return this.get('status') === 'active';
+    };
+
     return State;
 
   })(Backbone.Model);
@@ -186,9 +190,13 @@ var __hasProp = {}.hasOwnProperty,
     }
 
     AppStates.prototype._processState = function(name, args) {
-      var stateModel;
+      var ctrl, stateModel;
       stateModel = window.statesCollection.get(name);
-      return console.log(stateModel.get('computed_url'));
+      stateModel.set('status', 'active');
+      ctrl = stateModel.get('ctrl');
+      if (!_.isUndefined(window[ctrl])) {
+        return new window[ctrl];
+      }
     };
 
     return AppStates;

@@ -105,3 +105,20 @@ describe 'Marionette.States', ->
 			expect(@state1.get 'url_array').toEqual ['/stateOneUrl']
 			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
 			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
+
+	# describe 'state region', ->
+
+	# 	beforeEach ->
+	# 		setFixtures '<div ui-region>Region</div>'
+	# 		@app = new Marionette.Application
+	# 		@app.start()
+	# 		States = Marionette.AppStates.extend
+	# 					appStates : 
+	# 						'stateOne' : 
+	# 							url : '/stateOneUrl'
+
+	# 		@states = new States
+	# 		@state1 = statesCollection.get 'stateOne'
+
+	# 	it 'must have Application dynamic region as its region', ->
+	# 		expect(@state1.get 'region').toBe @app.dymanicRegion 
