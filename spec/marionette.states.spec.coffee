@@ -3,17 +3,15 @@ describe 'Marionette.States', ->
 	describe 'when the routes are configured and the controller exists', ->
 
 		beforeEach ->
-			currentUser = jasmine.createSpy 'currentUser'
 			@LoginCtrl = jasmine.createSpy 'LoginCtrl'
 			StateRouter = Marionette.AppStates.extend
 							appStates :
 								'login' :
-									cap : 'can_login'
-									url : '/login'
+									url : 'login'
 
 			@route = new StateRouter
 			Backbone.history.start()
-			@route.navigate('/login', true)
+			@route.navigate('login', true)
 
 		it 'must call the LoginCtrl controller ', ->
 			expect(@LoginCtrl).toHaveBeenCalled()

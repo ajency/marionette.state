@@ -50,20 +50,18 @@ describe('Marionette.LayoutView on render', function() {
 describe('Marionette.States', function() {
   return describe('when the routes are configured and the controller exists', function() {
     beforeEach(function() {
-      var StateRouter, currentUser;
-      currentUser = jasmine.createSpy('currentUser');
+      var StateRouter;
       this.LoginCtrl = jasmine.createSpy('LoginCtrl');
       StateRouter = Marionette.AppStates.extend({
         appStates: {
           'login': {
-            cap: 'can_login',
-            url: '/login'
+            url: 'login'
           }
         }
       });
       this.route = new StateRouter;
       Backbone.history.start();
-      return this.route.navigate('/login', true);
+      return this.route.navigate('login', true);
     });
     return it('must call the LoginCtrl controller ', function() {
       return expect(this.LoginCtrl).toHaveBeenCalled();

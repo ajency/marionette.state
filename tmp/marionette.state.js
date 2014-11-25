@@ -1,5 +1,6 @@
 var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 (function(root, factory) {
   var Backbone, Marionette, _;
@@ -92,9 +93,19 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype.processStates = function(states) {
-      return _.each(states, function(state) {
-        return console.log(state);
-      });
+      return _.each(states, (function(_this) {
+        return function(stateDef, stateName) {
+          return _this.route(stateDef['url'], stateName, _.bind(_this._stateCallback, {
+            def: stateDef
+          }));
+        };
+      })(this));
+    };
+
+    AppStates.prototype._stateCallback = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return console.log(this.def['url']);
     };
 
     return AppStates;
