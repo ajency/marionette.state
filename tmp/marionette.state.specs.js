@@ -239,6 +239,7 @@ describe('Registering a state with Backbone.Router', function() {
 describe('Process a state on route event', function() {
   beforeEach(function() {
     var States;
+    setFixtures(sandbox());
     States = Marionette.AppStates.extend({
       appStates: {
         'stateOne': {
@@ -247,14 +248,6 @@ describe('Process a state on route event', function() {
         'stateTwo': {
           url: '/stateTwoUrl',
           parent: 'stateOne'
-        },
-        'stateThree': {
-          url: '/stateThreeUrl',
-          parent: 'stateTwo'
-        },
-        'stateFour': {
-          url: '/someurl/:id',
-          parent: 'stateOne'
         }
       }
     });
@@ -262,8 +255,11 @@ describe('Process a state on route event', function() {
     this.router = new States({
       app: new Marionette.Application
     });
+    this.router.app.dynamicRegion = new Marionette.Region({
+      el: '#sandbox'
+    });
     Backbone.history.start();
-    return this.router.navigate('/stateOneUrl/someurl/100', true);
+    return this.router.navigate('/stateOneUrl/stateTwoUrl', true);
   });
   afterEach(function() {
     window.location.hash = '';
@@ -384,10 +380,10 @@ describe('When processing state with no parent and more then 1 view', function()
 describe('Process a child state', function() {
   beforeEach(function() {
     var States;
-    setFixture('<div ui-region></div>');
+    setFixtures('<div ui-region></div>');
     this.app = new Marionette.Application;
     this.app.addRegions({
-      dynamicRegion: $('[ui-region')
+      dynamicRegion: $('[ui-region]')
     });
     States = Marionette.AppStates.extend({
       appStates: {
@@ -429,7 +425,7 @@ describe('Process a child state', function() {
     beforeEach(function() {
       spyOn(window, 'StateOneCtrl');
       Backbone.history.start();
-      return this.router.navigate('/stateOneUrl/stateTwoUrl', true);
+      return this.router.navigate('/stateOneUrl/stateTwoUrl/stateThreeUrl', true);
     });
     return it('must run parent state first', function() {
       return expect(window.StateOneCtrl).toHaveBeenCalled();

@@ -212,6 +212,7 @@ describe 'Registering a state with Backbone.Router', ->
 describe 'Process a state on route event',->
 
 	beforeEach ->
+		setFixtures sandbox()
 		States = Marionette.AppStates.extend
 						appStates : 
 							'stateOne' : 
@@ -219,18 +220,13 @@ describe 'Process a state on route event',->
 							'stateTwo' : 
 								url : '/stateTwoUrl'
 								parent : 'stateOne'
-							'stateThree' : 
-								url : '/stateThreeUrl'
-								parent : 'stateTwo'
-							'stateFour' : 
-								url : '/someurl/:id'
-								parent : 'stateOne'
 
 		spyOn(States::,'_processState').and.callThrough()
 
 		@router = new States app : new Marionette.Application
+		@router.app.dynamicRegion = new Marionette.Region el : '#sandbox'
 		Backbone.history.start()
-		@router.navigate '/stateOneUrl/someurl/100', true
+		@router.navigate '/stateOneUrl/stateTwoUrl', true
 
 	afterEach ->
 		window.location.hash = ''
@@ -321,11 +317,11 @@ describe 'When processing state with no parent and more then 1 view', ->
 describe 'Process a child state',->
 
 	beforeEach ->
-		setFixture '<div ui-region></div>'
+		setFixtures '<div ui-region></div>'
 		@app = new Marionette.Application
 		@app.addRegions
-			dynamicRegion : $('[ui-region')
-			
+			dynamicRegion : $('[ui-region]')
+
 		States = Marionette.AppStates.extend
 						appStates : 
 							'stateOne' : 
@@ -355,9 +351,8 @@ describe 'Process a child state',->
 		beforeEach ->
 			spyOn(window, 'StateOneCtrl')
 			Backbone.history.start()
-			@router.navigate '/stateOneUrl/stateTwoUrl', true
+			@router.navigate '/stateOneUrl/stateTwoUrl/stateThreeUrl', true
 
 		it 'must run parent state first', ->
 			expect(window.StateOneCtrl).toHaveBeenCalled()
-
 

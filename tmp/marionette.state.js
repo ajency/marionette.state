@@ -196,80 +196,67 @@ var __hasProp = {}.hasOwnProperty,
           return true;
         });
       }, this);
-      this.on('route', this._processState, this);
+      this.on('route', this._processOnRouteState, this);
     }
 
-    AppStates.prototype._processState = function(name, args) {
-      var ctrl, stateModel, views, _region;
+    AppStates.prototype._processOnRouteState = function(name, args) {
+      var stateModel;
       if (args == null) {
         args = [];
       }
       stateModel = window.statesCollection.get(name);
       if (stateModel.isChildState()) {
-        return this._processChildState(name, args);
+        return this._processChildState(stateModel, args);
       } else {
-        stateModel.set('status', 'active');
-        if (stateModel.has('views') && false === stateModel.get('parent')) {
-          views = stateModel.get('views');
-          _.each(views, (function(_this) {
-            return function(value, key) {
-              var ctrl, _region;
-              ctrl = value['ctrl'];
-              if (_.isUndefined(window[ctrl])) {
-                throw new Marionette.Error({
-                  message: 'Controller not defined. Define a controller at window.' + ctrl
-                });
-              }
-              if (key === '') {
-                _region = _this.app.dynamicRegion;
-              } else {
-                _region = _this.app["" + key + "Region"];
-              }
-              return new window[ctrl]({
-                region: _region,
-                stateParams: args
-              });
-            };
-          })(this));
-          return;
-        }
-        ctrl = stateModel.get('ctrl');
-        if (_.isUndefined(window[ctrl])) {
-          throw new Marionette.Error({
-            message: 'Controller not defined. Define a controller at window.' + ctrl
-          });
-        }
-        if (false === stateModel.get('parent') && (this.app.dynamicRegion instanceof Marionette.Region) !== true) {
-          throw new Marionette.Error({
-            message: 'Dynamic region not defined for app'
-          });
-        }
-        if (false === stateModel.get('parent')) {
-          _region = this.app.dynamicRegion;
-        }
-        return new window[ctrl]({
-          region: _region,
-          stateParams: args
-        });
+        return this._processState(stateModel, args);
       }
     };
 
-    AppStates.prototype._processChildState = function(name, args) {
-      var ctrl, parentState, stateModel, _region;
-      stateModel = window.statesCollection.get(name);
+    AppStates.prototype._processChildState = function(stateModel, args) {
+      var parentState;
       parentState = window.statesCollection.get(stateModel.get('parent'));
-      ctrl = parentState.get('ctrl');
+      return this._processOnRouteState(parentState.get('name'), args);
+    };
+
+    AppStates.prototype._processState = function(stateModel, args) {
+      var ctrl, views, _region;
+      stateModel.set('status', 'active');
+      if (stateModel.has('views') && false === stateModel.get('parent')) {
+        views = stateModel.get('views');
+        _.each(views, (function(_this) {
+          return function(value, key) {
+            var ctrl, _region;
+            ctrl = value['ctrl'];
+            if (_.isUndefined(window[ctrl])) {
+              throw new Marionette.Error({
+                message: 'Controller not defined. Define a controller at window.' + ctrl
+              });
+            }
+            if (key === '') {
+              _region = _this.app.dynamicRegion;
+            } else {
+              _region = _this.app["" + key + "Region"];
+            }
+            return new window[ctrl]({
+              region: _region,
+              stateParams: args
+            });
+          };
+        })(this));
+        return;
+      }
+      ctrl = stateModel.get('ctrl');
       if (_.isUndefined(window[ctrl])) {
         throw new Marionette.Error({
           message: 'Controller not defined. Define a controller at window.' + ctrl
         });
       }
-      if (false === parentState.get('parent') && (this.app.dynamicRegion instanceof Marionette.Region) !== true) {
+      if (false === stateModel.get('parent') && (this.app.dynamicRegion instanceof Marionette.Region) !== true) {
         throw new Marionette.Error({
           message: 'Dynamic region not defined for app'
         });
       }
-      if (false === parentState.get('parent')) {
+      if (false === stateModel.get('parent')) {
         _region = this.app.dynamicRegion;
       }
       return new window[ctrl]({

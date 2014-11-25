@@ -1,11 +1,11 @@
 describe 'Process a child state',->
 
 	beforeEach ->
-		setFixture '<div ui-region></div>'
+		setFixtures '<div ui-region></div>'
 		@app = new Marionette.Application
 		@app.addRegions
-			dynamicRegion : $('[ui-region')
-			
+			dynamicRegion : $('[ui-region]')
+
 		States = Marionette.AppStates.extend
 						appStates : 
 							'stateOne' : 
@@ -35,9 +35,8 @@ describe 'Process a child state',->
 		beforeEach ->
 			spyOn(window, 'StateOneCtrl')
 			Backbone.history.start()
-			@router.navigate '/stateOneUrl/stateTwoUrl', true
+			@router.navigate '/stateOneUrl/stateTwoUrl/stateThreeUrl', true
 
 		it 'must run parent state first', ->
 			expect(window.StateOneCtrl).toHaveBeenCalled()
-
 
