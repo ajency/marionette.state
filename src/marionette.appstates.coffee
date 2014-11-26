@@ -1,60 +1,81 @@
 class Marionette.AppStates extends Backbone.Router
 
 	constructor : (options = {})->
+
 		super options
+
 		if not options.app or ( options.app instanceof Marionette.Application isnt true)
 			throw new Marionette.Error
 					message : 'Application instance needed'
 
-		{@app} = options
+		@_app  = options.app
+		@_statesCollection = window.statesCollection
 
-		@appStates = Marionette.getOption @, 'appStates'
-		states = []
-		_.map @appStates, (stateDef, stateName)->
-			states.push statesCollection.addState stateName, stateDef
+		# register all app states
+		@_registerStates()
 
-		_.each states, (state)->
-			@route state.get('computed_url'), state.get('name'), -> return true
-		, @
+	_registerStates : ->
 
-		@on 'route', @_processOnRouteState, @
+		appStates = Marionette.getOption @, 'appStates'
 
-	_processOnRouteState : (name, args = [])->
-		stateModel = window.statesCollection.get name
-		if stateModel.isChildState()
-			@_processChildState stateModel, args
-		else
-			@_processState stateModel, args
-		
-	_processChildState : (stateModel, args)->
-		parentState = window.statesCollection.get stateModel.get 'parent'
-		@_processOnRouteState parentState.get('name'), args
+		_.map appStates, (stateDef, stateName)=>
+			if _.isEmpty stateName
+				throw new Marionette.Error 'state name cannot be empty'
+			@_statesCollection.addState stateName, stateDef
 
-	_processState : (stateModel, args = [])->
-		stateModel.set 'status', 'processing'
-		stateModel.trigger "processing:#{stateModel.get 'name'}"
 
-		_region = @app.dynamicRegion
 
-		stateModel.set 'activeRegion', _region
+	#
 
-		ctrl = stateModel.get 'ctrl'
-		
-		ControllerClass = Marionette.RegionControllers::getRegionController ctrl
+	# 	{@app} = options
 
-		ctrlInstance = new ControllerClass
-								region : _region
-								stateParams : args
+	# 	@appStates = Marionette.getOption @, 'appStates'
+	# 	states = []
+	# 	_.map @appStates, (stateDef, stateName)->
+	# 		states.push statesCollection.addState stateName, stateDef
 
-		stateModel.listenTo ctrlInstance, 'complete', ->
+	# 	_.each states, (state)->
+	# 		@route state.get('computed_url'), state.get('name'), -> return true
+	# 	, @
 
-		# if stateModel.has('views') and false is stateModel.get 'parent' 
-			
+	# 	@on 'route', @_processOnRouteState, @
+
+	# _processOnRouteState : (name, args = [])->
+	# 	stateModel = window.statesCollection.get name
+	# 	if stateModel.isChildState()
+	# 		@_processChildState stateModel, args
+	# 	else
+	# 		@_processState stateModel, args
+
+	# _processChildState : (stateModel, args)->
+	# 	parentState = window.statesCollection.get stateModel.get 'parent'
+	# 	@_processOnRouteState parentState.get('name'), args
+
+	# _processState : (stateModel, args = [])->
+	# 	stateModel.set 'status', 'processing'
+	# 	stateModel.trigger "processing:#{stateModel.get 'name'}"
+
+	# 	_region = @app.dynamicRegion
+
+	# 	stateModel.set 'activeRegion', _region
+
+	# 	ctrl = stateModel.get 'ctrl'
+
+	# 	ControllerClass = Marionette.RegionControllers::getRegionController ctrl
+
+	# 	ctrlInstance = new ControllerClass
+	# 							region : _region
+	# 							stateParams : args
+
+	# 	stateModel.listenTo ctrlInstance, 'complete', ->
+
+		# if stateModel.has('views') and false is stateModel.get 'parent'
+
 		# 	views = stateModel.get 'views'
 		# 	_.each views, (value, key)=>
 		# 		ctrl = value['ctrl']
 		# 		ControllerClass = Marionette.RegionControllers::getRegionController ctrl
-		
+
 		# 		if key is ''
 		# 			_region = @app.dynamicRegion
 		# 		else
@@ -75,7 +96,7 @@ class Marionette.AppStates extends Backbone.Router
 		# 	throw new Marionette.Error
 		# 			message : 'Dynamic region not defined for app'
 
-		# if false is stateModel.get 'parent' 
+		# if false is stateModel.get 'parent'
 		# 	_region = @app.dynamicRegion
 
 		# new ControllerClass

@@ -269,3 +269,76 @@ describe('Marionette.StateCollection', function() {
     });
   });
 });
+
+describe('Maroinette.AppStates', function() {
+  describe('When initializing without the application object', function() {
+    return it('must throw ', function() {
+      return expect(function() {
+        return new Marionette.AppStates;
+      }).toThrow();
+    });
+  });
+  return describe('When initializing with application object', function() {
+    beforeEach(function() {
+      this.app = new Marionette.Application;
+      spyOn(Marionette.AppStates.prototype, '_registerStates').and.callThrough();
+      return this.appStates = new Marionette.AppStates({
+        app: this.app
+      });
+    });
+    it('must have _app property', function() {
+      return expect(this.appStates._app).toEqual(this.app);
+    });
+    it('must call _registerStates', function() {
+      return expect(this.appStates._registerStates).toHaveBeenCalled();
+    });
+    it('must reference the global statesCollection', function() {
+      return expect(this.appStates._statesCollection).toEqual(window.statesCollection);
+    });
+    return describe('Registering States', function() {
+      describe('register state with no name ""', function() {
+        beforeEach(function() {
+          var MyStates;
+          return MyStates = Marionette.AppStates.extend({
+            appStates: {
+              "": {
+                url: '/someurl'
+              }
+            }
+          });
+        });
+        return it('must throw error', function() {
+          var _app;
+          _app = this.app;
+          return expect(function() {
+            return new MyStates({
+              app: _app
+            });
+          }).toThrow();
+        });
+      });
+      return describe('register state with valid definition', function() {
+        beforeEach(function() {
+          var MyStates;
+          MyStates = Marionette.AppStates.extend({
+            appStates: {
+              "stateName": {
+                url: '/someurl'
+              },
+              "stateName2": {
+                url: '/statenameurl'
+              }
+            }
+          });
+          spyOn(window.statesCollection, 'addState');
+          return this.myStates = new MyStates({
+            app: this.app
+          });
+        });
+        return it('must call statesCollection.addState', function() {
+          return expect(window.statesCollection.addState).toHaveBeenCalled();
+        });
+      });
+    });
+  });
+});

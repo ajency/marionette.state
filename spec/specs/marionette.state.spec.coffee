@@ -5,3 +5,4 @@
 #@include ../marionette.regioncontroller.spec.coffee
 #@include ../marionette.statemodel.spec.coffee
 #@include ../marionette.statecollection.spec.coffee
+#@include ../marionette.appstates.spec.coffee

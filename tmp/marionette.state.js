@@ -217,5 +217,39 @@ var __hasProp = {}.hasOwnProperty,
 
   })(Backbone.Collection);
   window.statesCollection = new Marionette.StateCollection;
+  Marionette.AppStates = (function(_super) {
+    __extends(AppStates, _super);
+
+    function AppStates(options) {
+      if (options == null) {
+        options = {};
+      }
+      AppStates.__super__.constructor.call(this, options);
+      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
+        throw new Marionette.Error({
+          message: 'Application instance needed'
+        });
+      }
+      this._app = options.app;
+      this._statesCollection = window.statesCollection;
+      this._registerStates();
+    }
+
+    AppStates.prototype._registerStates = function() {
+      var appStates;
+      appStates = Marionette.getOption(this, 'appStates');
+      return _.map(appStates, (function(_this) {
+        return function(stateDef, stateName) {
+          if (_.isEmpty(stateName)) {
+            throw new Marionette.Error('state name cannot be empty');
+          }
+          return _this._statesCollection.addState(stateName, stateDef);
+        };
+      })(this));
+    };
+
+    return AppStates;
+
+  })(Backbone.Router);
   return Marionette.State;
 });
