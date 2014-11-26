@@ -232,8 +232,8 @@ var __hasProp = {}.hasOwnProperty,
       }
       this._app = options.app;
       this._statesCollection = window.statesCollection;
-      this.on('route', this._processStateOnRoute, this);
       this._registerStates();
+      this.on('route', this._processStateOnRoute, this);
     }
 
     AppStates.prototype._registerStates = function() {
@@ -246,9 +246,17 @@ var __hasProp = {}.hasOwnProperty,
             throw new Marionette.Error('state name cannot be empty');
           }
           stateModel = _this._statesCollection.addState(stateName, stateDef);
-          return _this.route(stateModel.get('computed_url'), stateModel.get('name'));
+          return _this.route(stateModel.get('computed_url'), stateModel.get('name'), function() {
+            return true;
+          });
         };
       })(this));
+    };
+
+    AppStates.prototype._processStateOnRoute = function(name, args) {
+      if (args == null) {
+        args = [];
+      }
     };
 
     return AppStates;

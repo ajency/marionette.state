@@ -224,8 +224,10 @@
 			@_statesCollection = window.statesCollection
 	
 			# register all app states
-			@on 'route', @_processStateOnRoute, @
 			@_registerStates()
+	
+			# listen to route event of the router
+			@on 'route', @_processStateOnRoute, @
 	
 		_registerStates : ->
 	
@@ -236,22 +238,12 @@
 					throw new Marionette.Error 'state name cannot be empty'
 	
 				stateModel = @_statesCollection.addState stateName, stateDef
-				@route stateModel.get('computed_url'), stateModel.get('name')
+				@route stateModel.get('computed_url'), stateModel.get('name'), -> return true
 	
 	
+		_processStateOnRoute : (name, args = [])->
 	
-		# 	{@app} = options
 	
-		# 	@appStates = Marionette.getOption @, 'appStates'
-		# 	states = []
-		# 	_.map @appStates, (stateDef, stateName)->
-		# 		states.push statesCollection.addState stateName, stateDef
-	
-		# 	_.each states, (state)->
-		# 		@route state.get('computed_url'), state.get('name'), -> return true
-		# 	, @
-	
-		# 	@on 'route', @_processOnRouteState, @
 	
 		# _processOnRouteState : (name, args = [])->
 		# 	stateModel = window.statesCollection.get name

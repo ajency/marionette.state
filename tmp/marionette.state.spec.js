@@ -336,6 +336,7 @@ describe('Maroinette.AppStates', function() {
             }
           });
           spyOn(window.statesCollection, 'addState').and.callThrough();
+          spyOn(MyStates.prototype, '_processStateOnRoute').and.callThrough();
           this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
           return this.myStates = new MyStates({
             app: this.app
@@ -349,10 +350,18 @@ describe('Maroinette.AppStates', function() {
         it('must have 2 states in collection', function() {
           return expect(window.statesCollection.length).toBe(2);
         });
-        return describe('Registering states with backbone router', function() {
+        describe('Registering states with backbone router', function() {
           return it('must call .route() with path and state name', function() {
-            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl', 'stateName2');
-            return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName');
+            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl', 'stateName2', jasmine.any(Function));
+            return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
+          });
+        });
+        return describe('When router triggers route event', function() {
+          beforeEach(function() {
+            return this.myStates.trigger('route', 'stateName', []);
+          });
+          return it('must run _processStateOnRoute function', function() {
+            return expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName', []);
           });
         });
       });

@@ -265,6 +265,7 @@ describe 'Maroinette.AppStates', ->
 										"stateName2" : url : '/statenameurl'
 
 					spyOn(window.statesCollection, 'addState').and.callThrough()
+					spyOn(MyStates::, '_processStateOnRoute').and.callThrough()
 					@routeSpy = spyOn(Backbone.Router::, 'route').and.callThrough()
 					@myStates = new MyStates app : @app
 
@@ -277,8 +278,19 @@ describe 'Maroinette.AppStates', ->
 				describe 'Registering states with backbone router', ->
 
 					it 'must call .route() with path and state name', ->
-						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl', 'stateName2'
-						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName'
+						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl', 'stateName2', jasmine.any Function
+						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName', jasmine.any Function
+
+				describe 'When router triggers route event', ->
+					beforeEach ->
+						@myStates.trigger 'route', 'stateName', []
+
+					it 'must run _processStateOnRoute function', ->
+						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName', []
+
+
+
+
 
 
 
