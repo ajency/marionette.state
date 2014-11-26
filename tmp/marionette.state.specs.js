@@ -64,7 +64,7 @@ describe('Marionette.LayoutView on render', function() {
 });
 
 describe('region controller lookup', function() {
-  return it('should throw if region controller lookup is not defined', function() {
+  return it('must have the lookup defined', function() {
     return expect(Marionette.RegionControllers.prototype.regionControllersLookup()).toEqual(jasmine.any(Object));
   });
 });

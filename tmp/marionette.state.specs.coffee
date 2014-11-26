@@ -44,7 +44,7 @@ describe 'Marionette.LayoutView on render', ->
 
 
 describe 'region controller lookup', ->
-	it 'should throw if region controller lookup is not defined', ->
+	it 'must have the lookup defined', ->
 		expect( Marionette.RegionControllers::regionControllersLookup()).toEqual jasmine.any Object
 
 describe 'when looking for region controller', ->
@@ -62,7 +62,6 @@ describe 'when looking for region controller', ->
 		expect(ctrl).toEqual jasmine.any Marionette.RegionController
 
 	describe 'when controller is not defined', ->
-
 		it 'must throw', ->
 			expect(-> Marionette.RegionControllers::getRegionController 'NoCtrl' ).toThrow()
 
