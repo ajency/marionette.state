@@ -1,3 +1,17 @@
+
+/*
+ *
+ * Marionette States (Marionette.State)
+ * State Based Routing for MarionetteJS applications. 
+ * Much like angular's ui-router
+ * http://surajair.github.io/marionette-state
+ * --------------------------------------
+ * Version: v0.1.0
+ *
+ * Copyright (c) 2014 Suraj Air 
+ * Distributed under MIT license
+ *
+ */
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
