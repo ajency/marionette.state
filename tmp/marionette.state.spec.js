@@ -221,3 +221,51 @@ describe('Marionette.State', function() {
     });
   });
 });
+
+describe('Application StateCollection', function() {
+  return it('window.statesCollection must be defined', function() {
+    return expect(window.statesCollection).toEqual(jasmine.any(Marionette.StateCollection));
+  });
+});
+
+describe('Marionette.StateCollection', function() {
+  it('must have Marionette.State as its model', function() {
+    return expect(Marionette.StateCollection.prototype.model).toEqual(Marionette.State);
+  });
+  return describe('Adding states', function() {
+    beforeEach(function() {
+      var states;
+      this.collection = new Marionette.StateCollection;
+      states = {
+        'someState': false,
+        'login': {
+          url: '/login'
+        },
+        'forgot-password': {
+          url: '/forgot-password',
+          ctrl: 'ForgotPwdCtrl'
+        },
+        'register': {
+          url: '/register'
+        }
+      };
+      return _.each(states, (function(_this) {
+        return function(def, name) {
+          return _this.collection.addState(name, def);
+        };
+      })(this));
+    });
+    afterEach(function() {
+      return this.collection.set([]);
+    });
+    it('must add the states to collection', function() {
+      return expect(this.collection.length).toBe(4);
+    });
+    return it('all states must have name and url property', function() {
+      return this.collection.each(function(state) {
+        expect(state.has('name')).toBe(true);
+        return expect(state.has('url')).toBe(true);
+      });
+    });
+  });
+});

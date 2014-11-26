@@ -192,5 +192,30 @@ var __hasProp = {}.hasOwnProperty,
     return State;
 
   })(Backbone.Model);
+  Marionette.StateCollection = (function(_super) {
+    __extends(StateCollection, _super);
+
+    function StateCollection() {
+      return StateCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    StateCollection.prototype.model = Marionette.State;
+
+    StateCollection.prototype.addState = function(name, definition) {
+      var data;
+      if (definition == null) {
+        definition = {};
+      }
+      data = {
+        name: name
+      };
+      _.defaults(data, definition);
+      return this.add(data);
+    };
+
+    return StateCollection;
+
+  })(Backbone.Collection);
+  window.statesCollection = new Marionette.StateCollection;
   return Marionette.State;
 });

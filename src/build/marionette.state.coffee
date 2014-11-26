@@ -42,5 +42,6 @@
 	# @include ../marionette.regioncontrollers.coffee
 	# @include ../marionette.regioncontroller.coffee
 	# @include ../marionette.statemodel.coffee
+	# @include ../marionette.statecollection.coffee
 
 	Marionette.State
