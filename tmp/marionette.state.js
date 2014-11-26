@@ -175,7 +175,7 @@ var __hasProp = {}.hasOwnProperty,
       if (!options.url) {
         options.url = "/" + stateName;
       }
-      options.computed_url = options.url;
+      options.computed_url = options.url.substring(1);
       options.url_to_array = [options.url];
       if (!options.ctrl) {
         options.ctrl = this._ctrlName(stateName);
@@ -240,10 +240,12 @@ var __hasProp = {}.hasOwnProperty,
       appStates = Marionette.getOption(this, 'appStates');
       return _.map(appStates, (function(_this) {
         return function(stateDef, stateName) {
+          var stateModel;
           if (_.isEmpty(stateName)) {
             throw new Marionette.Error('state name cannot be empty');
           }
-          return _this._statesCollection.addState(stateName, stateDef);
+          stateModel = _this._statesCollection.addState(stateName, stateDef);
+          return _this.route(stateModel.get('computed_url'), stateModel.get('name'));
         };
       })(this));
     };

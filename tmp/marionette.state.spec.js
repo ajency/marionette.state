@@ -2,6 +2,7 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 afterEach(function() {
+  window.statesCollection.set([]);
   window.location.hash = '';
   Backbone.history.stop();
   return Backbone.history.handlers.length = 0;
@@ -176,7 +177,7 @@ describe('Marionette.State', function() {
         return expect(this.state.get('parent')).toEqual(false);
       });
       it('must have the computed_url property', function() {
-        return expect(this.state.get('computed_url')).toBe('/stateName');
+        return expect(this.state.get('computed_url')).toBe('stateName');
       });
       it('must have the url_to_array property', function() {
         return expect(this.state.get('url_to_array')).toEqual(['/stateName']);
@@ -204,7 +205,7 @@ describe('Marionette.State', function() {
         return expect(this.state.get('url')).toBe('/customUrl');
       });
       it('must have the computed_url property', function() {
-        return expect(this.state.get('computed_url')).toBe('/customUrl');
+        return expect(this.state.get('computed_url')).toBe('customUrl');
       });
       it('must have the parent property', function() {
         return expect(this.state.get('parent')).toEqual('parentState');
@@ -317,7 +318,7 @@ describe('Maroinette.AppStates', function() {
           }).toThrow();
         });
       });
-      return describe('register state with valid definition', function() {
+      return describe('Register state with valid definition', function() {
         beforeEach(function() {
           var MyStates;
           MyStates = Marionette.AppStates.extend({
@@ -330,13 +331,25 @@ describe('Maroinette.AppStates', function() {
               }
             }
           });
-          spyOn(window.statesCollection, 'addState');
+          spyOn(window.statesCollection, 'addState').and.callThrough();
+          this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
           return this.myStates = new MyStates({
             app: this.app
           });
         });
-        return it('must call statesCollection.addState', function() {
-          return expect(window.statesCollection.addState).toHaveBeenCalled();
+        it('must call statesCollection.addState', function() {
+          return expect(window.statesCollection.addState).toHaveBeenCalledWith("stateName", {
+            url: '/someurl'
+          });
+        });
+        it('must have 2 states in collection', function() {
+          return expect(window.statesCollection.length).toBe(2);
+        });
+        return describe('Registering states with backbone router', function() {
+          return it('must call .route() with path and state name', function() {
+            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl', 'stateName2');
+            return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName');
+          });
         });
       });
     });

@@ -22,7 +22,7 @@ describe 'Marionette.State', ->
 				expect(@state.get 'parent').toEqual false
 
 			it 'must have the computed_url property', ->
-				expect(@state.get 'computed_url').toBe '/stateName'
+				expect(@state.get 'computed_url').toBe 'stateName'
 
 			it 'must have the url_to_array property', ->
 				expect(@state.get 'url_to_array').toEqual ['/stateName']
@@ -49,7 +49,7 @@ describe 'Marionette.State', ->
 				expect(@state.get 'url').toBe '/customUrl'
 
 			it 'must have the computed_url property', ->
-				expect(@state.get 'computed_url').toBe '/customUrl'
+				expect(@state.get 'computed_url').toBe 'customUrl'
 
 			it 'must have the parent property', ->
 				expect(@state.get 'parent').toEqual 'parentState'

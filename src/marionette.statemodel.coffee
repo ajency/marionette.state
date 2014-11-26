@@ -14,7 +14,7 @@ class Marionette.State extends Backbone.Model
 
 		stateName = options.name
 		options.url = "/#{stateName}" if not options.url
-		options.computed_url = options.url
+		options.computed_url = options.url.substring 1
 		options.url_to_array = [options.url]
 		options.ctrl = @_ctrlName stateName if not options.ctrl
 

@@ -34,7 +34,7 @@ describe 'Maroinette.AppStates', ->
 					_app = @app
 					expect(-> new MyStates app : _app).toThrow()
 
-			describe 'register state with valid definition', ->
+			describe 'Register state with valid definition', ->
 
 				beforeEach ->
 					MyStates = Marionette.AppStates.extend
@@ -42,11 +42,24 @@ describe 'Maroinette.AppStates', ->
 										"stateName" : url : '/someurl'
 										"stateName2" : url : '/statenameurl'
 
-					spyOn(window.statesCollection, 'addState')
+					spyOn(window.statesCollection, 'addState').and.callThrough()
+					@routeSpy = spyOn(Backbone.Router::, 'route').and.callThrough()
 					@myStates = new MyStates app : @app
 
 				it 'must call statesCollection.addState', ->
-					expect(window.statesCollection.addState).toHaveBeenCalled()
+					expect(window.statesCollection.addState).toHaveBeenCalledWith "stateName" , url : '/someurl'
+
+				it 'must have 2 states in collection', ->
+					expect(window.statesCollection.length).toBe 2
+
+				describe 'Registering states with backbone router', ->
+
+					it 'must call .route() with path and state name', ->
+						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl', 'stateName2'
+						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName'
+
+
+
 
 
 

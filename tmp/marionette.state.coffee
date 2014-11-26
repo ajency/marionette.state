@@ -135,7 +135,7 @@
 	
 			stateName = options.name
 			options.url = "/#{stateName}" if not options.url
-			options.computed_url = options.url
+			options.computed_url = options.url.substring 1
 			options.url_to_array = [options.url]
 			options.ctrl = @_ctrlName stateName if not options.ctrl
 	
@@ -233,7 +233,10 @@
 			_.map appStates, (stateDef, stateName)=>
 				if _.isEmpty stateName
 					throw new Marionette.Error 'state name cannot be empty'
-				@_statesCollection.addState stateName, stateDef
+	
+				stateModel = @_statesCollection.addState stateName, stateDef
+				@route stateModel.get('computed_url'), stateModel.get('name')
+	
 	
 	
 	

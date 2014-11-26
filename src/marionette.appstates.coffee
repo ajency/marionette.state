@@ -21,7 +21,10 @@ class Marionette.AppStates extends Backbone.Router
 		_.map appStates, (stateDef, stateName)=>
 			if _.isEmpty stateName
 				throw new Marionette.Error 'state name cannot be empty'
-			@_statesCollection.addState stateName, stateDef
+
+			stateModel = @_statesCollection.addState stateName, stateDef
+			@route stateModel.get('computed_url'), stateModel.get('name')
+
 
 
 
