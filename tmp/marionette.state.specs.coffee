@@ -3,12 +3,14 @@ afterEach ->
 	Backbone.history.stop()
 	Backbone.history.handlers.length = 0
 
-window['StateOneCtrl'] = Marionette.Controller.extend()
-window['StateTwoCtrl'] = Marionette.Controller.extend()
-window['StateThreeCtrl'] = Marionette.Controller.extend()
-window['StateFourCtrl'] = Marionette.Controller.extend()
-window['State1Ctrl'] = Marionette.Controller.extend()
-window['State2Ctrl'] = Marionette.Controller.extend()
+window.RegionControllers = {}
+window.RegionControllers['StateOneCtrl'] = Marionette.Controller.extend()
+window.RegionControllers['StateTwoCtrl'] = Marionette.Controller.extend()
+window.RegionControllers['StateThreeCtrl'] = Marionette.Controller.extend()
+window.RegionControllers['StateFourCtrl'] = Marionette.Controller.extend()
+window.RegionControllers['State1Ctrl'] = Marionette.Controller.extend()
+window.RegionControllers['State2Ctrl'] = Marionette.Controller.extend()
+window.RegionControllers['StateLeftCtrl'] = Marionette.Controller.extend()
 
 describe 'Marionette.Application on before start', ->
 
@@ -39,6 +41,30 @@ describe 'Marionette.LayoutView on render', ->
 	it 'must identify regions based on ui-region', ->
 		expect(layoutView.dynamicRegion).toEqual jasmine.any Marionette.Region
 		expect(layoutView.namedRegion).toEqual jasmine.any Marionette.Region
+
+
+describe 'region controller lookup', ->
+	it 'should throw if region controller lookup is not defined', ->
+		expect( Marionette.RegionControllers::regionControllersLookup()).toEqual jasmine.any Object
+
+describe 'when looking for region controller', ->
+
+	beforeEach ->
+		Marionette.RegionController = Marionette.Controller.extend()
+		window.RegionControllers = 
+					'LoginCtrl' : Marionette.RegionController.extend()
+					'NoAccessCtrl' : Marionette.RegionController.extend()
+		
+
+	it 'must return controller if present', ->
+		Ctrl = Marionette.RegionControllers::getRegionController 'LoginCtrl'
+		ctrl = new Ctrl
+		expect(ctrl).toEqual jasmine.any Marionette.RegionController
+
+	describe 'when controller is not defined', ->
+
+		it 'must throw', ->
+			expect(-> Marionette.RegionControllers::getRegionController 'NoCtrl' ).toThrow()
 
 
 describe 'Marionette.States', ->
@@ -221,17 +247,13 @@ describe 'Process a state on route event',->
 								url : '/stateTwoUrl'
 								parent : 'stateOne'
 
-		spyOn(States::,'_processState').and.callThrough()
+		spyOn(States::,'_processState')
 
 		@router = new States app : new Marionette.Application
-		@router.app.dynamicRegion = new Marionette.Region el : '#sandbox'
 		Backbone.history.start()
 		@router.navigate '/stateOneUrl/stateTwoUrl', true
 
 	afterEach ->
-		window.location.hash = ''
-		Backbone.history.stop()
-		Backbone.history.handlers.length = 0
 		statesCollection.set []
 
 	it 'must call _processState with args', ->
@@ -243,8 +265,8 @@ describe 'When processing state with no parent', ->
 	beforeEach ->
 		setFixtures '<div ui-region></div>'
 		@app = new Marionette.Application
-		
-		spyOn(window, 'StateOneCtrl')
+		@CtrlClass = jasmine.createSpy 'StateOneCtrl'
+		spyOn(Marionette.RegionControllers::, 'getRegionController').and.returnValue @CtrlClass
 		States = Marionette.AppStates.extend
 					appStates : 
 						'stateOne' : 
@@ -257,21 +279,19 @@ describe 'When processing state with no parent', ->
 		@state1 = statesCollection.get 'stateOne'
 
 	afterEach ->
-		window['StateOneCtrl'] = Marionette.Controller.extend()
 		statesCollection.set []
-
 
 	it 'must make the state active', ->
 		expect(@state1.isActive()).toBe true
 
 	it 'must run StateOneCtrl controller', ->
-		expect(window.StateOneCtrl).toHaveBeenCalled()
+		expect(@CtrlClass).toHaveBeenCalled()
 
 	it 'must run StateOneCtrl with region', ->
 		data = 
 			region : @app.dynamicRegion
 			stateParams : [null]
-		expect(window.StateOneCtrl).toHaveBeenCalledWith data
+		expect(@CtrlClass).toHaveBeenCalledWith data
 
 
 describe 'When processing state with no parent and more then 1 view', ->
@@ -279,17 +299,18 @@ describe 'When processing state with no parent and more then 1 view', ->
 	beforeEach ->
 		setFixtures '<div ui-region></div><div ui-region="name"></div>'
 		@app = new Marionette.Application
-		window['SomeCtrl'] =  Marionette.Controller.extend()
-		window['SomeNameCtrl'] =  Marionette.Controller.extend()
-		spyOn(window, 'SomeCtrl')
-		spyOn(window, 'SomeNameCtrl')
+		@State1Ctrl = jasmine.createSpy 'State1Ctrl'
+		@State2Ctrl = jasmine.createSpy 'State2Ctrl'
+		spyOn(Marionette.RegionControllers::, 'getRegionController').and.callFake (name)=>
+					 @[name]
+
 		States = Marionette.AppStates.extend
 					appStates : 
 						'stateOne' : 
 							url : '/stateOneUrl'
 							views : 
-								"" : ctrl : 'SomeCtrl'
-								'name' : ctrl : 'SomeNameCtrl'
+								"" : ctrl : 'State1Ctrl'
+								'name' : ctrl : 'State2Ctrl'
 
 		@app.addInitializer =>
 			@router = new States app : @app
@@ -306,53 +327,11 @@ describe 'When processing state with no parent and more then 1 view', ->
 		data = 
 			region : @app.dynamicRegion
 			stateParams : [null]
-		expect(window.SomeCtrl).toHaveBeenCalledWith data
+		expect(@State1Ctrl).toHaveBeenCalledWith data
 
 	it 'must run SomeNameCtrl in app.nameRegion', ->
 		data = 
 			region : @app.nameRegion
 			stateParams : [null]
-		expect(window.SomeNameCtrl).toHaveBeenCalledWith data
-
-describe 'Process a child state',->
-
-	beforeEach ->
-		setFixtures '<div ui-region></div>'
-		@app = new Marionette.Application
-		@app.addRegions
-			dynamicRegion : $('[ui-region]')
-
-		States = Marionette.AppStates.extend
-						appStates : 
-							'stateOne' : 
-								url : '/stateOneUrl'
-							'stateTwo' : 
-								url : '/stateTwoUrl'
-								parent : 'stateOne'
-							'stateThree' : 
-								url : '/stateThreeUrl'
-								parent : 'stateTwo'
-							'stateFour' : 
-								url : '/someurl/:id'
-								parent : 'stateThree'
-								views : 
-									'region1@stateThree' : ctrl : 'State1Ctrl'
-									'region2@stateThree' : ctrl : 'State2Ctrl'
-
-		@router = new States app : @app
-
-	afterEach ->
-		@router = null
-		Backbone.history.stop()
-		statesCollection.set []
-
-	describe 'when processing child state without views', ->
-
-		beforeEach ->
-			spyOn(window, 'StateOneCtrl')
-			Backbone.history.start()
-			@router.navigate '/stateOneUrl/stateTwoUrl/stateThreeUrl', true
-
-		it 'must run parent state first', ->
-			expect(window.StateOneCtrl).toHaveBeenCalled()
+		expect(@State2Ctrl).toHaveBeenCalledWith data
 

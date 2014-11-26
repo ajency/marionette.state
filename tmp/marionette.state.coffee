@@ -67,6 +67,21 @@
 				@addRegion regionName, selector : $(region)
 	
 			
+	class Marionette.RegionControllers
+	
+		regionControllersLookup : ->
+			if not window.RegionControllers
+				window.RegionControllers = {}
+	
+			window.RegionControllers
+	
+		getRegionController : (name)->
+			lookUp = Marionette.RegionControllers::regionControllersLookup()
+			if not _.isUndefined lookUp[name]
+				return lookUp[name]
+			else
+				throw new Marionette.Error
+								message : 'region controller not found'
 	
 	class Marionette.State extends Backbone.Model
 	
@@ -172,16 +187,14 @@
 				views = stateModel.get 'views'
 				_.each views, (value, key)=>
 					ctrl = value['ctrl']
-					if _.isUndefined window[ctrl]
-						throw new Marionette.Error
-								message : 'Controller not defined. Define a controller at window.' + ctrl
-	
+					ControllerClass = Marionette.RegionControllers::getRegionController ctrl
+			
 					if key is ''
 						_region = @app.dynamicRegion
 					else
 						_region = @app["#{key}Region"]
 	
-					new window[ctrl]
+					new ControllerClass
 						region : _region
 						stateParams : args
 	
@@ -189,9 +202,7 @@
 	
 			# get controller
 			ctrl = stateModel.get 'ctrl'
-			if _.isUndefined window[ctrl]
-				throw new Marionette.Error
-						message : 'Controller not defined. Define a controller at window.' + ctrl
+			ControllerClass = Marionette.RegionControllers::getRegionController ctrl
 	
 			# get the region to run controller
 			if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
@@ -201,7 +212,7 @@
 			if false is stateModel.get 'parent' 
 				_region = @app.dynamicRegion
 	
-			new window[ctrl]
+			new ControllerClass
 					region : _region
 					stateParams : args
 	

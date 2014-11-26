@@ -8,20 +8,16 @@ describe 'Process a child state',->
 
 		States = Marionette.AppStates.extend
 						appStates : 
-							'stateOne' : 
-								url : '/stateOneUrl'
+							'root' : 
+								url : ''
+								views : 
+									'' : ctrl : 'State1Ctrl'
+									'left' : ctrl : 'StateLeftCtrl'
 							'stateTwo' : 
 								url : '/stateTwoUrl'
-								parent : 'stateOne'
-							'stateThree' : 
-								url : '/stateThreeUrl'
-								parent : 'stateTwo'
-							'stateFour' : 
-								url : '/someurl/:id'
-								parent : 'stateThree'
+								parent : 'root'
 								views : 
-									'region1@stateThree' : ctrl : 'State1Ctrl'
-									'region2@stateThree' : ctrl : 'State2Ctrl'
+									'@root' : ctrl : 'State2Ctrl'
 
 		@router = new States app : @app
 
@@ -35,7 +31,7 @@ describe 'Process a child state',->
 		beforeEach ->
 			spyOn(window, 'StateOneCtrl')
 			Backbone.history.start()
-			@router.navigate '/stateOneUrl/stateTwoUrl/stateThreeUrl', true
+			@router.navigate '/stateTwoUrl', true
 
 		it 'must run parent state first', ->
 			expect(window.StateOneCtrl).toHaveBeenCalled()

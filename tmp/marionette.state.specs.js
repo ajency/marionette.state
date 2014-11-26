@@ -7,17 +7,21 @@ afterEach(function() {
   return Backbone.history.handlers.length = 0;
 });
 
-window['StateOneCtrl'] = Marionette.Controller.extend();
+window.RegionControllers = {};
 
-window['StateTwoCtrl'] = Marionette.Controller.extend();
+window.RegionControllers['StateOneCtrl'] = Marionette.Controller.extend();
 
-window['StateThreeCtrl'] = Marionette.Controller.extend();
+window.RegionControllers['StateTwoCtrl'] = Marionette.Controller.extend();
 
-window['StateFourCtrl'] = Marionette.Controller.extend();
+window.RegionControllers['StateThreeCtrl'] = Marionette.Controller.extend();
 
-window['State1Ctrl'] = Marionette.Controller.extend();
+window.RegionControllers['StateFourCtrl'] = Marionette.Controller.extend();
 
-window['State2Ctrl'] = Marionette.Controller.extend();
+window.RegionControllers['State1Ctrl'] = Marionette.Controller.extend();
+
+window.RegionControllers['State2Ctrl'] = Marionette.Controller.extend();
+
+window.RegionControllers['StateLeftCtrl'] = Marionette.Controller.extend();
 
 describe('Marionette.Application on before start', function() {
   var app;
@@ -56,6 +60,35 @@ describe('Marionette.LayoutView on render', function() {
   return it('must identify regions based on ui-region', function() {
     expect(layoutView.dynamicRegion).toEqual(jasmine.any(Marionette.Region));
     return expect(layoutView.namedRegion).toEqual(jasmine.any(Marionette.Region));
+  });
+});
+
+describe('region controller lookup', function() {
+  return it('should throw if region controller lookup is not defined', function() {
+    return expect(Marionette.RegionControllers.prototype.regionControllersLookup()).toEqual(jasmine.any(Object));
+  });
+});
+
+describe('when looking for region controller', function() {
+  beforeEach(function() {
+    Marionette.RegionController = Marionette.Controller.extend();
+    return window.RegionControllers = {
+      'LoginCtrl': Marionette.RegionController.extend(),
+      'NoAccessCtrl': Marionette.RegionController.extend()
+    };
+  });
+  it('must return controller if present', function() {
+    var Ctrl, ctrl;
+    Ctrl = Marionette.RegionControllers.prototype.getRegionController('LoginCtrl');
+    ctrl = new Ctrl;
+    return expect(ctrl).toEqual(jasmine.any(Marionette.RegionController));
+  });
+  return describe('when controller is not defined', function() {
+    return it('must throw', function() {
+      return expect(function() {
+        return Marionette.RegionControllers.prototype.getRegionController('NoCtrl');
+      }).toThrow();
+    });
   });
 });
 
@@ -251,20 +284,14 @@ describe('Process a state on route event', function() {
         }
       }
     });
-    spyOn(States.prototype, '_processState').and.callThrough();
+    spyOn(States.prototype, '_processState');
     this.router = new States({
       app: new Marionette.Application
-    });
-    this.router.app.dynamicRegion = new Marionette.Region({
-      el: '#sandbox'
     });
     Backbone.history.start();
     return this.router.navigate('/stateOneUrl/stateTwoUrl', true);
   });
   afterEach(function() {
-    window.location.hash = '';
-    Backbone.history.stop();
-    Backbone.history.handlers.length = 0;
     return statesCollection.set([]);
   });
   return it('must call _processState with args', function() {
@@ -280,7 +307,8 @@ describe('When processing state with no parent', function() {
     var States;
     setFixtures('<div ui-region></div>');
     this.app = new Marionette.Application;
-    spyOn(window, 'StateOneCtrl');
+    this.CtrlClass = jasmine.createSpy('StateOneCtrl');
+    spyOn(Marionette.RegionControllers.prototype, 'getRegionController').and.returnValue(this.CtrlClass);
     States = Marionette.AppStates.extend({
       appStates: {
         'stateOne': {
@@ -301,14 +329,13 @@ describe('When processing state with no parent', function() {
     return this.state1 = statesCollection.get('stateOne');
   });
   afterEach(function() {
-    window['StateOneCtrl'] = Marionette.Controller.extend();
     return statesCollection.set([]);
   });
   it('must make the state active', function() {
     return expect(this.state1.isActive()).toBe(true);
   });
   it('must run StateOneCtrl controller', function() {
-    return expect(window.StateOneCtrl).toHaveBeenCalled();
+    return expect(this.CtrlClass).toHaveBeenCalled();
   });
   return it('must run StateOneCtrl with region', function() {
     var data;
@@ -316,7 +343,7 @@ describe('When processing state with no parent', function() {
       region: this.app.dynamicRegion,
       stateParams: [null]
     };
-    return expect(window.StateOneCtrl).toHaveBeenCalledWith(data);
+    return expect(this.CtrlClass).toHaveBeenCalledWith(data);
   });
 });
 
@@ -325,20 +352,23 @@ describe('When processing state with no parent and more then 1 view', function()
     var States;
     setFixtures('<div ui-region></div><div ui-region="name"></div>');
     this.app = new Marionette.Application;
-    window['SomeCtrl'] = Marionette.Controller.extend();
-    window['SomeNameCtrl'] = Marionette.Controller.extend();
-    spyOn(window, 'SomeCtrl');
-    spyOn(window, 'SomeNameCtrl');
+    this.State1Ctrl = jasmine.createSpy('State1Ctrl');
+    this.State2Ctrl = jasmine.createSpy('State2Ctrl');
+    spyOn(Marionette.RegionControllers.prototype, 'getRegionController').and.callFake((function(_this) {
+      return function(name) {
+        return _this[name];
+      };
+    })(this));
     States = Marionette.AppStates.extend({
       appStates: {
         'stateOne': {
           url: '/stateOneUrl',
           views: {
             "": {
-              ctrl: 'SomeCtrl'
+              ctrl: 'State1Ctrl'
             },
             'name': {
-              ctrl: 'SomeNameCtrl'
+              ctrl: 'State2Ctrl'
             }
           }
         }
@@ -365,7 +395,7 @@ describe('When processing state with no parent and more then 1 view', function()
       region: this.app.dynamicRegion,
       stateParams: [null]
     };
-    return expect(window.SomeCtrl).toHaveBeenCalledWith(data);
+    return expect(this.State1Ctrl).toHaveBeenCalledWith(data);
   });
   return it('must run SomeNameCtrl in app.nameRegion', function() {
     var data;
@@ -373,62 +403,6 @@ describe('When processing state with no parent and more then 1 view', function()
       region: this.app.nameRegion,
       stateParams: [null]
     };
-    return expect(window.SomeNameCtrl).toHaveBeenCalledWith(data);
-  });
-});
-
-describe('Process a child state', function() {
-  beforeEach(function() {
-    var States;
-    setFixtures('<div ui-region></div>');
-    this.app = new Marionette.Application;
-    this.app.addRegions({
-      dynamicRegion: $('[ui-region]')
-    });
-    States = Marionette.AppStates.extend({
-      appStates: {
-        'stateOne': {
-          url: '/stateOneUrl'
-        },
-        'stateTwo': {
-          url: '/stateTwoUrl',
-          parent: 'stateOne'
-        },
-        'stateThree': {
-          url: '/stateThreeUrl',
-          parent: 'stateTwo'
-        },
-        'stateFour': {
-          url: '/someurl/:id',
-          parent: 'stateThree',
-          views: {
-            'region1@stateThree': {
-              ctrl: 'State1Ctrl'
-            },
-            'region2@stateThree': {
-              ctrl: 'State2Ctrl'
-            }
-          }
-        }
-      }
-    });
-    return this.router = new States({
-      app: this.app
-    });
-  });
-  afterEach(function() {
-    this.router = null;
-    Backbone.history.stop();
-    return statesCollection.set([]);
-  });
-  return describe('when processing child state without views', function() {
-    beforeEach(function() {
-      spyOn(window, 'StateOneCtrl');
-      Backbone.history.start();
-      return this.router.navigate('/stateOneUrl/stateTwoUrl/stateThreeUrl', true);
-    });
-    return it('must run parent state first', function() {
-      return expect(window.StateOneCtrl).toHaveBeenCalled();
-    });
+    return expect(this.State2Ctrl).toHaveBeenCalledWith(data);
   });
 });
