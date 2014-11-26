@@ -90,7 +90,7 @@ describe('Marionette.RegionControllers', function() {
 });
 
 describe('Marionette.RegionController', function() {
-  return describe('when initializing the region controller', function() {
+  describe('when initializing the region controller', function() {
     describe('when region is not passed', function() {
       return it('must throw an error', function() {
         return expect(function() {
@@ -113,6 +113,39 @@ describe('Marionette.RegionController', function() {
       });
       return it('must have _region property', function() {
         return expect(this.regionCtrl._region).toEqual(this._region);
+      });
+    });
+  });
+  return describe('when showing the view inside the region', function() {
+    beforeEach(function() {
+      setFixtures(sandbox());
+      this._region = new Marionette.Region({
+        el: '#sandbox'
+      });
+      return this.regionCtrl = new Marionette.RegionController({
+        region: this._region
+      });
+    });
+    describe('when view is not instance of Backbone.View', function() {
+      return it('must throw an error', function() {
+        var regionCtrl;
+        regionCtrl = this.regionCtrl;
+        return expect(function() {
+          return regionCtrl.show('abc');
+        }).toThrow();
+      });
+    });
+    return describe('when view instance passed', function() {
+      beforeEach(function() {
+        spyOn(this._region, 'show');
+        this.view = new Marionette.ItemView();
+        return this.regionCtrl.show(this.view);
+      });
+      it('must have _view property equal to view', function() {
+        return expect(this.regionCtrl._view).toEqual(this.view);
+      });
+      return it('must run show function on the passed region', function() {
+        return expect(this._region.show).toHaveBeenCalledWith(this.view);
       });
     });
   });

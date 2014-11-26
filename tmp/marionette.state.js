@@ -131,6 +131,16 @@ var __hasProp = {}.hasOwnProperty,
       this._region = options.region;
     }
 
+    RegionController.prototype.show = function(view) {
+      if (view instanceof Backbone.View !== true) {
+        throw new Marionette.Error({
+          message: 'View instance is not valid Backbone.View'
+        });
+      }
+      this._view = view;
+      return this._region.show(view);
+    };
+
     return RegionController;
 
   })(Marionette.Controller);

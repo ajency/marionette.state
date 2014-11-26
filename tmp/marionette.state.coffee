@@ -110,5 +110,14 @@
 			@_ctrlID = _.uniqueId 'ctrl-'
 			@_region = options.region
 	
+		show : (view)->
+	
+			if view instanceof Backbone.View isnt true
+				throw new Marionette.Error
+					message: 'View instance is not valid Backbone.View'
+	
+			@_view = view
+			@_region.show view
+	
 
 	Marionette.State

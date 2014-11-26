@@ -18,35 +18,30 @@ describe 'Marionette.RegionController', ->
 				expect(@regionCtrl._ctrlID).toBeDefined()
 
 			it 'must have _region property', ->
-			  	expect(@regionCtrl._region).toEqual @_region
+				expect(@regionCtrl._region).toEqual @_region
 
+	describe 'when showing the view inside the region', ->
 
+		beforeEach ->
+			setFixtures sandbox()
+			@_region = new Marionette.Region el : '#sandbox'
+			@regionCtrl = new Marionette.RegionController region : @_region
 
-	# describe 'on construction of object', ->
-	# 	it 'must throw error if region not passed', ->
-	# 		expect( -> new Marionette.RegionController() ).toThrow()
-	# 		expect( -> new Marionette.RegionController region : 'not a region object' ).toThrow()
+		describe 'when view is not instance of Backbone.View', ->
 
-	# 	it 'must have the unique id', ->
-	# 		regionCtrl = new Marionette.RegionController region : _region
-	# 		expect(regionCtrl._ctrlID).toBeDefined()
+			it 'must throw an error', ->
+				regionCtrl = @regionCtrl
+				expect(-> regionCtrl.show('abc')).toThrow()
 
-	# 	it 'must have the region object assigned to region property', ->
-	# 		regionCtrl = new Marionette.RegionController region : _region
-	# 		expect(regionCtrl._region).toBe _region
+		describe 'when view instance passed', ->
 
+			beforeEach ->
+				spyOn(@_region, 'show')
+				@view  = new Marionette.ItemView()
+				@regionCtrl.show @view
 
-	# describe "showing a view in region", ->
+			it 'must have _view property equal to view', ->
+				expect(@regionCtrl._view).toEqual @view
 
-	# 	beforeEach ->
-	# 		setFixtures sandbox()
-	# 		@sandboxRegion =  new Marionette.Region el : '#sandbox'
-	# 		@ctrl  = new Marionette.RegionController region : @sandboxRegion
-
-	# 	it 'must throw if view is not passed', ->
-	# 		expect(-> @ctrl.show() ).toThrow()
-
-	# 	it 'must show view inside the region', ->
-	# 		view  = new Marionette.ItemView 'template' : 'My View'
-	# 		@ctrl.show view
-	# 		expect(@sandboxRegion.currentView).toBe view
+			it 'must run show function on the passed region', ->
+				expect(@_region.show).toHaveBeenCalledWith @view
