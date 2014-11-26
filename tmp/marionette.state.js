@@ -144,5 +144,53 @@ var __hasProp = {}.hasOwnProperty,
     return RegionController;
 
   })(Marionette.Controller);
+  Marionette.State = (function(_super) {
+    __extends(State, _super);
+
+    function State() {
+      return State.__super__.constructor.apply(this, arguments);
+    }
+
+    State.prototype.idAttribute = 'name';
+
+    State.prototype.defaults = function() {
+      return {
+        ctrl: function() {
+          throw new Marionette.Error('Controller not defined');
+        },
+        parent: false,
+        status: 'inactive'
+      };
+    };
+
+    State.prototype.initialize = function(options) {
+      var stateName;
+      if (options == null) {
+        options = {};
+      }
+      if (!options.name || _.isEmpty(options.name)) {
+        throw new Marionette.Error('State Name must be passed');
+      }
+      stateName = options.name;
+      if (!options.url) {
+        options.url = "/" + stateName;
+      }
+      options.computed_url = options.url;
+      options.url_to_array = [options.url];
+      if (!options.ctrl) {
+        options.ctrl = this._ctrlName(stateName);
+      }
+      return this.set(options);
+    };
+
+    State.prototype._ctrlName = function(name) {
+      return name.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1) + 'Ctrl';
+      });
+    };
+
+    return State;
+
+  })(Backbone.Model);
   return Marionette.State;
 });

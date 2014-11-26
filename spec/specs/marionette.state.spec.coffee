@@ -3,3 +3,4 @@
 #@include ../marionette.layoutview.spec.coffee
 #@include ../marionette.regioncontrollers.spec.coffee
 #@include ../marionette.regioncontroller.spec.coffee
+#@include ../marionette.statemodel.spec.coffee

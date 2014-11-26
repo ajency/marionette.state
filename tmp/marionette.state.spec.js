@@ -150,3 +150,74 @@ describe('Marionette.RegionController', function() {
     });
   });
 });
+
+describe('Marionette.State', function() {
+  return describe('when initializing the State', function() {
+    describe('when state name is not pased', function() {
+      return it('must throw an error', function() {
+        return expect(function() {
+          return new Marionette.State;
+        }).toThrow();
+      });
+    });
+    describe('when state name is passed', function() {
+      beforeEach(function() {
+        return this.state = new Marionette.State({
+          'name': 'stateName'
+        });
+      });
+      it('must have state name as ID', function() {
+        return expect(this.state.id).toBe('stateName');
+      });
+      it('must have the url property', function() {
+        return expect(this.state.get('url')).toBe('/stateName');
+      });
+      it('must have the parent property', function() {
+        return expect(this.state.get('parent')).toEqual(false);
+      });
+      it('must have the computed_url property', function() {
+        return expect(this.state.get('computed_url')).toBe('/stateName');
+      });
+      it('must have the url_to_array property', function() {
+        return expect(this.state.get('url_to_array')).toEqual(['/stateName']);
+      });
+      it('must have the status property', function() {
+        return expect(this.state.get('status')).toBe('inactive');
+      });
+      return it('must have the ctrl property', function() {
+        return expect(this.state.get('ctrl')).toBe('StateNameCtrl');
+      });
+    });
+    return describe('when full options are passed', function() {
+      beforeEach(function() {
+        return this.state = new Marionette.State({
+          'name': 'stateName',
+          'url': '/customUrl',
+          'ctrl': 'MyCustomCtrl',
+          'parent': 'parentState'
+        });
+      });
+      it('must have state name as ID', function() {
+        return expect(this.state.id).toBe('stateName');
+      });
+      it('must have the url property', function() {
+        return expect(this.state.get('url')).toBe('/customUrl');
+      });
+      it('must have the computed_url property', function() {
+        return expect(this.state.get('computed_url')).toBe('/customUrl');
+      });
+      it('must have the parent property', function() {
+        return expect(this.state.get('parent')).toEqual('parentState');
+      });
+      it('must have the url_to_array property', function() {
+        return expect(this.state.get('url_to_array')).toEqual(['/customUrl']);
+      });
+      it('must have the status property', function() {
+        return expect(this.state.get('status')).toBe('inactive');
+      });
+      return it('must have the ctrl property', function() {
+        return expect(this.state.get('ctrl')).toBe('MyCustomCtrl');
+      });
+    });
+  });
+});
