@@ -232,6 +232,7 @@ var __hasProp = {}.hasOwnProperty,
       }
       this._app = options.app;
       this._statesCollection = window.statesCollection;
+      this.on('route', this._processStateOnRoute, this);
       this._registerStates();
     }
 

@@ -224,6 +224,7 @@
 			@_statesCollection = window.statesCollection
 	
 			# register all app states
+			@on 'route', @_processStateOnRoute, @
 			@_registerStates()
 	
 		_registerStates : ->
@@ -238,9 +239,6 @@
 				@route stateModel.get('computed_url'), stateModel.get('name')
 	
 	
-	
-	
-		#
 	
 		# 	{@app} = options
 	

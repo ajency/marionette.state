@@ -12,6 +12,7 @@ class Marionette.AppStates extends Backbone.Router
 		@_statesCollection = window.statesCollection
 
 		# register all app states
+		@on 'route', @_processStateOnRoute, @
 		@_registerStates()
 
 	_registerStates : ->
@@ -26,9 +27,6 @@ class Marionette.AppStates extends Backbone.Router
 			@route stateModel.get('computed_url'), stateModel.get('name')
 
 
-
-
-	#
 
 	# 	{@app} = options
 

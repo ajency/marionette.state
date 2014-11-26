@@ -283,6 +283,7 @@ describe('Maroinette.AppStates', function() {
     beforeEach(function() {
       this.app = new Marionette.Application;
       spyOn(Marionette.AppStates.prototype, '_registerStates').and.callThrough();
+      spyOn(Marionette.AppStates.prototype, 'on').and.callThrough();
       return this.appStates = new Marionette.AppStates({
         app: this.app
       });
@@ -295,6 +296,9 @@ describe('Maroinette.AppStates', function() {
     });
     it('must reference the global statesCollection', function() {
       return expect(this.appStates._statesCollection).toEqual(window.statesCollection);
+    });
+    it('must listen to "route" event', function() {
+      return expect(this.appStates.on).toHaveBeenCalledWith('route', this.appStates._processStateOnRoute, this.appStates);
     });
     return describe('Registering States', function() {
       describe('register state with no name ""', function() {

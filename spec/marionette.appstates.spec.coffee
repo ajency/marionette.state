@@ -10,6 +10,7 @@ describe 'Maroinette.AppStates', ->
 		beforeEach ->
 			@app = new Marionette.Application
 			spyOn(Marionette.AppStates::, '_registerStates').and.callThrough()
+			spyOn(Marionette.AppStates::, 'on').and.callThrough()
 			@appStates = new Marionette.AppStates app : @app
 
 		it 'must have _app property', ->
@@ -20,6 +21,9 @@ describe 'Maroinette.AppStates', ->
 
 		it 'must reference the global statesCollection', ->
 			expect(@appStates._statesCollection).toEqual window.statesCollection
+
+		it 'must listen to "route" event',->
+			expect(@appStates.on).toHaveBeenCalledWith 'route', @appStates._processStateOnRoute, @appStates
 
 		describe 'Registering States', ->
 
