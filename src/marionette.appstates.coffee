@@ -30,38 +30,54 @@ class Marionette.AppStates extends Backbone.Router
 		parentState = window.statesCollection.get stateModel.get 'parent'
 		@_processOnRouteState parentState.get('name'), args
 
-	_processState : (stateModel, args)->
-		stateModel.set 'status', 'active'
-		if stateModel.has('views') and false is stateModel.get 'parent' 
-			
-			views = stateModel.get 'views'
-			_.each views, (value, key)=>
-				ctrl = value['ctrl']
-				ControllerClass = Marionette.RegionControllers::getRegionController ctrl
-		
-				if key is ''
-					_region = @app.dynamicRegion
-				else
-					_region = @app["#{key}Region"]
+	_processState : (stateModel, args = [])->
+		stateModel.set 'status', 'processing'
+		stateModel.trigger "processing:#{stateModel.get 'name'}"
 
-				new ControllerClass
-					region : _region
-					stateParams : args
+		_region = @app.dynamicRegion
 
-			return
+		stateModel.set 'activeRegion', _region
 
-		# get controller
 		ctrl = stateModel.get 'ctrl'
+		
 		ControllerClass = Marionette.RegionControllers::getRegionController ctrl
 
-		# get the region to run controller
-		if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
-			throw new Marionette.Error
-					message : 'Dynamic region not defined for app'
+		ctrlInstance = new ControllerClass
+								region : _region
+								stateParams : args
 
-		if false is stateModel.get 'parent' 
-			_region = @app.dynamicRegion
+		stateModel.listenTo ctrlInstance, 'complete', ->
 
-		new ControllerClass
-				region : _region
-				stateParams : args
+		# if stateModel.has('views') and false is stateModel.get 'parent' 
+			
+		# 	views = stateModel.get 'views'
+		# 	_.each views, (value, key)=>
+		# 		ctrl = value['ctrl']
+		# 		ControllerClass = Marionette.RegionControllers::getRegionController ctrl
+		
+		# 		if key is ''
+		# 			_region = @app.dynamicRegion
+		# 		else
+		# 			_region = @app["#{key}Region"]
+
+		# 		new ControllerClass
+		# 			region : _region
+		# 			stateParams : args
+
+		# 	return
+
+		# # get controller
+		# ctrl = stateModel.get 'ctrl'
+		# ControllerClass = Marionette.RegionControllers::getRegionController ctrl
+
+		# # get the region to run controller
+		# if false is stateModel.get('parent') and ( @app.dynamicRegion instanceof Marionette.Region) isnt true
+		# 	throw new Marionette.Error
+		# 			message : 'Dynamic region not defined for app'
+
+		# if false is stateModel.get 'parent' 
+		# 	_region = @app.dynamicRegion
+
+		# new ControllerClass
+		# 		region : _region
+		# 		stateParams : args

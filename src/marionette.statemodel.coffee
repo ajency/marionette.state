@@ -10,5 +10,8 @@ class Marionette.State extends Backbone.Model
 	isActive : ->
 		@get('status') is 'active'
 
+	getStatus : ->
+		@get 'status'
+
 	isChildState : ->
 		@get('parent') isnt false

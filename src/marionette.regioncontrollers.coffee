@@ -1,15 +1,10 @@
 class Marionette.RegionControllers
 
-	regionControllersLookup : ->
-		if not window.RegionControllers
-			window.RegionControllers = {}
-
-		window.RegionControllers
+	controllers : {}
 
 	getRegionController : (name)->
-		lookUp = Marionette.RegionControllers::regionControllersLookup()
-		if not _.isUndefined lookUp[name]
-			return lookUp[name]
+		if not _.isUndefined @controllers[name]
+			return @controllers[name]
 		else
 			throw new Marionette.Error
-							message : 'region controller not found'
+						message : "#{name} controller not found"

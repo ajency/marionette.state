@@ -13,10 +13,10 @@ _.extend Marionette.LayoutView::,
 		  	@_reInitializeRegions()
 		
 		Marionette.ItemView.prototype.render.apply @, arguments
-		@_identifyRegions()
+		@_detectRegions()
 		@
 
-	_identifyRegions : ->
+	_detectRegions : ->
 		@$el.find('[ui-region]').each (index, region)=>
 			regionName = $(region).attr 'ui-region'
 			if _.isEmpty regionName

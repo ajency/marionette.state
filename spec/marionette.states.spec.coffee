@@ -1,26 +1,3 @@
-describe 'region controller lookup', ->
-	it 'must have the lookup defined', ->
-		expect( Marionette.RegionControllers::regionControllersLookup()).toEqual jasmine.any Object
-
-describe 'when looking for region controller', ->
-
-	beforeEach ->
-		Marionette.RegionController = Marionette.Controller.extend()
-		window.RegionControllers = 
-					'LoginCtrl' : Marionette.RegionController.extend()
-					'NoAccessCtrl' : Marionette.RegionController.extend()
-		
-
-	it 'must return controller if present', ->
-		Ctrl = Marionette.RegionControllers::getRegionController 'LoginCtrl'
-		ctrl = new Ctrl
-		expect(ctrl).toEqual jasmine.any Marionette.RegionController
-
-	describe 'when controller is not defined', ->
-		it 'must throw', ->
-			expect(-> Marionette.RegionControllers::getRegionController 'NoCtrl' ).toThrow()
-
-
 describe 'Marionette.States', ->
 
 	afterEach ->
@@ -128,28 +105,3 @@ describe 'Marionette.States', ->
 			expect(@state1.get 'url_array').toEqual ['/stateOneUrl']
 			expect(@state2.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl']
 			expect(@state3.get 'url_array').toEqual ['/stateOneUrl','/stateTwoUrl','/stateThreeUrl']
-
-	# describe 'state views', ->
-
-	# 	beforeEach ->
-	# 		setFixtures '<div ui-region>Region</div>'
-	# 		@app = new Marionette.Application
-	# 		@app.start()
-	# 		States = Marionette.AppStates.extend
-	# 					appStates : 
-	# 						'state1' : 
-	# 							url : '/state1url'
-	# 						'state2' : 
-	# 							url : '/state2url'
-	# 							parent : 'state1'
-	# 							views : 
-	# 								'@state1' : ctrl : 'SomeCtrl'
-	# 								'regionname@state1' : ctrl : 'SomeOtherCtrl'
-
-
-
-	# 		@states = new States app : new Marionette.Application
-	# 		@state1 = statesCollection.get 'stateOne'
-
-	# 	it 'must have Application dynamic region as its region', ->
-	# 		expect(@state1.get 'views').toBe 

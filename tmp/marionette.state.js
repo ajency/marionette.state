@@ -12,9 +12,6 @@
  * Distributed under MIT license
  *
  */
-var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
 (function(root, factory) {
   var Backbone, Marionette, _;
   Backbone = void 0;
@@ -36,10 +33,16 @@ var __hasProp = {}.hasOwnProperty,
   "use strict";
   _.extend(Marionette.Application.prototype, {
     start: function(options) {
-      var _possibleRegions;
       if (options == null) {
         options = {};
       }
+      this._detectRegions();
+      this.triggerMethod('before:start', options);
+      this._initCallbacks.run(options, this);
+      return this.triggerMethod('start', options);
+    },
+    _detectRegions: function() {
+      var _possibleRegions;
       _possibleRegions = $('[ui-region]').each((function(_this) {
         return function(index, region) {
           var regionName;
@@ -54,9 +57,11 @@ var __hasProp = {}.hasOwnProperty,
           });
         };
       })(this));
-      this.triggerMethod('before:start', options);
-      this._initCallbacks.run(options, this);
-      return this.triggerMethod('start', options);
+      if (_.isUndefined(this.dynamicRegion)) {
+        throw new Marionette.Error({
+          message: 'Need atleast one dynamic region'
+        });
+      }
     }
   });
   _.extend(Marionette.LayoutView.prototype, {
@@ -68,10 +73,10 @@ var __hasProp = {}.hasOwnProperty,
         this._reInitializeRegions();
       }
       Marionette.ItemView.prototype.render.apply(this, arguments);
-      this._identifyRegions();
+      this._detectRegions();
       return this;
     },
-    _identifyRegions: function() {
+    _detectRegions: function() {
       return this.$el.find('[ui-region]').each((function(_this) {
         return function(index, region) {
           var regionName;
@@ -91,21 +96,14 @@ var __hasProp = {}.hasOwnProperty,
   Marionette.RegionControllers = (function() {
     function RegionControllers() {}
 
-    RegionControllers.prototype.regionControllersLookup = function() {
-      if (!window.RegionControllers) {
-        window.RegionControllers = {};
-      }
-      return window.RegionControllers;
-    };
+    RegionControllers.prototype.controllers = {};
 
     RegionControllers.prototype.getRegionController = function(name) {
-      var lookUp;
-      lookUp = Marionette.RegionControllers.prototype.regionControllersLookup();
-      if (!_.isUndefined(lookUp[name])) {
-        return lookUp[name];
+      if (!_.isUndefined(this.controllers[name])) {
+        return this.controllers[name];
       } else {
         throw new Marionette.Error({
-          message: 'region controller not found'
+          message: "" + name + " controller not found"
         });
       }
     };
@@ -113,191 +111,5 @@ var __hasProp = {}.hasOwnProperty,
     return RegionControllers;
 
   })();
-  Marionette.State = (function(_super) {
-    __extends(State, _super);
-
-    function State() {
-      return State.__super__.constructor.apply(this, arguments);
-    }
-
-    State.prototype.idAttribute = 'name';
-
-    State.prototype.defaults = function() {
-      return {
-        ctrl: '',
-        parent: false,
-        status: 'inactive'
-      };
-    };
-
-    State.prototype.isActive = function() {
-      return this.get('status') === 'active';
-    };
-
-    State.prototype.isChildState = function() {
-      return this.get('parent') !== false;
-    };
-
-    return State;
-
-  })(Backbone.Model);
-  Marionette.StatesCollection = (function(_super) {
-    __extends(StatesCollection, _super);
-
-    function StatesCollection() {
-      return StatesCollection.__super__.constructor.apply(this, arguments);
-    }
-
-    StatesCollection.prototype.model = Marionette.State;
-
-    StatesCollection.prototype.addState = function(name, definition) {
-      var computeUrl, computedUrl, data, stateModel, urlArray, urlToArray;
-      if (definition == null) {
-        definition = {};
-      }
-      data = {
-        name: name
-      };
-      _.defaults(data, definition);
-      this.add(data);
-      stateModel = this.get(name);
-      if (_.isEmpty(stateModel.get('ctrl'))) {
-        stateModel.set('ctrl', "" + (this.sentenceCase(name)) + "Ctrl");
-      }
-      computedUrl = stateModel.get('url');
-      computeUrl = (function(_this) {
-        return function(state) {
-          var parent, parentState;
-          parent = state.get('parent');
-          parentState = _this.get(parent);
-          computedUrl = "" + (parentState.get('url')) + computedUrl;
-          if (false !== parentState.get('parent')) {
-            return computeUrl(parentState);
-          }
-        };
-      })(this);
-      if (false !== stateModel.get('parent')) {
-        computeUrl(stateModel);
-      }
-      stateModel.set('computed_url', computedUrl.substring(1));
-      urlArray = [];
-      urlArray.push(stateModel.get('url'));
-      urlToArray = (function(_this) {
-        return function(state) {
-          var parent, parentState;
-          parent = state.get('parent');
-          parentState = _this.get(parent);
-          urlArray.push(parentState.get('url'));
-          if (false !== parentState.get('parent')) {
-            return urlToArray(parentState);
-          }
-        };
-      })(this);
-      if (false !== stateModel.get('parent')) {
-        urlToArray(stateModel);
-      }
-      stateModel.set('url_array', urlArray.reverse());
-      return stateModel;
-    };
-
-    StatesCollection.prototype.sentenceCase = function(name) {
-      return name.replace(/\w\S*/g, function(txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1);
-      });
-    };
-
-    return StatesCollection;
-
-  })(Backbone.Collection);
-  window.statesCollection = new Marionette.StatesCollection;
-  Marionette.AppStates = (function(_super) {
-    __extends(AppStates, _super);
-
-    function AppStates(options) {
-      var states;
-      if (options == null) {
-        options = {};
-      }
-      AppStates.__super__.constructor.call(this, options);
-      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
-        throw new Marionette.Error({
-          message: 'Application instance needed'
-        });
-      }
-      this.app = options.app;
-      this.appStates = Marionette.getOption(this, 'appStates');
-      states = [];
-      _.map(this.appStates, function(stateDef, stateName) {
-        return states.push(statesCollection.addState(stateName, stateDef));
-      });
-      _.each(states, function(state) {
-        return this.route(state.get('computed_url'), state.get('name'), function() {
-          return true;
-        });
-      }, this);
-      this.on('route', this._processOnRouteState, this);
-    }
-
-    AppStates.prototype._processOnRouteState = function(name, args) {
-      var stateModel;
-      if (args == null) {
-        args = [];
-      }
-      stateModel = window.statesCollection.get(name);
-      if (stateModel.isChildState()) {
-        return this._processChildState(stateModel, args);
-      } else {
-        return this._processState(stateModel, args);
-      }
-    };
-
-    AppStates.prototype._processChildState = function(stateModel, args) {
-      var parentState;
-      parentState = window.statesCollection.get(stateModel.get('parent'));
-      return this._processOnRouteState(parentState.get('name'), args);
-    };
-
-    AppStates.prototype._processState = function(stateModel, args) {
-      var ControllerClass, ctrl, views, _region;
-      stateModel.set('status', 'active');
-      if (stateModel.has('views') && false === stateModel.get('parent')) {
-        views = stateModel.get('views');
-        _.each(views, (function(_this) {
-          return function(value, key) {
-            var ControllerClass, ctrl, _region;
-            ctrl = value['ctrl'];
-            ControllerClass = Marionette.RegionControllers.prototype.getRegionController(ctrl);
-            if (key === '') {
-              _region = _this.app.dynamicRegion;
-            } else {
-              _region = _this.app["" + key + "Region"];
-            }
-            return new ControllerClass({
-              region: _region,
-              stateParams: args
-            });
-          };
-        })(this));
-        return;
-      }
-      ctrl = stateModel.get('ctrl');
-      ControllerClass = Marionette.RegionControllers.prototype.getRegionController(ctrl);
-      if (false === stateModel.get('parent') && (this.app.dynamicRegion instanceof Marionette.Region) !== true) {
-        throw new Marionette.Error({
-          message: 'Dynamic region not defined for app'
-        });
-      }
-      if (false === stateModel.get('parent')) {
-        _region = this.app.dynamicRegion;
-      }
-      return new ControllerClass({
-        region: _region,
-        stateParams: args
-      });
-    };
-
-    return AppStates;
-
-  })(Backbone.Router);
   return Marionette.State;
 });
