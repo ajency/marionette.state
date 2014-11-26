@@ -37,7 +37,6 @@
 ) this, (root, Backbone, _, Marionette) ->
 	"use strict"
 
-	
 	_.extend Marionette.Application::,
 		
 		start : (options = {})->
@@ -53,8 +52,6 @@
 			@triggerMethod 'before:start', options
 			@_initCallbacks.run options, @
 			@triggerMethod 'start', options
-	
-	
 	_.extend Marionette.LayoutView::,
 		
 		render: ->
@@ -82,7 +79,6 @@
 					regionName = "#{regionName}Region"
 				@addRegion regionName, selector : $(region)
 	
-			
 	class Marionette.RegionControllers
 	
 		regionControllersLookup : ->
@@ -98,7 +94,6 @@
 			else
 				throw new Marionette.Error
 								message : 'region controller not found'
-	
 	class Marionette.State extends Backbone.Model
 	
 		idAttribute : 'name'
@@ -113,10 +108,10 @@
 	
 		isChildState : ->
 			@get('parent') isnt false
-	
-	
 	class Marionette.StatesCollection extends Backbone.Collection
+	
 		model : Marionette.State
+		
 		addState : (name, definition = {})->
 			data = name : name
 			_.defaults  data, definition
@@ -163,7 +158,6 @@
 				return txt.charAt(0).toUpperCase() + txt.substr(1)
 	
 	window.statesCollection = new Marionette.StatesCollection
-	
 	class Marionette.AppStates extends Backbone.Router
 	
 		constructor : (options = {})->
@@ -231,13 +225,5 @@
 			new ControllerClass
 					region : _region
 					stateParams : args
-	
-		
-	
-	
-	
-	
-	
-	
 	
 	Marionette.State

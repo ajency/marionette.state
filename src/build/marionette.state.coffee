@@ -37,7 +37,11 @@
 ) this, (root, Backbone, _, Marionette) ->
 	"use strict"
 
-	# @include ../marionette.region.coffee
-	# @include ../marionette.states.coffee
+	# @include ../marionette.application.coffee
+	# @include ../marionette.layoutview.coffee
+	# @include ../marionette.regioncontrollers.coffee
+	# @include ../marionette.statemodel.coffee
+	# @include ../marionette.statecollection.coffee
+	# @include ../marionette.appstates.coffee
 	
 	Marionette.State
