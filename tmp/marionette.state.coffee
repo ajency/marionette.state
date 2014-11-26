@@ -1,13 +1,13 @@
 ###
 #
 # Marionette States (Marionette.State)
-# State Based Routing for MarionetteJS applications. 
+# State Based Routing for MarionetteJS applications.
 # Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
 # Version: v0.1.0
 #
-# Copyright (c) 2014 Suraj Air 
+# Copyright (c) 2014 Suraj Air
 # Distributed under MIT license
 #
 
@@ -97,4 +97,18 @@
 				throw new Marionette.Error
 							message : "#{name} controller not found"
 	
+	class Marionette.RegionController extends Marionette.Controller
+	
+		constructor : (options = {})->
+	
+			if not options.region or ( options.region instanceof Marionette.Region isnt true )
+				throw new Marionette.Error
+					message: 'Region instance is not passed'
+	
+			super options
+	
+			@_ctrlID = _.uniqueId 'ctrl-'
+			@_region = options.region
+	
+
 	Marionette.State

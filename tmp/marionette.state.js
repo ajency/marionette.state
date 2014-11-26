@@ -2,16 +2,19 @@
 /*
  *
  * Marionette States (Marionette.State)
- * State Based Routing for MarionetteJS applications. 
+ * State Based Routing for MarionetteJS applications.
  * Much like angular's ui-router
  * http://surajair.github.io/marionette.state
  * --------------------------------------------------
  * Version: v0.1.0
  *
- * Copyright (c) 2014 Suraj Air 
+ * Copyright (c) 2014 Suraj Air
  * Distributed under MIT license
  *
  */
+var __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
 (function(root, factory) {
   var Backbone, Marionette, _;
   Backbone = void 0;
@@ -111,5 +114,25 @@
     return RegionControllers;
 
   })();
+  Marionette.RegionController = (function(_super) {
+    __extends(RegionController, _super);
+
+    function RegionController(options) {
+      if (options == null) {
+        options = {};
+      }
+      if (!options.region || (options.region instanceof Marionette.Region !== true)) {
+        throw new Marionette.Error({
+          message: 'Region instance is not passed'
+        });
+      }
+      RegionController.__super__.constructor.call(this, options);
+      this._ctrlID = _.uniqueId('ctrl-');
+      this._region = options.region;
+    }
+
+    return RegionController;
+
+  })(Marionette.Controller);
   return Marionette.State;
 });

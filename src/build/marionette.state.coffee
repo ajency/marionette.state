@@ -1,13 +1,13 @@
 ###
 #
 # Marionette States (Marionette.State)
-# State Based Routing for MarionetteJS applications. 
+# State Based Routing for MarionetteJS applications.
 # Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
 # Version: v0.1.0
 #
-# Copyright (c) 2014 Suraj Air 
+# Copyright (c) 2014 Suraj Air
 # Distributed under MIT license
 #
 
@@ -40,5 +40,6 @@
 	# @include ../marionette.application.coffee
 	# @include ../marionette.layoutview.coffee
 	# @include ../marionette.regioncontrollers.coffee
-	
+	# @include ../marionette.regioncontroller.coffee
+
 	Marionette.State

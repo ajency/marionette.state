@@ -88,3 +88,32 @@ describe('Marionette.RegionControllers', function() {
     });
   });
 });
+
+describe('Marionette.RegionController', function() {
+  return describe('when initializing the region controller', function() {
+    describe('when region is not passed', function() {
+      return it('must throw an error', function() {
+        return expect(function() {
+          return new Marionette.RegionController;
+        }).toThrow();
+      });
+    });
+    return describe('when region instance is passed', function() {
+      beforeEach(function() {
+        setFixtures(sandbox());
+        this._region = new Marionette.Region({
+          el: '#sandbox'
+        });
+        return this.regionCtrl = new Marionette.RegionController({
+          region: this._region
+        });
+      });
+      it('must have a unique controllerid', function() {
+        return expect(this.regionCtrl._ctrlID).toBeDefined();
+      });
+      return it('must have _region property', function() {
+        return expect(this.regionCtrl._region).toEqual(this._region);
+      });
+    });
+  });
+});

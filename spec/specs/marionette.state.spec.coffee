@@ -2,3 +2,4 @@
 #@include ../marionette.application.spec.coffee
 #@include ../marionette.layoutview.spec.coffee
 #@include ../marionette.regioncontrollers.spec.coffee
+#@include ../marionette.regioncontroller.spec.coffee
