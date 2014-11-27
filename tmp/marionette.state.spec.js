@@ -414,7 +414,7 @@ describe('Marionette.StateProcessor', function() {
         return expect(this.stateProcessor._app).toEqual(this.app);
       });
     });
-    return describe('When processing a state', function() {
+    describe('When processing a state', function() {
       beforeEach(function() {
         this.StateCtrl = (function(_super) {
           __extends(StateCtrl, _super);
@@ -473,7 +473,7 @@ describe('Marionette.StateProcessor', function() {
           return this.stateProcessor._ctrlInstance.trigger('view:rendered', new Marionette.ItemView);
         });
         return it('must resovle the state', function() {
-          return expect(this.stateProcessor._deferred.state()).toBe('resolved');
+          return expect(this.stateProcessor._state.get('status')).toBe('resolved');
         });
       });
       return describe('when processing state with params', function() {
@@ -494,6 +494,29 @@ describe('Marionette.StateProcessor', function() {
             stateParams: [12]
           });
         });
+      });
+    });
+    return describe('when the same controller is run again', function() {
+      beforeEach(function() {
+        this.app.dynamicRegion = new Marionette.Region({
+          el: $('[ui-region]')
+        });
+        this.paramStateProcessor = new Marionette.StateProcessor({
+          state: this.state,
+          app: this.app,
+          stateParams: [12]
+        });
+        spyOn(Marionette.RegionControllers.prototype, 'getRegionController').and.callThrough();
+        this.paramStateProcessor.process();
+        this.ctrl = this.app.dynamicRegion._ctrlInstance;
+        spyOn(this.ctrl, 'trigger').and.callThrough();
+        return this.paramStateProcessor.process();
+      });
+      it('must be called only once', function() {
+        return expect(Marionette.RegionControllers.prototype.getRegionController.calls.count()).toEqual(1);
+      });
+      return it('must trigger the view:rendered event on ctlr', function() {
+        return expect(this.ctrl.trigger).toHaveBeenCalled();
       });
     });
   });

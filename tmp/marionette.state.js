@@ -106,6 +106,9 @@ var __hasProp = {}.hasOwnProperty,
         params = [];
       }
       return this._ctrlStateParams = params;
+    },
+    setControllerInstance: function(ctrlInstance) {
+      return this._ctrlInstance = ctrlInstance;
     }
   });
   Marionette.RegionControllers = (function() {
@@ -288,16 +291,24 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var CtrlClass, ctrlInstance, _ctrlClassName, _region;
+      var CtrlClass, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._region = _region = this._app.dynamicRegion;
-      this._region.setController(_ctrlClassName);
-      this._region.setControllerStateParams(this._stateParams);
+      currentCtrlClass = _region._ctrlClass;
+      ctrlStateParams = _region._ctrlStateParams;
+      if (currentCtrlClass === _ctrlClassName && ctrlStateParams === this._stateParams) {
+        currentCtrlInstance = this._region._ctrlInstance;
+        currentCtrlInstance.trigger('view:rendered');
+        return this._deferred.promise();
+      }
+      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
         stateParams: this._stateParams
       });
+      this._region.setController(_ctrlClassName);
+      this._region.setControllerStateParams(this._stateParams);
+      this._region.setControllerInstance(ctrlInstance);
       this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
       return this._deferred.promise();
     };
@@ -307,6 +318,7 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype._onViewRendered = function() {
+      this._state.set('status', 'resolved');
       return this._deferred.resolve(true);
     };
 

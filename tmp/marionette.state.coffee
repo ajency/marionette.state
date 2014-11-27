@@ -95,6 +95,10 @@
 		setControllerStateParams : (params = [])->
 			@_ctrlStateParams = params
 	
+		setControllerInstance :(ctrlInstance)->
+			@_ctrlInstance = ctrlInstance
+	
+	
 	class Marionette.RegionControllers
 	
 		controllers : {}
@@ -252,16 +256,25 @@
 	
 		process : ->
 			_ctrlClassName = @_state.get 'ctrl'
-			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 			@_region = _region = @_app.dynamicRegion
+	
+			#get current cotrl
+			currentCtrlClass = _region._ctrlClass
+			ctrlStateParams = _region._ctrlStateParams
+			if currentCtrlClass is _ctrlClassName and ctrlStateParams is @_stateParams
+				currentCtrlInstance = @_region._ctrlInstance
+				currentCtrlInstance.trigger 'view:rendered'
+				return @_deferred.promise()
+	
+			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
+	
+			@_ctrlInstance = ctrlInstance = new CtrlClass
+												region : _region
+												stateParams : @_stateParams
 	
 			@_region.setController _ctrlClassName
 			@_region.setControllerStateParams @_stateParams
-	
-			@_ctrlInstance = ctrlInstance = new CtrlClass
-													region : _region
-													stateParams : @_stateParams
-	
+			@_region.setControllerInstance ctrlInstance
 			@listenTo ctrlInstance, 'view:rendered', @_onViewRendered
 	
 			@_deferred.promise()
@@ -270,6 +283,7 @@
 			@_deferred.state()
 	
 		_onViewRendered : =>
+			@_state.set 'status', 'resolved'
 			@_deferred.resolve true
 	
 	

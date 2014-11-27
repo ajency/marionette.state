@@ -74,13 +74,12 @@ describe 'Marionette.StateProcessor', ->
 				expect(@setCtrlSpy).toHaveBeenCalledWith 'StateOneCtrl'
 				expect(@setCtrlParamSpy).toHaveBeenCalledWith []
 
-
 			describe 'when view is rendered in region', ->
 				beforeEach ->
 					@stateProcessor._ctrlInstance.trigger 'view:rendered', new Marionette.ItemView
 
 				it 'must resovle the state', ->
-					expect(@stateProcessor._deferred.state()).toBe 'resolved'
+					expect(@stateProcessor._state.get 'status').toBe 'resolved'
 
 
 			describe 'when processing state with params', ->
@@ -99,6 +98,28 @@ describe 'Marionette.StateProcessor', ->
 					expect(@StateCtrl::initialize).toHaveBeenCalledWith
 															region : jasmine.any Marionette.Region
 															stateParams : [12]
+
+		describe 'when the same controller is run again', ->
+			beforeEach ->
+				@app.dynamicRegion = new Marionette.Region el : $('[ui-region]')
+				@paramStateProcessor = new Marionette.StateProcessor
+														state : @state
+														app : @app
+														stateParams : [12]
+				spyOn(Marionette.RegionControllers::,'getRegionController').and.callThrough()
+
+				@paramStateProcessor.process()
+				@ctrl = @app.dynamicRegion._ctrlInstance
+				spyOn( @ctrl, 'trigger').and.callThrough()
+				@paramStateProcessor.process()
+
+			it 'must be called only once', ->
+				expect(Marionette.RegionControllers::getRegionController.calls.count()).toEqual 1
+
+			it 'must trigger the view:rendered event on ctlr', ->
+				expect(@ctrl.trigger).toHaveBeenCalled()
+
+
 
 
 

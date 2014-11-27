@@ -6,3 +6,7 @@ _.extend Marionette.Region::,
 
 	setControllerStateParams : (params = [])->
 		@_ctrlStateParams = params
+
+	setControllerInstance :(ctrlInstance)->
+		@_ctrlInstance = ctrlInstance
+

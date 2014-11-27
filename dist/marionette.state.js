@@ -106,12 +106,22 @@ var __hasProp = {}.hasOwnProperty,
         params = [];
       }
       return this._ctrlStateParams = params;
+    },
+    setControllerInstance: function(ctrlInstance) {
+      return this._ctrlInstance = ctrlInstance;
     }
   });
   Marionette.RegionControllers = (function() {
     function RegionControllers() {}
 
     RegionControllers.prototype.controllers = {};
+
+    RegionControllers.prototype.setLookup = function(object) {
+      if (object !== window && _.isUndefined(window[object])) {
+        throw new Marionette.Error('Controller lookup object is not defined');
+      }
+      return this.controllers = object;
+    };
 
     RegionControllers.prototype.getRegionController = function(name) {
       if (!_.isUndefined(this.controllers[name])) {
@@ -176,7 +186,8 @@ var __hasProp = {}.hasOwnProperty,
           throw new Marionette.Error('Controller not defined');
         },
         parent: false,
-        status: 'inactive'
+        status: 'inactive',
+        parentStates: []
       };
     };
 
@@ -197,13 +208,33 @@ var __hasProp = {}.hasOwnProperty,
       if (!options.ctrl) {
         options.ctrl = this._ctrlName(stateName);
       }
+      this.on('change:parentStates', this._processParentStates);
       return this.set(options);
+    };
+
+    State.prototype._processParentStates = function(state) {
+      var computedUrl, parentStates, urlToArray;
+      parentStates = state.get('parentStates');
+      computedUrl = state.get('computed_url');
+      urlToArray = state.get('url_to_array');
+      _.each(parentStates, (function(_this) {
+        return function(pState) {
+          computedUrl = "" + (pState.get('computed_url')) + "/" + computedUrl;
+          return urlToArray.unshift(pState.get('url_to_array')[0]);
+        };
+      })(this));
+      state.set("computed_url", computedUrl);
+      return state.set("url_to_array", urlToArray);
     };
 
     State.prototype._ctrlName = function(name) {
       return name.replace(/\w\S*/g, function(txt) {
         return txt.charAt(0).toUpperCase() + txt.substr(1) + 'Ctrl';
       });
+    };
+
+    State.prototype.isChildState = function() {
+      return this.get('parent') !== false;
     };
 
     return State;
@@ -234,60 +265,6 @@ var __hasProp = {}.hasOwnProperty,
 
   })(Backbone.Collection);
   window.statesCollection = new Marionette.StateCollection;
-  Marionette.AppStates = (function(_super) {
-    __extends(AppStates, _super);
-
-    function AppStates(options) {
-      if (options == null) {
-        options = {};
-      }
-      AppStates.__super__.constructor.call(this, options);
-      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
-        throw new Marionette.Error({
-          message: 'Application instance needed'
-        });
-      }
-      this._app = options.app;
-      this._statesCollection = window.statesCollection;
-      this._registerStates();
-      this.on('route', this._processStateOnRoute, this);
-    }
-
-    AppStates.prototype._registerStates = function() {
-      var appStates;
-      appStates = Marionette.getOption(this, 'appStates');
-      return _.map(appStates, (function(_this) {
-        return function(stateDef, stateName) {
-          var stateModel;
-          if (_.isEmpty(stateName)) {
-            throw new Marionette.Error('state name cannot be empty');
-          }
-          stateModel = _this._statesCollection.addState(stateName, stateDef);
-          return _this.route(stateModel.get('computed_url'), stateModel.get('name'), function() {
-            return true;
-          });
-        };
-      })(this));
-    };
-
-    AppStates.prototype._processStateOnRoute = function(name, args) {
-      var processor, stateModel;
-      if (args == null) {
-        args = [];
-      }
-      stateModel = this._statesCollection.get(name);
-      processor = new Marionette.StateProcessor({
-        state: stateModel,
-        app: this._app,
-        stateParams: args
-      });
-      processor.process();
-      return processor;
-    };
-
-    return AppStates;
-
-  })(Backbone.Router);
   Marionette.StateProcessor = (function(_super) {
     __extends(StateProcessor, _super);
 
@@ -314,16 +291,24 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var CtrlClass, ctrlInstance, _ctrlClassName, _region;
+      var CtrlClass, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._region = _region = this._app.dynamicRegion;
-      this._region.setController(_ctrlClassName);
-      this._region.setControllerStateParams(this._stateParams);
+      currentCtrlClass = _region._ctrlClass;
+      ctrlStateParams = _region._ctrlStateParams;
+      if (currentCtrlClass === _ctrlClassName && ctrlStateParams === this._stateParams) {
+        currentCtrlInstance = this._region._ctrlInstance;
+        currentCtrlInstance.trigger('view:rendered');
+        return this._deferred.promise();
+      }
+      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
         stateParams: this._stateParams
       });
+      this._region.setController(_ctrlClassName);
+      this._region.setControllerStateParams(this._stateParams);
+      this._region.setControllerInstance(ctrlInstance);
       this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
       return this._deferred.promise();
     };
@@ -333,11 +318,94 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype._onViewRendered = function() {
+      this._state.set('status', 'resolved');
       return this._deferred.resolve(true);
     };
 
     return StateProcessor;
 
   })(Marionette.Object);
+  Marionette.AppStates = (function(_super) {
+    __extends(AppStates, _super);
+
+    function AppStates(options) {
+      if (options == null) {
+        options = {};
+      }
+      this._getParentStates = __bind(this._getParentStates, this);
+      AppStates.__super__.constructor.call(this, options);
+      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
+        throw new Marionette.Error({
+          message: 'Application instance needed'
+        });
+      }
+      this._app = options.app;
+      this._statesCollection = window.statesCollection;
+      this._registerStates();
+      this.on('route', this._processStateOnRoute, this);
+    }
+
+    AppStates.prototype._registerStates = function() {
+      var appStates;
+      appStates = Marionette.getOption(this, 'appStates');
+      _.map(appStates, (function(_this) {
+        return function(stateDef, stateName) {
+          if (_.isEmpty(stateName)) {
+            throw new Marionette.Error('state name cannot be empty');
+          }
+          return _this._statesCollection.addState(stateName, stateDef);
+        };
+      })(this));
+      return _.map(appStates, (function(_this) {
+        return function(stateDef, stateName) {
+          var parentStates, stateModel;
+          stateModel = _this._statesCollection.get(stateName);
+          if (stateModel.isChildState()) {
+            parentStates = _this._getParentStates(stateModel);
+            stateModel.set('parentStates', parentStates);
+          }
+          return _this.route(stateModel.get('computed_url'), stateModel.get('name'), function() {
+            return true;
+          });
+        };
+      })(this));
+    };
+
+    AppStates.prototype._getParentStates = function(childState) {
+      var getParentState, parentStates;
+      parentStates = [];
+      getParentState = function(state) {
+        var parentState;
+        if (state instanceof Marionette.State !== true) {
+          throw Error('Not a valid state');
+        }
+        parentState = window.statesCollection.get(state.get('parent'));
+        parentStates.push(parentState);
+        if (parentState.isChildState()) {
+          return getParentState(parentState);
+        }
+      };
+      getParentState(childState);
+      return parentStates;
+    };
+
+    AppStates.prototype._processStateOnRoute = function(name, args) {
+      var processor, stateModel;
+      if (args == null) {
+        args = [];
+      }
+      stateModel = this._statesCollection.get(name);
+      processor = new Marionette.StateProcessor({
+        state: stateModel,
+        app: this._app,
+        stateParams: args
+      });
+      processor.process();
+      return processor;
+    };
+
+    return AppStates;
+
+  })(Backbone.Router);
   return Marionette.State;
 });
