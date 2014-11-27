@@ -71,7 +71,7 @@ describe('Marionette.RegionControllers', function() {
     describe('when controller exists', function() {
       beforeEach(function() {
         return Marionette.RegionControllers.prototype.controllers = {
-          'LoginCtrl': Marionette.Controller.extend()
+          'LoginCtrl': Marionette.RegionController.extend()
         };
       });
       return it('must not throw an error', function() {
@@ -373,6 +373,70 @@ describe('Maroinette.AppStates', function() {
             return expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName1', [23, 'abc']);
           });
         });
+      });
+    });
+  });
+});
+
+describe('Marionette.StateProcessor', function() {
+  beforeEach(function() {
+    this.state = statesCollection.addState('stateOne');
+    return Marionette.RegionControllers.prototype.controllers = {
+      'StateOneCtrl': Marionette.RegionController.extend()
+    };
+  });
+  afterEach(function() {
+    return Marionette.RegionControllers.prototype.controllers = {};
+  });
+  return describe('When initializing the StateProcessor', function() {
+    describe('when initializing without statemodel', function() {
+      return it('must throw ', function() {
+        return expect(function() {
+          return new Marionette.StateProcessor;
+        }).toThrow();
+      });
+    });
+    describe('When initializing with statemodel', function() {
+      beforeEach(function() {
+        return this.stateProcessor = new Marionette.StateProcessor({
+          state: this.state
+        });
+      });
+      it('must not throw', function() {
+        return expect((function(_this) {
+          return function() {
+            return new Marionette.StateProcessor({
+              state: _this.state
+            });
+          };
+        })(this)).not.toThrow();
+      });
+      it('must have _state property', function() {
+        return expect(this.stateProcessor._state).toEqual(this.state);
+      });
+      return it('must have deffered object', function() {
+        return expect(this.stateProcessor._deffered.done).toEqual(jasmine.any(Function));
+      });
+    });
+    return describe('When processing a state', function() {
+      beforeEach(function() {
+        setFixtures('<div ui-region></div>');
+        this.app = new Marionette.Application;
+        this.app.dynamicRegion = new Marionette.Region({
+          el: $('[ui-region]')
+        });
+        this.stateProcessor = new Marionette.StateProcessor({
+          state: this.state
+        });
+        return this.stateProcessor.process();
+      });
+      it('must have _ctrlClass defined', function() {
+        var _ctrlClass;
+        _ctrlClass = Marionette.RegionControllers.prototype.controllers['StateOneCtrl'];
+        return expect(this.stateProcessor._ctrlClass).toEqual(_ctrlClass);
+      });
+      return it('must have _region defined', function() {
+        return expect(this.stateProcessor._region).toEqual(this.app.dynamicRegion);
       });
     });
   });

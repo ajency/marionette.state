@@ -44,5 +44,7 @@
 	# @include ../marionette.statemodel.coffee
 	# @include ../marionette.statecollection.coffee
 	# @include ../marionette.appstates.coffee
+	#
+	# @include ../marionette.stateprocessor.coffee
 
 	Marionette.State

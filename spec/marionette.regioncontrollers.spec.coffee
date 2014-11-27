@@ -3,10 +3,10 @@ describe 'Marionette.RegionControllers', ->
 	describe 'when getting a region controller', ->
 
 		describe 'when controller exists', ->
-		
+
 			beforeEach ->
-				Marionette.RegionControllers::controllers = 
-										'LoginCtrl' : Marionette.Controller.extend()
+				Marionette.RegionControllers::controllers =
+										'LoginCtrl' : Marionette.RegionController.extend()
 
 			it 'must not throw an error', ->
 				expect( -> Marionette.RegionControllers::getRegionController 'LoginCtrl').not.toThrow()

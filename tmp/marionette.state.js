@@ -267,5 +267,34 @@ var __hasProp = {}.hasOwnProperty,
     return AppStates;
 
   })(Backbone.Router);
+  Marionette.StateProcessor = (function(_super) {
+    __extends(StateProcessor, _super);
+
+    function StateProcessor() {
+      return StateProcessor.__super__.constructor.apply(this, arguments);
+    }
+
+    StateProcessor.prototype.initialize = function(options) {
+      var stateModel;
+      if (options == null) {
+        options = {};
+      }
+      this._state = stateModel = this.getOption('state');
+      if (_.isUndefined(stateModel) || (stateModel instanceof Marionette.State !== true)) {
+        throw new Marionette.Error('State model needed');
+      }
+      return this._deffered = new Marionette.Deferred();
+    };
+
+    StateProcessor.prototype.process = function() {
+      var _ctrlClassName;
+      _ctrlClassName = this._state.get('ctrl');
+      this._ctrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
+      return this._region = '';
+    };
+
+    return StateProcessor;
+
+  })(Marionette.Object);
   return Marionette.State;
 });
