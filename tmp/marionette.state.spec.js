@@ -205,7 +205,7 @@ describe('Marionette.RegionController', function() {
 });
 
 describe('Marionette.State', function() {
-  return describe('when initializing the State', function() {
+  describe('when initializing the State', function() {
     describe('when state name is not pased', function() {
       return it('must throw an error', function() {
         return expect(function() {
@@ -215,12 +215,19 @@ describe('Marionette.State', function() {
     });
     describe('when state name is passed', function() {
       beforeEach(function() {
+        spyOn(Marionette.State.prototype, 'on').and.callThrough();
         return this.state = new Marionette.State({
           'name': 'stateName'
         });
       });
+      it('must listen to "change:parentStates" event', function() {
+        return expect(this.state.on).toHaveBeenCalledWith('change:parentStates', this.state._processParentStates);
+      });
       it('must have state name as ID', function() {
         return expect(this.state.id).toBe('stateName');
+      });
+      it('must have parentStates as an array', function() {
+        return expect(this.state.get('parentStates')).toEqual(jasmine.any(Array));
       });
       it('must have the url property', function() {
         return expect(this.state.get('url')).toBe('/stateName');
@@ -271,6 +278,32 @@ describe('Marionette.State', function() {
       return it('must have the ctrl property', function() {
         return expect(this.state.get('ctrl')).toBe('MyCustomCtrl');
       });
+    });
+  });
+  return describe('When parentStates property changes', function() {
+    beforeEach(function() {
+      this.parentState1 = new Marionette.State({
+        'name': 'parentState1'
+      });
+      this.parentState2 = new Marionette.State({
+        'name': 'parentState2',
+        parent: 'parentState1'
+      });
+      this.state = new Marionette.State({
+        'name': 'stateName',
+        parent: 'parenState2'
+      });
+      return this.state.set('parentStates', [this.parentState2, this.parentState1]);
+    });
+    it('must have computed_url equal to /parentState1/parentState2/stateName', function() {
+      var cUrl;
+      cUrl = 'parentState1/parentState2/stateName';
+      return expect(this.state.get('computed_url')).toBe(cUrl);
+    });
+    return it('must have url_to_array ', function() {
+      var arr;
+      arr = ['/parentState1', '/parentState2', '/stateName'];
+      return expect(this.state.get('url_to_array')).toEqual(arr);
     });
   });
 });

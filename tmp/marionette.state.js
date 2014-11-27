@@ -183,7 +183,8 @@ var __hasProp = {}.hasOwnProperty,
           throw new Marionette.Error('Controller not defined');
         },
         parent: false,
-        status: 'inactive'
+        status: 'inactive',
+        parentStates: []
       };
     };
 
@@ -204,7 +205,23 @@ var __hasProp = {}.hasOwnProperty,
       if (!options.ctrl) {
         options.ctrl = this._ctrlName(stateName);
       }
+      this.on('change:parentStates', this._processParentStates);
       return this.set(options);
+    };
+
+    State.prototype._processParentStates = function(state) {
+      var computedUrl, parentStates, urlToArray;
+      parentStates = state.get('parentStates');
+      computedUrl = state.get('computed_url');
+      urlToArray = state.get('url_to_array');
+      _.each(parentStates, (function(_this) {
+        return function(pState) {
+          computedUrl = "" + (pState.get('computed_url')) + "/" + computedUrl;
+          return urlToArray.unshift(pState.get('url_to_array')[0]);
+        };
+      })(this));
+      state.set("computed_url", computedUrl);
+      return state.set("url_to_array", urlToArray);
     };
 
     State.prototype._ctrlName = function(name) {
