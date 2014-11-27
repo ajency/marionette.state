@@ -261,7 +261,8 @@
 			#get current cotrl
 			currentCtrlClass = _region._ctrlClass
 			ctrlStateParams = _region._ctrlStateParams
-			if currentCtrlClass is _ctrlClassName and ctrlStateParams is @_stateParams
+			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
+			if currentCtrlClass is _ctrlClassName and arrayCompare
 				currentCtrlInstance = @_region._ctrlInstance
 				currentCtrlInstance.trigger 'view:rendered'
 				return @_deferred.promise()

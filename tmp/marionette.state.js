@@ -291,12 +291,13 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var CtrlClass, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
+      var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
       this._region = _region = this._app.dynamicRegion;
       currentCtrlClass = _region._ctrlClass;
       ctrlStateParams = _region._ctrlStateParams;
-      if (currentCtrlClass === _ctrlClassName && ctrlStateParams === this._stateParams) {
+      arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
+      if (currentCtrlClass === _ctrlClassName && arrayCompare) {
         currentCtrlInstance = this._region._ctrlInstance;
         currentCtrlInstance.trigger('view:rendered');
         return this._deferred.promise();
