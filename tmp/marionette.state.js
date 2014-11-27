@@ -138,9 +138,9 @@ var __hasProp = {}.hasOwnProperty,
           message: 'Region instance is not passed'
         });
       }
-      RegionController.__super__.constructor.call(this, options);
       this._ctrlID = _.uniqueId('ctrl-');
       this._region = options.region;
+      RegionController.__super__.constructor.call(this, options);
     }
 
     RegionController.prototype.show = function(view) {

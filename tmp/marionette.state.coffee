@@ -114,10 +114,9 @@
 				throw new Marionette.Error
 					message: 'Region instance is not passed'
 	
-			super options
-	
 			@_ctrlID = _.uniqueId 'ctrl-'
 			@_region = options.region
+			super options
 	
 		show : (view)->
 	
