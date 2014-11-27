@@ -380,7 +380,13 @@ describe('Maroinette.AppStates', function() {
 
 describe('Marionette.StateProcessor', function() {
   beforeEach(function() {
+    setFixtures('<div ui-region></div>');
+    this.app = new Marionette.Application;
     this.state = statesCollection.addState('stateOne');
+    this.paramState = statesCollection.addState('paramState', {
+      url: '/paramstate/:id',
+      ctrl: 'ParamCtrl'
+    });
     return Marionette.RegionControllers.prototype.controllers = {
       'StateOneCtrl': Marionette.RegionController.extend()
     };
@@ -389,24 +395,33 @@ describe('Marionette.StateProcessor', function() {
     return Marionette.RegionControllers.prototype.controllers = {};
   });
   return describe('When initializing the StateProcessor', function() {
-    describe('when initializing without statemodel', function() {
+    describe('when initializing without statemodel and Application instance', function() {
       return it('must throw ', function() {
-        return expect(function() {
+        expect(function() {
           return new Marionette.StateProcessor;
         }).toThrow();
+        return expect((function(_this) {
+          return function() {
+            return new Marionette.StateProcessor({
+              state: _this.state
+            });
+          };
+        })(this)).toThrow();
       });
     });
-    describe('When initializing with statemodel', function() {
+    describe('When initializing with statemodel and application instance', function() {
       beforeEach(function() {
         return this.stateProcessor = new Marionette.StateProcessor({
-          state: this.state
+          state: this.state,
+          app: this.app
         });
       });
       it('must not throw', function() {
         return expect((function(_this) {
           return function() {
             return new Marionette.StateProcessor({
-              state: _this.state
+              state: _this.state,
+              app: _this.app
             });
           };
         })(this)).not.toThrow();
@@ -414,29 +429,87 @@ describe('Marionette.StateProcessor', function() {
       it('must have _state property', function() {
         return expect(this.stateProcessor._state).toEqual(this.state);
       });
-      return it('must have deffered object', function() {
-        return expect(this.stateProcessor._deffered.done).toEqual(jasmine.any(Function));
+      it('must have _deferred object', function() {
+        return expect(this.stateProcessor._deferred.done).toEqual(jasmine.any(Function));
+      });
+      return it('must have application object', function() {
+        return expect(this.stateProcessor._app).toEqual(this.app);
       });
     });
     return describe('When processing a state', function() {
       beforeEach(function() {
-        setFixtures('<div ui-region></div>');
-        this.app = new Marionette.Application;
+        this.StateCtrl = (function(_super) {
+          __extends(StateCtrl, _super);
+
+          function StateCtrl() {
+            return StateCtrl.__super__.constructor.apply(this, arguments);
+          }
+
+          StateCtrl.prototype.initialize = function(options) {
+            if (options == null) {
+              options = {};
+            }
+          };
+
+          return StateCtrl;
+
+        })(Marionette.RegionController);
+        spyOn(Marionette.RegionControllers.prototype, 'getRegionController').and.returnValue(this.StateCtrl);
+        spyOn(this.StateCtrl.prototype, 'initialize');
         this.app.dynamicRegion = new Marionette.Region({
           el: $('[ui-region]')
         });
         this.stateProcessor = new Marionette.StateProcessor({
-          state: this.state
+          state: this.state,
+          app: this.app
         });
-        return this.stateProcessor.process();
+        spyOn(this.stateProcessor, 'listenTo').and.callThrough();
+        return this.promise = this.stateProcessor.process();
       });
       it('must have _ctrlClass defined', function() {
-        var _ctrlClass;
-        _ctrlClass = Marionette.RegionControllers.prototype.controllers['StateOneCtrl'];
-        return expect(this.stateProcessor._ctrlClass).toEqual(_ctrlClass);
+        return expect(this.stateProcessor._ctrlClass).toEqual(this.StateCtrl);
       });
-      return it('must have _region defined', function() {
+      it('must listen to "view:rendered" event of ctrl instance', function() {
+        return expect(this.stateProcessor.listenTo).toHaveBeenCalledWith(jasmine.any(Marionette.RegionController), 'view:rendered', this.stateProcessor._onViewRendered);
+      });
+      it('must have _region defined', function() {
         return expect(this.stateProcessor._region).toEqual(this.app.dynamicRegion);
+      });
+      it('must run controller with state params', function() {
+        return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
+          region: this.app.dynamicRegion,
+          stateParams: []
+        });
+      });
+      it('must return the promise', function() {
+        return expect(this.promise.done).toEqual(jasmine.any(Function));
+      });
+      describe('when view is rendered in region', function() {
+        beforeEach(function() {
+          return this.stateProcessor._ctrlInstance.trigger('view:rendered', new Marionette.ItemView);
+        });
+        return it('must resovle the state', function() {
+          return expect(this.stateProcessor._deferred.state()).toBe('resolved');
+        });
+      });
+      return describe('when processing state with params', function() {
+        beforeEach(function() {
+          this.paramStateProcessor = new Marionette.StateProcessor({
+            state: this.state,
+            app: this.app,
+            stateParams: [12]
+          });
+          return this.paramStateProcessor.process();
+        });
+        it('must store the state params', function() {
+          return expect(this.paramStateProcessor._stateParams).toEqual([12]);
+        });
+        return it('must run controller with state params', function() {
+          return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
+            region: jasmine.any(Marionette.Region),
+            stateParams: [12]
+          });
+        });
       });
     });
   });

@@ -13,7 +13,8 @@
  *
  */
 var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 (function(root, factory) {
   var Backbone, Marionette, _;
@@ -271,26 +272,42 @@ var __hasProp = {}.hasOwnProperty,
     __extends(StateProcessor, _super);
 
     function StateProcessor() {
+      this._onViewRendered = __bind(this._onViewRendered, this);
       return StateProcessor.__super__.constructor.apply(this, arguments);
     }
 
     StateProcessor.prototype.initialize = function(options) {
-      var stateModel;
+      var app, stateModel;
       if (options == null) {
         options = {};
       }
       this._state = stateModel = this.getOption('state');
+      this._app = app = this.getOption('app');
       if (_.isUndefined(stateModel) || (stateModel instanceof Marionette.State !== true)) {
         throw new Marionette.Error('State model needed');
       }
-      return this._deffered = new Marionette.Deferred();
+      if (_.isUndefined(app) || (app instanceof Marionette.Application !== true)) {
+        throw new Marionette.Error('application instance needed');
+      }
+      this._stateParams = options.stateParams ? options.stateParams : [];
+      return this._deferred = new Marionette.Deferred();
     };
 
     StateProcessor.prototype.process = function() {
-      var _ctrlClassName;
+      var CtrlClass, ctrlInstance, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      this._ctrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
-      return this._region = '';
+      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
+      this._region = _region = this._app.dynamicRegion;
+      this._ctrlInstance = ctrlInstance = new CtrlClass({
+        region: _region,
+        stateParams: this._stateParams
+      });
+      this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
+      return this._deferred.promise();
+    };
+
+    StateProcessor.prototype._onViewRendered = function() {
+      return this._deferred.resolve(true);
     };
 
     return StateProcessor;
