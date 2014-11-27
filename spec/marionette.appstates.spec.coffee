@@ -66,14 +66,9 @@ describe 'Maroinette.AppStates', ->
 				describe 'When router triggers route event', ->
 					beforeEach ->
 						@myStates.trigger 'route', 'stateName', []
+						@myStates.trigger 'route', 'stateName1', [23, 'abc']
 
 					it 'must run _processStateOnRoute function', ->
 						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName', []
-
-
-
-
-
-
-
+						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName1', [23, 'abc']
 

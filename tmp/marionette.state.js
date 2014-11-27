@@ -138,6 +138,11 @@ var __hasProp = {}.hasOwnProperty,
         });
       }
       this._view = view;
+      this.listenTo(this._view, 'show', (function(_this) {
+        return function() {
+          return _this.trigger('view:rendered', _this._view);
+        };
+      })(this));
       return this._region.show(view);
     };
 

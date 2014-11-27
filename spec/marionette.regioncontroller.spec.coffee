@@ -37,11 +37,19 @@ describe 'Marionette.RegionController', ->
 
 			beforeEach ->
 				spyOn(@_region, 'show')
+				spyOn(@regionCtrl, 'trigger')
 				@view  = new Marionette.ItemView()
 				@regionCtrl.show @view
+				@view.trigger 'show'
 
 			it 'must have _view property equal to view', ->
 				expect(@regionCtrl._view).toEqual @view
 
 			it 'must run show function on the passed region', ->
 				expect(@_region.show).toHaveBeenCalledWith @view
+
+			describe 'when the view is rendered on screen', ->
+
+				it 'ctrl must tigger "view:rendered" event', ->
+					expect(@regionCtrl.trigger).toHaveBeenCalledWith 'view:rendered', @view
+

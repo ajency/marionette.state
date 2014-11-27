@@ -139,14 +139,21 @@ describe('Marionette.RegionController', function() {
     return describe('when view instance passed', function() {
       beforeEach(function() {
         spyOn(this._region, 'show');
+        spyOn(this.regionCtrl, 'trigger');
         this.view = new Marionette.ItemView();
-        return this.regionCtrl.show(this.view);
+        this.regionCtrl.show(this.view);
+        return this.view.trigger('show');
       });
       it('must have _view property equal to view', function() {
         return expect(this.regionCtrl._view).toEqual(this.view);
       });
-      return it('must run show function on the passed region', function() {
+      it('must run show function on the passed region', function() {
         return expect(this._region.show).toHaveBeenCalledWith(this.view);
+      });
+      return describe('when the view is rendered on screen', function() {
+        return it('ctrl must tigger "view:rendered" event', function() {
+          return expect(this.regionCtrl.trigger).toHaveBeenCalledWith('view:rendered', this.view);
+        });
       });
     });
   });
@@ -358,10 +365,12 @@ describe('Maroinette.AppStates', function() {
         });
         return describe('When router triggers route event', function() {
           beforeEach(function() {
-            return this.myStates.trigger('route', 'stateName', []);
+            this.myStates.trigger('route', 'stateName', []);
+            return this.myStates.trigger('route', 'stateName1', [23, 'abc']);
           });
           return it('must run _processStateOnRoute function', function() {
-            return expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName', []);
+            expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName', []);
+            return expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName1', [23, 'abc']);
           });
         });
       });
