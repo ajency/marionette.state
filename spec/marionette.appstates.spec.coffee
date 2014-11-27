@@ -1,11 +1,5 @@
 describe 'Maroinette.AppStates', ->
 
-	beforeEach ->
-		Marionette.RegionControllers::controllers =
-										'StateNameCtrl' : Marionette.RegionController.extend()
-										'StateName1Ctrl' : Marionette.RegionController.extend()
-
-
 	describe 'When initializing without the application object', ->
 
 		it 'must throw ', ->

@@ -92,6 +92,14 @@ describe('Marionette.Region', function() {
 });
 
 describe('Marionette.RegionControllers', function() {
+  describe('Lookup place for controllers', function() {
+    beforeEach(function() {
+      return Marionette.RegionControllers.prototype.setLookup(window);
+    });
+    return it('must be define', function() {
+      return expect(Marionette.RegionControllers.prototype.controllers).toEqual(window);
+    });
+  });
   return describe('when getting a region controller', function() {
     describe('when controller exists', function() {
       beforeEach(function() {
@@ -303,119 +311,6 @@ describe('Marionette.StateCollection', function() {
   });
 });
 
-describe('Maroinette.AppStates', function() {
-  beforeEach(function() {
-    return Marionette.RegionControllers.prototype.controllers = {
-      'StateNameCtrl': Marionette.RegionController.extend(),
-      'StateName1Ctrl': Marionette.RegionController.extend()
-    };
-  });
-  describe('When initializing without the application object', function() {
-    return it('must throw ', function() {
-      return expect(function() {
-        return new Marionette.AppStates;
-      }).toThrow();
-    });
-  });
-  return describe('When initializing with application object', function() {
-    beforeEach(function() {
-      this.app = new Marionette.Application;
-      spyOn(Marionette.AppStates.prototype, '_registerStates').and.callThrough();
-      spyOn(Marionette.AppStates.prototype, 'on').and.callThrough();
-      return this.appStates = new Marionette.AppStates({
-        app: this.app
-      });
-    });
-    it('must have _app property', function() {
-      return expect(this.appStates._app).toEqual(this.app);
-    });
-    it('must call _registerStates', function() {
-      return expect(this.appStates._registerStates).toHaveBeenCalled();
-    });
-    it('must reference the global statesCollection', function() {
-      return expect(this.appStates._statesCollection).toEqual(window.statesCollection);
-    });
-    it('must listen to "route" event', function() {
-      return expect(this.appStates.on).toHaveBeenCalledWith('route', this.appStates._processStateOnRoute, this.appStates);
-    });
-    return describe('Registering States', function() {
-      describe('register state with no name ""', function() {
-        beforeEach(function() {
-          var MyStates;
-          return MyStates = Marionette.AppStates.extend({
-            appStates: {
-              "": {
-                url: '/someurl'
-              }
-            }
-          });
-        });
-        return it('must throw error', function() {
-          var _app;
-          _app = this.app;
-          return expect(function() {
-            return new MyStates({
-              app: _app
-            });
-          }).toThrow();
-        });
-      });
-      return describe('Register state with valid definition', function() {
-        beforeEach(function() {
-          this.MyStates = Marionette.AppStates.extend({
-            appStates: {
-              "stateName": {
-                url: '/someurl'
-              },
-              "stateName2": {
-                url: '/statenameurl/:id'
-              }
-            }
-          });
-          spyOn(window.statesCollection, 'addState').and.callThrough();
-          this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
-          return this.myStates = new this.MyStates({
-            app: this.app
-          });
-        });
-        it('must call statesCollection.addState', function() {
-          return expect(window.statesCollection.addState).toHaveBeenCalledWith("stateName", {
-            url: '/someurl'
-          });
-        });
-        it('must have 2 states in collection', function() {
-          return expect(window.statesCollection.length).toBe(2);
-        });
-        describe('Registering states with backbone router', function() {
-          return it('must call .route() with path and state name', function() {
-            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl/:id', 'stateName2', jasmine.any(Function));
-            return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
-          });
-        });
-        return describe('When processing route', function() {
-          beforeEach(function() {
-            statesCollection.addState('stateName');
-            statesCollection.addState('stateName1');
-            spyOn(Marionette.StateProcessor.prototype, 'initialize');
-            spyOn(Marionette.StateProcessor.prototype, 'process');
-            return this.stateProcessor = this.myStates._processStateOnRoute('stateName', [23]);
-          });
-          it('must call state processor with state model and application object', function() {
-            return expect(this.stateProcessor.initialize).toHaveBeenCalledWith({
-              state: jasmine.any(Marionette.State),
-              app: jasmine.any(Marionette.Application),
-              stateParams: [23]
-            });
-          });
-          return it('must call process function', function() {
-            return expect(this.stateProcessor.process).toHaveBeenCalled();
-          });
-        });
-      });
-    });
-  });
-});
-
 describe('Marionette.StateProcessor', function() {
   beforeEach(function() {
     setFixtures('<div ui-region></div>');
@@ -552,6 +447,113 @@ describe('Marionette.StateProcessor', function() {
           return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
             region: jasmine.any(Marionette.Region),
             stateParams: [12]
+          });
+        });
+      });
+    });
+  });
+});
+
+describe('Maroinette.AppStates', function() {
+  describe('When initializing without the application object', function() {
+    return it('must throw ', function() {
+      return expect(function() {
+        return new Marionette.AppStates;
+      }).toThrow();
+    });
+  });
+  return describe('When initializing with application object', function() {
+    beforeEach(function() {
+      this.app = new Marionette.Application;
+      spyOn(Marionette.AppStates.prototype, '_registerStates').and.callThrough();
+      spyOn(Marionette.AppStates.prototype, 'on').and.callThrough();
+      return this.appStates = new Marionette.AppStates({
+        app: this.app
+      });
+    });
+    it('must have _app property', function() {
+      return expect(this.appStates._app).toEqual(this.app);
+    });
+    it('must call _registerStates', function() {
+      return expect(this.appStates._registerStates).toHaveBeenCalled();
+    });
+    it('must reference the global statesCollection', function() {
+      return expect(this.appStates._statesCollection).toEqual(window.statesCollection);
+    });
+    it('must listen to "route" event', function() {
+      return expect(this.appStates.on).toHaveBeenCalledWith('route', this.appStates._processStateOnRoute, this.appStates);
+    });
+    return describe('Registering States', function() {
+      describe('register state with no name ""', function() {
+        beforeEach(function() {
+          var MyStates;
+          return MyStates = Marionette.AppStates.extend({
+            appStates: {
+              "": {
+                url: '/someurl'
+              }
+            }
+          });
+        });
+        return it('must throw error', function() {
+          var _app;
+          _app = this.app;
+          return expect(function() {
+            return new MyStates({
+              app: _app
+            });
+          }).toThrow();
+        });
+      });
+      return describe('Register state with valid definition', function() {
+        beforeEach(function() {
+          this.MyStates = Marionette.AppStates.extend({
+            appStates: {
+              "stateName": {
+                url: '/someurl'
+              },
+              "stateName2": {
+                url: '/statenameurl/:id'
+              }
+            }
+          });
+          spyOn(window.statesCollection, 'addState').and.callThrough();
+          this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
+          return this.myStates = new this.MyStates({
+            app: this.app
+          });
+        });
+        it('must call statesCollection.addState', function() {
+          return expect(window.statesCollection.addState).toHaveBeenCalledWith("stateName", {
+            url: '/someurl'
+          });
+        });
+        it('must have 2 states in collection', function() {
+          return expect(window.statesCollection.length).toBe(2);
+        });
+        describe('Registering states with backbone router', function() {
+          return it('must call .route() with path and state name', function() {
+            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl/:id', 'stateName2', jasmine.any(Function));
+            return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
+          });
+        });
+        return describe('When processing route', function() {
+          beforeEach(function() {
+            statesCollection.addState('stateName');
+            statesCollection.addState('stateName1');
+            spyOn(Marionette.StateProcessor.prototype, 'initialize');
+            spyOn(Marionette.StateProcessor.prototype, 'process');
+            return this.stateProcessor = this.myStates._processStateOnRoute('stateName', [23]);
+          });
+          it('must call state processor with state model and application object', function() {
+            return expect(this.stateProcessor.initialize).toHaveBeenCalledWith({
+              state: jasmine.any(Marionette.State),
+              app: jasmine.any(Marionette.Application),
+              stateParams: [23]
+            });
+          });
+          return it('must call process function', function() {
+            return expect(this.stateProcessor.process).toHaveBeenCalled();
           });
         });
       });
