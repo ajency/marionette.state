@@ -278,7 +278,8 @@ var __hasProp = {}.hasOwnProperty,
       stateModel = this._statesCollection.get(name);
       processor = new Marionette.StateProcessor({
         state: stateModel,
-        app: this._app
+        app: this._app,
+        stateParams: args
       });
       processor.process();
       return processor;

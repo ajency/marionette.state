@@ -368,7 +368,7 @@ describe('Maroinette.AppStates', function() {
                 url: '/someurl'
               },
               "stateName2": {
-                url: '/statenameurl'
+                url: '/statenameurl/:id'
               }
             }
           });
@@ -388,7 +388,7 @@ describe('Maroinette.AppStates', function() {
         });
         describe('Registering states with backbone router', function() {
           return it('must call .route() with path and state name', function() {
-            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl', 'stateName2', jasmine.any(Function));
+            expect(this.routeSpy).toHaveBeenCalledWith('statenameurl/:id', 'stateName2', jasmine.any(Function));
             return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
           });
         });
@@ -398,12 +398,13 @@ describe('Maroinette.AppStates', function() {
             statesCollection.addState('stateName1');
             spyOn(Marionette.StateProcessor.prototype, 'initialize');
             spyOn(Marionette.StateProcessor.prototype, 'process');
-            return this.stateProcessor = this.myStates._processStateOnRoute('stateName', []);
+            return this.stateProcessor = this.myStates._processStateOnRoute('stateName', [23]);
           });
           it('must call state processor with state model and application object', function() {
             return expect(this.stateProcessor.initialize).toHaveBeenCalledWith({
               state: jasmine.any(Marionette.State),
-              app: jasmine.any(Marionette.Application)
+              app: jasmine.any(Marionette.Application),
+              stateParams: [23]
             });
           });
           return it('must call process function', function() {

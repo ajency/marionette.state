@@ -309,7 +309,7 @@ describe 'Maroinette.AppStates', ->
 					@MyStates = Marionette.AppStates.extend
 									appStates :
 										"stateName" : url : '/someurl'
-										"stateName2" : url : '/statenameurl'
+										"stateName2" : url : '/statenameurl/:id'
 
 					spyOn(window.statesCollection, 'addState').and.callThrough()
 
@@ -325,7 +325,7 @@ describe 'Maroinette.AppStates', ->
 				describe 'Registering states with backbone router', ->
 
 					it 'must call .route() with path and state name', ->
-						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl', 'stateName2', jasmine.any Function
+						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl/:id', 'stateName2', jasmine.any Function
 						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName', jasmine.any Function
 
 				describe 'When processing route', ->
@@ -334,14 +334,13 @@ describe 'Maroinette.AppStates', ->
 						statesCollection.addState 'stateName1'
 						spyOn(Marionette.StateProcessor::, 'initialize')
 						spyOn(Marionette.StateProcessor::, 'process')
-						@stateProcessor = @myStates._processStateOnRoute 'stateName', []
-
-
+						@stateProcessor = @myStates._processStateOnRoute 'stateName', [23]
 
 					it 'must call state processor with state model and application object',->
 						expect(@stateProcessor.initialize).toHaveBeenCalledWith
 															state : jasmine.any Marionette.State
 															app : jasmine.any Marionette.Application
+															stateParams : [23]
 
 					it 'must call process function', ->
 						expect(@stateProcessor.process).toHaveBeenCalled()
