@@ -39,6 +39,7 @@
 
 	# @include ../marionette.application.coffee
 	# @include ../marionette.layoutview.coffee
+	# @include ../marionette.region.coffee
 	# @include ../marionette.regioncontrollers.coffee
 	# @include ../marionette.regioncontroller.coffee
 	# @include ../marionette.statemodel.coffee

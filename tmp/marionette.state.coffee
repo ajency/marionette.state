@@ -86,6 +86,15 @@
 					regionName = "#{regionName}Region"
 				@addRegion regionName, selector : $(region)
 	
+	
+	_.extend Marionette.Region::,
+	
+		setController : (ctrlClass)->
+			@_ctrlClass = ctrlClass
+	
+		setControllerStateParams : (params = [])->
+			@_ctrlStateParams = params
+	
 	class Marionette.RegionControllers
 	
 		controllers : {}
@@ -332,6 +341,9 @@
 			_ctrlClassName = @_state.get 'ctrl'
 			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 			@_region = _region = @_app.dynamicRegion
+	
+			@_region.setController _ctrlClassName
+			@_region.setControllerStateParams @_stateParams
 	
 			@_ctrlInstance = ctrlInstance = new CtrlClass
 													region : _region

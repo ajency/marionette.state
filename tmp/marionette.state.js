@@ -97,6 +97,17 @@ var __hasProp = {}.hasOwnProperty,
       })(this));
     }
   });
+  _.extend(Marionette.Region.prototype, {
+    setController: function(ctrlClass) {
+      return this._ctrlClass = ctrlClass;
+    },
+    setControllerStateParams: function(params) {
+      if (params == null) {
+        params = [];
+      }
+      return this._ctrlStateParams = params;
+    }
+  });
   Marionette.RegionControllers = (function() {
     function RegionControllers() {}
 
@@ -298,6 +309,8 @@ var __hasProp = {}.hasOwnProperty,
       _ctrlClassName = this._state.get('ctrl');
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._region = _region = this._app.dynamicRegion;
+      this._region.setController(_ctrlClassName);
+      this._region.setControllerStateParams(this._stateParams);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
         stateParams: this._stateParams

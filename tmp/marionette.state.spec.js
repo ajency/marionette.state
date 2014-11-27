@@ -66,6 +66,31 @@ describe('Marionette.LayoutView', function() {
   });
 });
 
+describe('Marionette.Region', function() {
+  beforeEach(function() {
+    setFixtures(sandbox());
+    return this.region = new Marionette.Region({
+      el: '#sandbox'
+    });
+  });
+  describe('When seting the controller', function() {
+    beforeEach(function() {
+      return this.region.setController('CtrlClass');
+    });
+    return it('must hold the ctrlclass property', function() {
+      return expect(this.region._ctrlClass).toEqual('CtrlClass');
+    });
+  });
+  return describe('When seting the controller states params', function() {
+    beforeEach(function() {
+      return this.region.setControllerStateParams([12, 23]);
+    });
+    return it('must hold the _ctrlStateParams property', function() {
+      return expect(this.region._ctrlStateParams).toEqual([12, 23]);
+    });
+  });
+});
+
 describe('Marionette.RegionControllers', function() {
   return describe('when getting a region controller', function() {
     describe('when controller exists', function() {
@@ -459,6 +484,8 @@ describe('Marionette.StateProcessor', function() {
         this.app.dynamicRegion = new Marionette.Region({
           el: $('[ui-region]')
         });
+        this.setCtrlSpy = spyOn(this.app.dynamicRegion, 'setController');
+        this.setCtrlParamSpy = spyOn(this.app.dynamicRegion, 'setControllerStateParams');
         this.stateProcessor = new Marionette.StateProcessor({
           state: this.state,
           app: this.app
@@ -483,6 +510,10 @@ describe('Marionette.StateProcessor', function() {
       });
       it('must return the promise', function() {
         return expect(this.promise.done).toEqual(jasmine.any(Function));
+      });
+      it('region must store the name of ctrl with params', function() {
+        expect(this.setCtrlSpy).toHaveBeenCalledWith('StateOneCtrl');
+        return expect(this.setCtrlParamSpy).toHaveBeenCalledWith([]);
       });
       describe('when view is rendered in region', function() {
         beforeEach(function() {

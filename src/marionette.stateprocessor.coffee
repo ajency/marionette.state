@@ -21,6 +21,9 @@ class Marionette.StateProcessor extends Marionette.Object
 		@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 		@_region = _region = @_app.dynamicRegion
 
+		@_region.setController _ctrlClassName
+		@_region.setControllerStateParams @_stateParams
+
 		@_ctrlInstance = ctrlInstance = new CtrlClass
 												region : _region
 												stateParams : @_stateParams

@@ -49,6 +49,36 @@ describe 'Marionette.LayoutView', ->
 			expect(layoutView.namedRegion).toEqual jasmine.any Marionette.Region
 
 
+describe 'Marionette.Region', ->
+
+	beforeEach ->
+		setFixtures sandbox()
+		@region = new Marionette.Region el : '#sandbox'
+
+	describe 'When seting the controller', ->
+
+		beforeEach ->
+			@region.setController 'CtrlClass'
+
+		it 'must hold the ctrlclass property', ->
+			expect(@region._ctrlClass).toEqual 'CtrlClass'
+
+
+	describe 'When seting the controller states params', ->
+
+		beforeEach ->
+			@region.setControllerStateParams [12, 23]
+
+		it 'must hold the _ctrlStateParams property', ->
+			expect(@region._ctrlStateParams).toEqual [12, 23]
+
+
+
+
+
+
+
+
 describe 'Marionette.RegionControllers', ->
 
 	describe 'when getting a region controller', ->
@@ -351,6 +381,8 @@ describe 'Marionette.StateProcessor', ->
 				spyOn(Marionette.RegionControllers::, 'getRegionController').and.returnValue @StateCtrl
 				spyOn(@StateCtrl::, 'initialize')
 				@app.dynamicRegion = new Marionette.Region el : $('[ui-region]')
+				@setCtrlSpy = spyOn(@app.dynamicRegion,'setController')
+				@setCtrlParamSpy = spyOn(@app.dynamicRegion,'setControllerStateParams')
 				@stateProcessor = new Marionette.StateProcessor state : @state, app : @app
 				spyOn(@stateProcessor, 'listenTo').and.callThrough()
 				@promise = @stateProcessor.process()
@@ -371,6 +403,10 @@ describe 'Marionette.StateProcessor', ->
 
 			it 'must return the promise', ->
 				expect(@promise.done).toEqual jasmine.any Function
+
+			it 'region must store the name of ctrl with params', ->
+				expect(@setCtrlSpy).toHaveBeenCalledWith 'StateOneCtrl'
+				expect(@setCtrlParamSpy).toHaveBeenCalledWith []
 
 
 			describe 'when view is rendered in region', ->
@@ -395,8 +431,8 @@ describe 'Marionette.StateProcessor', ->
 
 				it 'must run controller with state params', ->
 					expect(@StateCtrl::initialize).toHaveBeenCalledWith
-																	region : jasmine.any Marionette.Region
-																	stateParams : [12]
+															region : jasmine.any Marionette.Region
+															stateParams : [12]
 
 
 

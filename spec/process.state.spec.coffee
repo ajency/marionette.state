@@ -47,6 +47,8 @@ describe 'Marionette.StateProcessor', ->
 				spyOn(Marionette.RegionControllers::, 'getRegionController').and.returnValue @StateCtrl
 				spyOn(@StateCtrl::, 'initialize')
 				@app.dynamicRegion = new Marionette.Region el : $('[ui-region]')
+				@setCtrlSpy = spyOn(@app.dynamicRegion,'setController')
+				@setCtrlParamSpy = spyOn(@app.dynamicRegion,'setControllerStateParams')
 				@stateProcessor = new Marionette.StateProcessor state : @state, app : @app
 				spyOn(@stateProcessor, 'listenTo').and.callThrough()
 				@promise = @stateProcessor.process()
@@ -67,6 +69,10 @@ describe 'Marionette.StateProcessor', ->
 
 			it 'must return the promise', ->
 				expect(@promise.done).toEqual jasmine.any Function
+
+			it 'region must store the name of ctrl with params', ->
+				expect(@setCtrlSpy).toHaveBeenCalledWith 'StateOneCtrl'
+				expect(@setCtrlParamSpy).toHaveBeenCalledWith []
 
 
 			describe 'when view is rendered in region', ->
@@ -91,8 +97,8 @@ describe 'Marionette.StateProcessor', ->
 
 				it 'must run controller with state params', ->
 					expect(@StateCtrl::initialize).toHaveBeenCalledWith
-																	region : jasmine.any Marionette.Region
-																	stateParams : [12]
+															region : jasmine.any Marionette.Region
+															stateParams : [12]
 
 
 
