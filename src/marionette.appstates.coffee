@@ -30,7 +30,11 @@ class Marionette.AppStates extends Backbone.Router
 
 
 	_processStateOnRoute : (name, args = [])->
-
+		stateModel = @_statesCollection.get name
+		processor = new Marionette.StateProcessor
+										state : stateModel
+										app : @_app
+		processor
 
 
 	# _processOnRouteState : (name, args = [])->

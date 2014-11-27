@@ -2,7 +2,6 @@
 class Marionette.StateProcessor extends Marionette.Object
 
 	initialize : (options = {})->
-
 		@_state = stateModel = @getOption 'state'
 		@_app = app = @getOption 'app'
 
@@ -32,6 +31,8 @@ class Marionette.StateProcessor extends Marionette.Object
 
 		@_deferred.promise()
 
+	getStatus : ->
+		@_deferred.state()
 
 	_onViewRendered : =>
 		@_deferred.resolve true

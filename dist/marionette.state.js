@@ -271,9 +271,16 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {
+      var processor, stateModel;
       if (args == null) {
         args = [];
       }
+      stateModel = this._statesCollection.get(name);
+      processor = new Marionette.StateProcessor({
+        state: stateModel,
+        app: this._app
+      });
+      return processor;
     };
 
     return AppStates;
@@ -317,6 +324,10 @@ var __hasProp = {}.hasOwnProperty,
       });
       this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
       return this._deferred.promise();
+    };
+
+    StateProcessor.prototype.getStatus = function() {
+      return this._deferred.state();
     };
 
     StateProcessor.prototype._onViewRendered = function() {

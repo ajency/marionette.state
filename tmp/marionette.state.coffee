@@ -252,7 +252,11 @@
 	
 	
 		_processStateOnRoute : (name, args = [])->
-	
+			stateModel = @_statesCollection.get name
+			processor = new Marionette.StateProcessor
+											state : stateModel
+											app : @_app
+			processor
 	
 	
 		# _processOnRouteState : (name, args = [])->
@@ -323,7 +327,6 @@
 	class Marionette.StateProcessor extends Marionette.Object
 	
 		initialize : (options = {})->
-	
 			@_state = stateModel = @getOption 'state'
 			@_app = app = @getOption 'app'
 	
@@ -353,6 +356,8 @@
 	
 			@_deferred.promise()
 	
+		getStatus : ->
+			@_deferred.state()
 	
 		_onViewRendered : =>
 			@_deferred.resolve true

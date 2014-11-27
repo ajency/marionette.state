@@ -323,12 +323,29 @@ describe 'Maroinette.AppStates', ->
 
 				describe 'When router triggers route event', ->
 					beforeEach ->
+						statesCollection.addState 'stateName'
+						statesCollection.addState 'stateName1'
 						@myStates.trigger 'route', 'stateName', []
 						@myStates.trigger 'route', 'stateName1', [23, 'abc']
 
 					it 'must run _processStateOnRoute function', ->
 						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName', []
 						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName1', [23, 'abc']
+
+				describe 'When processing route', ->
+					beforeEach ->
+						statesCollection.addState 'stateName'
+						statesCollection.addState 'stateName1'
+						spyOn(Marionette.StateProcessor::, 'initialize').and.callThrough()
+						@stateProcessor = @myStates._processStateOnRoute 'stateName', []
+
+					it 'must call state processor with state model and application object',->
+						expect(@stateProcessor.initialize).toHaveBeenCalledWith
+																		state : jasmine.any Marionette.State
+																		app : @app
+
+					it 'must have status as pending', ->
+						expect(@stateProcessor.getStatus()).toBe 'pending'
 
 
 
