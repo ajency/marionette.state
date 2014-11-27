@@ -1,5 +1,11 @@
 describe 'Maroinette.AppStates', ->
 
+	beforeEach ->
+		Marionette.RegionControllers::controllers =
+										'StateNameCtrl' : Marionette.RegionController.extend()
+										'StateName1Ctrl' : Marionette.RegionController.extend()
+
+
 	describe 'When initializing without the application object', ->
 
 		it 'must throw ', ->
@@ -9,6 +15,7 @@ describe 'Maroinette.AppStates', ->
 
 		beforeEach ->
 			@app = new Marionette.Application
+
 			spyOn(Marionette.AppStates::, '_registerStates').and.callThrough()
 			spyOn(Marionette.AppStates::, 'on').and.callThrough()
 			@appStates = new Marionette.AppStates app : @app
@@ -41,15 +48,15 @@ describe 'Maroinette.AppStates', ->
 			describe 'Register state with valid definition', ->
 
 				beforeEach ->
-					MyStates = Marionette.AppStates.extend
+					@MyStates = Marionette.AppStates.extend
 									appStates :
 										"stateName" : url : '/someurl'
 										"stateName2" : url : '/statenameurl'
 
 					spyOn(window.statesCollection, 'addState').and.callThrough()
-					spyOn(MyStates::, '_processStateOnRoute').and.callThrough()
+
 					@routeSpy = spyOn(Backbone.Router::, 'route').and.callThrough()
-					@myStates = new MyStates app : @app
+					@myStates = new @MyStates app : @app
 
 				it 'must call statesCollection.addState', ->
 					expect(window.statesCollection.addState).toHaveBeenCalledWith "stateName" , url : '/someurl'
@@ -63,29 +70,21 @@ describe 'Maroinette.AppStates', ->
 						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl', 'stateName2', jasmine.any Function
 						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName', jasmine.any Function
 
-				describe 'When router triggers route event', ->
-					beforeEach ->
-						statesCollection.addState 'stateName'
-						statesCollection.addState 'stateName1'
-						@myStates.trigger 'route', 'stateName', []
-						@myStates.trigger 'route', 'stateName1', [23, 'abc']
-
-					it 'must run _processStateOnRoute function', ->
-						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName', []
-						expect(@myStates._processStateOnRoute).toHaveBeenCalledWith 'stateName1', [23, 'abc']
-
 				describe 'When processing route', ->
 					beforeEach ->
 						statesCollection.addState 'stateName'
 						statesCollection.addState 'stateName1'
-						spyOn(Marionette.StateProcessor::, 'initialize').and.callThrough()
+						spyOn(Marionette.StateProcessor::, 'initialize')
+						spyOn(Marionette.StateProcessor::, 'process')
 						@stateProcessor = @myStates._processStateOnRoute 'stateName', []
+
+
 
 					it 'must call state processor with state model and application object',->
 						expect(@stateProcessor.initialize).toHaveBeenCalledWith
-																		state : jasmine.any Marionette.State
-																		app : @app
+															state : jasmine.any Marionette.State
+															app : jasmine.any Marionette.Application
 
-					it 'must have status as pending', ->
-						expect(@stateProcessor.getStatus()).toBe 'pending'
+					it 'must call process function', ->
+						expect(@stateProcessor.process).toHaveBeenCalled()
 

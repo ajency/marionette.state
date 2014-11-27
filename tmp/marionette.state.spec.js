@@ -304,6 +304,12 @@ describe('Marionette.StateCollection', function() {
 });
 
 describe('Maroinette.AppStates', function() {
+  beforeEach(function() {
+    return Marionette.RegionControllers.prototype.controllers = {
+      'StateNameCtrl': Marionette.RegionController.extend(),
+      'StateName1Ctrl': Marionette.RegionController.extend()
+    };
+  });
   describe('When initializing without the application object', function() {
     return it('must throw ', function() {
       return expect(function() {
@@ -356,8 +362,7 @@ describe('Maroinette.AppStates', function() {
       });
       return describe('Register state with valid definition', function() {
         beforeEach(function() {
-          var MyStates;
-          MyStates = Marionette.AppStates.extend({
+          this.MyStates = Marionette.AppStates.extend({
             appStates: {
               "stateName": {
                 url: '/someurl'
@@ -368,9 +373,8 @@ describe('Maroinette.AppStates', function() {
             }
           });
           spyOn(window.statesCollection, 'addState').and.callThrough();
-          spyOn(MyStates.prototype, '_processStateOnRoute').and.callThrough();
           this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
-          return this.myStates = new MyStates({
+          return this.myStates = new this.MyStates({
             app: this.app
           });
         });
@@ -388,33 +392,22 @@ describe('Maroinette.AppStates', function() {
             return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
           });
         });
-        describe('When router triggers route event', function() {
-          beforeEach(function() {
-            statesCollection.addState('stateName');
-            statesCollection.addState('stateName1');
-            this.myStates.trigger('route', 'stateName', []);
-            return this.myStates.trigger('route', 'stateName1', [23, 'abc']);
-          });
-          return it('must run _processStateOnRoute function', function() {
-            expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName', []);
-            return expect(this.myStates._processStateOnRoute).toHaveBeenCalledWith('stateName1', [23, 'abc']);
-          });
-        });
         return describe('When processing route', function() {
           beforeEach(function() {
             statesCollection.addState('stateName');
             statesCollection.addState('stateName1');
-            spyOn(Marionette.StateProcessor.prototype, 'initialize').and.callThrough();
+            spyOn(Marionette.StateProcessor.prototype, 'initialize');
+            spyOn(Marionette.StateProcessor.prototype, 'process');
             return this.stateProcessor = this.myStates._processStateOnRoute('stateName', []);
           });
           it('must call state processor with state model and application object', function() {
             return expect(this.stateProcessor.initialize).toHaveBeenCalledWith({
               state: jasmine.any(Marionette.State),
-              app: this.app
+              app: jasmine.any(Marionette.Application)
             });
           });
-          return it('must have status as pending', function() {
-            return expect(this.stateProcessor.getStatus()).toBe('pending');
+          return it('must call process function', function() {
+            return expect(this.stateProcessor.process).toHaveBeenCalled();
           });
         });
       });

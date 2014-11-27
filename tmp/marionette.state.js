@@ -280,6 +280,7 @@ var __hasProp = {}.hasOwnProperty,
         state: stateModel,
         app: this._app
       });
+      processor.process();
       return processor;
     };
 

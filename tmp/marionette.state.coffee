@@ -256,6 +256,7 @@
 			processor = new Marionette.StateProcessor
 											state : stateModel
 											app : @_app
+			processor.process()
 			processor
 	
 	
