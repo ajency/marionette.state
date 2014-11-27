@@ -30,7 +30,7 @@ describe('Marionette.Application', function() {
       setFixtures('<div ui-region="named">Region</div>');
       return app = new Marionette.Application;
     });
-    return it('ap.start() must throw error', function() {
+    return it('app.start() must throw error', function() {
       return expect(function() {
         return app.start();
       }).toThrow();
@@ -93,11 +93,23 @@ describe('Marionette.Region', function() {
 
 describe('Marionette.RegionControllers', function() {
   describe('Lookup place for controllers', function() {
-    beforeEach(function() {
-      return Marionette.RegionControllers.prototype.setLookup(window);
+    afterEach(function() {
+      return Marionette.RegionControllers.prototype.controllers = {};
     });
-    return it('must be define', function() {
-      return expect(Marionette.RegionControllers.prototype.controllers).toEqual(window);
+    describe('When the object is defined', function() {
+      beforeEach(function() {
+        return Marionette.RegionControllers.prototype.setLookup(window);
+      });
+      return it('must be define', function() {
+        return expect(Marionette.RegionControllers.prototype.controllers).toEqual(window);
+      });
+    });
+    return describe('When the object is not defined', function() {
+      return it('must throw', function() {
+        return expect(function() {
+          return Marionette.RegionControllers.prototype.setLookup(xooma);
+        }).toThrow();
+      });
     });
   });
   return describe('when getting a region controller', function() {
@@ -455,6 +467,29 @@ describe('Marionette.StateProcessor', function() {
 });
 
 describe('Maroinette.AppStates', function() {
+  beforeEach(function() {
+    this.inValidStates = {
+      "": {
+        url: '/someurl'
+      }
+    };
+    return this.validStates = {
+      "stateName": {
+        url: '/someurl'
+      },
+      "stateName2": {
+        url: '/statenameurl/:id'
+      },
+      "stateName3": {
+        url: '/statename3/:id',
+        parent: 'stateName2'
+      },
+      "stateName4": {
+        url: '/statename4/:id',
+        parent: 'stateName3'
+      }
+    };
+  });
   describe('When initializing without the application object', function() {
     return it('must throw ', function() {
       return expect(function() {
@@ -488,11 +523,7 @@ describe('Maroinette.AppStates', function() {
         beforeEach(function() {
           var MyStates;
           return MyStates = Marionette.AppStates.extend({
-            appStates: {
-              "": {
-                url: '/someurl'
-              }
-            }
+            appStates: this.inValidStates
           });
         });
         return it('must throw error', function() {
@@ -508,28 +539,27 @@ describe('Maroinette.AppStates', function() {
       return describe('Register state with valid definition', function() {
         beforeEach(function() {
           this.MyStates = Marionette.AppStates.extend({
-            appStates: {
-              "stateName": {
-                url: '/someurl'
-              },
-              "stateName2": {
-                url: '/statenameurl/:id'
-              }
-            }
+            appStates: this.validStates
           });
           spyOn(window.statesCollection, 'addState').and.callThrough();
           this.routeSpy = spyOn(Backbone.Router.prototype, 'route').and.callThrough();
-          return this.myStates = new this.MyStates({
+          this.myStates = new this.MyStates({
             app: this.app
           });
+          return this.childState = statesCollection.get('stateName4');
         });
         it('must call statesCollection.addState', function() {
           return expect(window.statesCollection.addState).toHaveBeenCalledWith("stateName", {
             url: '/someurl'
           });
         });
-        it('must have 2 states in collection', function() {
-          return expect(window.statesCollection.length).toBe(2);
+        describe('Getting parent states of child state', function() {
+          beforeEach(function() {
+            return this.parentStates = this.myStates._getParentStates(this.childState);
+          });
+          return it('must return the array of parent states', function() {
+            return expect(this.parentStates.length).toEqual(2);
+          });
         });
         describe('Registering states with backbone router', function() {
           return it('must call .route() with path and state name', function() {
@@ -540,7 +570,6 @@ describe('Maroinette.AppStates', function() {
         return describe('When processing route', function() {
           beforeEach(function() {
             statesCollection.addState('stateName');
-            statesCollection.addState('stateName1');
             spyOn(Marionette.StateProcessor.prototype, 'initialize');
             spyOn(Marionette.StateProcessor.prototype, 'process');
             return this.stateProcessor = this.myStates._processStateOnRoute('stateName', [23]);

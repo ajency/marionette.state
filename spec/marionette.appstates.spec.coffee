@@ -1,5 +1,14 @@
 describe 'Maroinette.AppStates', ->
 
+	beforeEach ->
+		@inValidStates = "" : url : '/someurl'
+		@validStates =
+				"stateName" : url : '/someurl'
+				"stateName2" : url : '/statenameurl/:id'
+				"stateName3" : url : '/statename3/:id', parent : 'stateName2'
+				"stateName4" : url : '/statename4/:id', parent : 'stateName3'
+
+
 	describe 'When initializing without the application object', ->
 
 		it 'must throw ', ->
@@ -9,7 +18,6 @@ describe 'Maroinette.AppStates', ->
 
 		beforeEach ->
 			@app = new Marionette.Application
-
 			spyOn(Marionette.AppStates::, '_registerStates').and.callThrough()
 			spyOn(Marionette.AppStates::, 'on').and.callThrough()
 			@appStates = new Marionette.AppStates app : @app
@@ -31,32 +39,31 @@ describe 'Maroinette.AppStates', ->
 			describe 'register state with no name ""', ->
 
 				beforeEach ->
-					MyStates = Marionette.AppStates.extend
-									appStates :
-										"" : url : '/someurl'
-
+					MyStates = Marionette.AppStates.extend appStates : @inValidStates
 				it 'must throw error', ->
 					_app = @app
 					expect(-> new MyStates app : _app).toThrow()
 
 			describe 'Register state with valid definition', ->
-
 				beforeEach ->
-					@MyStates = Marionette.AppStates.extend
-									appStates :
-										"stateName" : url : '/someurl'
-										"stateName2" : url : '/statenameurl/:id'
-
+					@MyStates = Marionette.AppStates.extend appStates : @validStates
 					spyOn(window.statesCollection, 'addState').and.callThrough()
-
 					@routeSpy = spyOn(Backbone.Router::, 'route').and.callThrough()
 					@myStates = new @MyStates app : @app
+					@childState = statesCollection.get 'stateName4'
 
 				it 'must call statesCollection.addState', ->
 					expect(window.statesCollection.addState).toHaveBeenCalledWith "stateName" , url : '/someurl'
 
-				it 'must have 2 states in collection', ->
-					expect(window.statesCollection.length).toBe 2
+				describe 'Getting parent states of child state', ->
+
+					beforeEach ->
+						@parentStates = @myStates._getParentStates @childState
+
+					it 'must return the array of parent states', ->
+						expect(@parentStates.length).toEqual 2
+						#expect(@parentStates).toEqual [jasmine.any(Marionette.State)]
+
 
 				describe 'Registering states with backbone router', ->
 
@@ -67,7 +74,6 @@ describe 'Maroinette.AppStates', ->
 				describe 'When processing route', ->
 					beforeEach ->
 						statesCollection.addState 'stateName'
-						statesCollection.addState 'stateName1'
 						spyOn(Marionette.StateProcessor::, 'initialize')
 						spyOn(Marionette.StateProcessor::, 'process')
 						@stateProcessor = @myStates._processStateOnRoute 'stateName', [23]

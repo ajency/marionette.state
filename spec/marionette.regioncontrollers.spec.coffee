@@ -5,18 +5,18 @@ describe 'Marionette.RegionControllers', ->
 		afterEach ->
 			Marionette.RegionControllers::controllers = {}
 
-	  	describe 'When the object is defined', ->
+		describe 'When the object is defined', ->
 
-	  	  	beforeEach ->
-	  			Marionette.RegionControllers::setLookup window
+			beforeEach ->
+				Marionette.RegionControllers::setLookup window
 
-		  	it 'must be define', ->
-	  			expect(Marionette.RegionControllers::controllers).toEqual window
+			it 'must be define', ->
+				expect(Marionette.RegionControllers::controllers).toEqual window
 
-	  	describe 'When the object is not defined', ->
+		describe 'When the object is not defined', ->
 
-	  		it 'must throw', ->
-	  			expect(-> Marionette.RegionControllers::setLookup xooma ).toThrow()
+			it 'must throw', ->
+				expect(-> Marionette.RegionControllers::setLookup xooma ).toThrow()
 
 
 

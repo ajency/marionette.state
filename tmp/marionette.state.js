@@ -213,6 +213,10 @@ var __hasProp = {}.hasOwnProperty,
       });
     };
 
+    State.prototype.isChildState = function() {
+      return this.get('parent') !== false;
+    };
+
     return State;
 
   })(Backbone.Model);
@@ -299,6 +303,7 @@ var __hasProp = {}.hasOwnProperty,
       if (options == null) {
         options = {};
       }
+      this._getParentStates = __bind(this._getParentStates, this);
       AppStates.__super__.constructor.call(this, options);
       if (!options.app || (options.app instanceof Marionette.Application !== true)) {
         throw new Marionette.Error({
@@ -314,18 +319,45 @@ var __hasProp = {}.hasOwnProperty,
     AppStates.prototype._registerStates = function() {
       var appStates;
       appStates = Marionette.getOption(this, 'appStates');
-      return _.map(appStates, (function(_this) {
+      _.map(appStates, (function(_this) {
         return function(stateDef, stateName) {
-          var stateModel;
           if (_.isEmpty(stateName)) {
             throw new Marionette.Error('state name cannot be empty');
           }
-          stateModel = _this._statesCollection.addState(stateName, stateDef);
+          return _this._statesCollection.addState(stateName, stateDef);
+        };
+      })(this));
+      return _.map(appStates, (function(_this) {
+        return function(stateDef, stateName) {
+          var parentStates, stateModel;
+          stateModel = _this._statesCollection.get(stateName);
+          if (stateModel.isChildState()) {
+            parentStates = _this._getParentStates(stateModel);
+            stateModel.set('parentStates', parentStates);
+          }
           return _this.route(stateModel.get('computed_url'), stateModel.get('name'), function() {
             return true;
           });
         };
       })(this));
+    };
+
+    AppStates.prototype._getParentStates = function(childState) {
+      var getParentState, parentStates;
+      parentStates = [];
+      getParentState = function(state) {
+        var parentState;
+        if (state instanceof Marionette.State !== true) {
+          throw Error('Not a valid state');
+        }
+        parentState = window.statesCollection.get(state.get('parent'));
+        parentStates.push(parentState);
+        if (parentState.isChildState()) {
+          return getParentState(parentState);
+        }
+      };
+      getParentState(childState);
+      return parentStates;
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {

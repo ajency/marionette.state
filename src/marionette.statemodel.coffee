@@ -24,13 +24,5 @@ class Marionette.State extends Backbone.Model
 		name.replace /\w\S*/g, (txt)->
 			return txt.charAt(0).toUpperCase() + txt.substr(1) + 'Ctrl'
 
-
-
-	# isActive : ->
-	# 	@get('status') is 'active'
-
-	# getStatus : ->
-	# 	@get 'status'
-
-	# isChildState : ->
-	# 	@get('parent') isnt false
+	isChildState : ->
+		@get('parent') isnt false
