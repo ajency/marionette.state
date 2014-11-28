@@ -8,7 +8,7 @@ describe 'Marionette.StateProcessor', ->
 													url : '/paramstate/:id'
 													ctrl : 'ParamCtrl'
 		Marionette.RegionControllers::controllers =
-										'StateOneCtrl' : Marionette.RegionController.extend()
+									'StateOneCtrl' : Marionette.RegionController.extend()
 
 	afterEach ->
 		Marionette.RegionControllers::controllers = {}
@@ -21,13 +21,15 @@ describe 'Marionette.StateProcessor', ->
 				expect(-> new Marionette.StateProcessor ).toThrow()
 				expect(=> new Marionette.StateProcessor state : @state).toThrow()
 
-		describe 'When initializing with statemodel and application instance', ->
+		describe 'When initializing with statemodel and regionContainer instance', ->
 
 			beforeEach ->
-				@stateProcessor = new Marionette.StateProcessor state : @state, app : @app
+				@stateProcessor = new Marionette.StateProcessor
+													state : @state
+													regionContainer : @app
 
 			it 'must not throw', ->
-				expect(=> new Marionette.StateProcessor state : @state, app : @app ).not.toThrow()
+				expect(=> new Marionette.StateProcessor state : @state, regionContainer : @app ).not.toThrow()
 
 			it 'must have _state property', ->
 				expect(@stateProcessor._state).toEqual @state
@@ -35,8 +37,8 @@ describe 'Marionette.StateProcessor', ->
 			it 'must have _deferred object', ->
 				expect(@stateProcessor._deferred.done).toEqual jasmine.any Function
 
-			it 'must have application object', ->
-				expect(@stateProcessor._app).toEqual @app
+			it 'must have regionContainer object', ->
+				expect(@stateProcessor._regionContainer).toEqual @app
 
 		describe 'When processing a state', ->
 
@@ -49,7 +51,10 @@ describe 'Marionette.StateProcessor', ->
 				@app.dynamicRegion = new Marionette.Region el : $('[ui-region]')
 				@setCtrlSpy = spyOn(@app.dynamicRegion,'setController')
 				@setCtrlParamSpy = spyOn(@app.dynamicRegion,'setControllerStateParams')
-				@stateProcessor = new Marionette.StateProcessor state : @state, app : @app
+				@stateProcessor = new Marionette.StateProcessor
+														state : @state
+														regionContainer : @app
+
 				spyOn(@stateProcessor, 'listenTo').and.callThrough()
 				@promise = @stateProcessor.process()
 
@@ -63,9 +68,9 @@ describe 'Marionette.StateProcessor', ->
 				expect(@stateProcessor._region).toEqual @app.dynamicRegion
 
 			it 'must run controller with state params', ->
-					expect(@StateCtrl::initialize).toHaveBeenCalledWith
-																	region : @app.dynamicRegion
-																	stateParams : []
+				expect(@StateCtrl::initialize).toHaveBeenCalledWith
+														region : @app.dynamicRegion
+														stateParams : []
 
 			it 'must return the promise', ->
 				expect(@promise.done).toEqual jasmine.any Function
@@ -78,8 +83,11 @@ describe 'Marionette.StateProcessor', ->
 				beforeEach ->
 					@stateProcessor._ctrlInstance.trigger 'view:rendered', new Marionette.ItemView
 
-				it 'must resovle the state', ->
-					expect(@stateProcessor._state.get 'status').toBe 'resolved'
+				it 'must resovle with controller instance', (done)->
+					@promise.done (ctrl)->
+						expect(ctrl).toEqual jasmine.any Marionette.RegionController
+					.always ->
+						done()
 
 
 			describe 'when processing state with params', ->
@@ -87,7 +95,7 @@ describe 'Marionette.StateProcessor', ->
 				beforeEach ->
 					@paramStateProcessor = new Marionette.StateProcessor
 															state : @state
-															app : @app
+															regionContainer : @app
 															stateParams : [12]
 					@paramStateProcessor.process()
 
@@ -104,7 +112,7 @@ describe 'Marionette.StateProcessor', ->
 				@app.dynamicRegion = new Marionette.Region el : $('[ui-region]')
 				@paramStateProcessor = new Marionette.StateProcessor
 														state : @state
-														app : @app
+														regionContainer : @app
 														stateParams : [12]
 				spyOn(Marionette.RegionControllers::,'getRegionController').and.callThrough()
 
@@ -118,8 +126,6 @@ describe 'Marionette.StateProcessor', ->
 
 			it 'must trigger the view:rendered event on ctlr', ->
 				expect(@ctrl.trigger).toHaveBeenCalled()
-
-
 
 
 

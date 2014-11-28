@@ -136,7 +136,10 @@
 					message: 'View instance is not valid Backbone.View'
 	
 			@_view = view
-			@listenTo @_view, 'show', => @trigger 'view:rendered', @_view
+			@listenTo @_view, 'show', =>
+						_.delay =>
+							@trigger 'view:rendered', @_view
+						, 100
 			@_region.show view
 	
 	
@@ -182,6 +185,10 @@
 	
 		isChildState : ->
 			@get('parent') isnt false
+	
+		hasParams : ->
+			url = @get 'url'
+			url.indexOf('/:') isnt -1
 	
 	class Marionette.StateCollection extends Backbone.Collection
 	
@@ -242,13 +249,13 @@
 	
 		initialize : (options = {})->
 			@_state = stateModel = @getOption 'state'
-			@_app = app = @getOption 'app'
+			@_regionContainer = _regionContainer = @getOption 'regionContainer'
 	
 			if _.isUndefined(stateModel) or (stateModel instanceof Marionette.State isnt true)
 				throw new Marionette.Error 'State model needed'
 	
-			if _.isUndefined(app) or (app instanceof Marionette.Application isnt true)
-				throw new Marionette.Error 'application instance needed'
+			if _.isUndefined(_regionContainer) or (_regionContainer instanceof Marionette.Application isnt true and _regionContainer instanceof Marionette.View isnt true)
+				throw new Marionette.Error 'regionContainer needed. This can be Application object or layoutview object'
 	
 			@_stateParams = if options.stateParams then options.stateParams else []
 	
@@ -256,15 +263,15 @@
 	
 		process : ->
 			_ctrlClassName = @_state.get 'ctrl'
-			@_region = _region = @_app.dynamicRegion
+			@_region = _region = @_regionContainer.dynamicRegion
 	
 			#get current cotrl
-			currentCtrlClass = _region._ctrlClass
-			ctrlStateParams = _region._ctrlStateParams
+			currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
+			ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
 			if currentCtrlClass is _ctrlClassName and arrayCompare
 				currentCtrlInstance = @_region._ctrlInstance
-				currentCtrlInstance.trigger 'view:rendered'
+				@_deferred.resolve currentCtrlInstance
 				return @_deferred.promise()
 	
 			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
@@ -285,7 +292,7 @@
 	
 		_onViewRendered : =>
 			@_state.set 'status', 'resolved'
-			@_deferred.resolve true
+			@_deferred.resolve @_ctrlInstance
 	
 	
 	
@@ -303,11 +310,11 @@
 			@_app  = options.app
 			@_statesCollection = window.statesCollection
 	
-			# register all app states
-			@_registerStates()
-	
 			# listen to route event of the router
 			@on 'route', @_processStateOnRoute, @
+	
+			# register all app states
+			@_registerStates()
 	
 		_registerStates : ->
 	
@@ -343,13 +350,68 @@
 	
 	
 		_processStateOnRoute : (name, args = [])->
+	
 			stateModel = @_statesCollection.get name
-			processor = new Marionette.StateProcessor
-											state : stateModel
-											app : @_app
-											stateParams : args
-			processor.process()
-			processor
+			statesToProcess = []
+	
+			data =
+				state : stateModel
+				params : []
+	
+			if stateModel.hasParams()
+				data.params = _.flatten [args[args.length - 1]]
+	
+			if not stateModel.isChildState()
+				data.regionContainer = @_app
+	
+			statesToProcess.push data
+	
+			if stateModel.isChildState()
+				parentStates = stateModel.get('parentStates')
+				k = 0
+				_.each parentStates, (state, i)=>
+					data = {}
+					data.state = state
+					data.params = []
+					if stateModel.hasParams()
+						data.params = _.flatten [args[k]]
+						k++
+					if not stateModel.isChildState()
+						data.regionContainer = @_app
+	
+					statesToProcess.unshift data
+	
+			currentStateProcessor = Marionette.Deferred()
+			processState = (index, regionContainer)->
+				stateData = statesToProcess[index]
+				processor = new Marionette.StateProcessor
+								state : stateData.state
+								regionContainer : regionContainer
+								stateParams : stateData.params
+				promise = processor.process()
+				promise.done (ctrl)->
+					if index is statesToProcess.length - 1
+						currentStateProcessor.resolve processor
+	
+					if index < statesToProcess.length - 1
+						index++
+						processState index, ctrl._view
+	
+			processState 0, @_app
+	
+			currentStateProcessor.promise()
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 
 	Marionette.State

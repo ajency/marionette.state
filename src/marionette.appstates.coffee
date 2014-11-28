@@ -11,11 +11,11 @@ class Marionette.AppStates extends Backbone.Router
 		@_app  = options.app
 		@_statesCollection = window.statesCollection
 
-		# register all app states
-		@_registerStates()
-
 		# listen to route event of the router
 		@on 'route', @_processStateOnRoute, @
+
+		# register all app states
+		@_registerStates()
 
 	_registerStates : ->
 
@@ -51,10 +51,65 @@ class Marionette.AppStates extends Backbone.Router
 
 
 	_processStateOnRoute : (name, args = [])->
+
 		stateModel = @_statesCollection.get name
-		processor = new Marionette.StateProcessor
-										state : stateModel
-										app : @_app
-										stateParams : args
-		processor.process()
-		processor
+		statesToProcess = []
+
+		data =
+			state : stateModel
+			params : []
+
+		if stateModel.hasParams()
+			data.params = _.flatten [args[args.length - 1]]
+
+		if not stateModel.isChildState()
+			data.regionContainer = @_app
+
+		statesToProcess.push data
+
+		if stateModel.isChildState()
+			parentStates = stateModel.get('parentStates')
+			k = 0
+			_.each parentStates, (state, i)=>
+				data = {}
+				data.state = state
+				data.params = []
+				if stateModel.hasParams()
+					data.params = _.flatten [args[k]]
+					k++
+				if not stateModel.isChildState()
+					data.regionContainer = @_app
+
+				statesToProcess.unshift data
+
+		currentStateProcessor = Marionette.Deferred()
+		processState = (index, regionContainer)->
+			stateData = statesToProcess[index]
+			processor = new Marionette.StateProcessor
+							state : stateData.state
+							regionContainer : regionContainer
+							stateParams : stateData.params
+			promise = processor.process()
+			promise.done (ctrl)->
+				if index is statesToProcess.length - 1
+					currentStateProcessor.resolve processor
+
+				if index < statesToProcess.length - 1
+					index++
+					processState index, ctrl._view
+
+		processState 0, @_app
+
+		currentStateProcessor.promise()
+
+
+
+
+
+
+
+
+
+
+
+

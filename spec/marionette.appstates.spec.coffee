@@ -5,7 +5,7 @@ describe 'Maroinette.AppStates', ->
 		@validStates =
 				"stateName" : url : '/someurl'
 				"stateName2" : url : '/statenameurl/:id'
-				"stateName3" : url : '/statename3/:id', parent : 'stateName2'
+				"stateName3" : url : '/statename3', parent : 'stateName2'
 				"stateName4" : url : '/statename4/:id', parent : 'stateName3'
 
 
@@ -71,19 +71,79 @@ describe 'Maroinette.AppStates', ->
 						expect(@routeSpy).toHaveBeenCalledWith 'statenameurl/:id', 'stateName2', jasmine.any Function
 						expect(@routeSpy).toHaveBeenCalledWith 'someurl', 'stateName', jasmine.any Function
 
-				describe 'When processing route', ->
+				xdescribe 'When processing state', ->
 					beforeEach ->
 						statesCollection.addState 'stateName'
 						spyOn(Marionette.StateProcessor::, 'initialize')
-						spyOn(Marionette.StateProcessor::, 'process')
-						@stateProcessor = @myStates._processStateOnRoute 'stateName', [23]
+						@promise = @myStates._processStateOnRoute 'stateName', [23]
+						console.log @promise
 
-					it 'must call state processor with state model and application object',->
-						expect(@stateProcessor.initialize).toHaveBeenCalledWith
-															state : jasmine.any Marionette.State
-															app : jasmine.any Marionette.Application
-															stateParams : [23]
+					it 'must call state processor with state model and regionContainer object',(done)->
+						@promise.done (stateProcessor)->
+							expect(stateProcessor.initialize).toHaveBeenCalledWith
+												state : jasmine.any Marionette.State
+												regionContainer : jasmine.any(Marionette.Application)
+												stateParams : [23]
+							done()
 
-					it 'must call process function', ->
-						expect(@stateProcessor.process).toHaveBeenCalled()
+					xit 'must call process function', ->
+						@promise.done (stateProcessor)=>
+							expect(@p).toHaveBeenCalled()
+
+
+
+				describe 'When processing a child state', ->
+
+					beforeEach ->
+						MyStates = Marionette.AppStates.extend appStates : @validStates
+						@myStates = new MyStates app : @app
+						spyOn(Marionette.StateProcessor::, 'initialize').and.callThrough()
+						spyOn(Marionette.StateProcessor::, 'process').and.callFake ->
+							a = Marionette.Deferred()
+							a.resolve new Marionette.Object
+							a.promise()
+						@promise = @myStates._processStateOnRoute 'stateName3', [1,3]
+						console.log @promise
+
+					it 'must call Marionette.StateProcessor 3 times',->
+						expect(Marionette.StateProcessor::initialize.calls.count()).toBe 2
+
+					# xit 'must call Marionette.StateProcessor in proper sequence 1', (done)->
+					# 	state2 = statesCollection.get 'stateName2'
+					# 	@promise.always ->
+					# 		s = Marionette.StateProcessor::initialize.calls.argsFor(0)
+					# 		expect(s).toEqual [
+					# 					state : state2
+					# 					regionContainer : @app
+					# 					stateParams : [1]
+					# 			]
+					# 		done()
+
+					# xit 'must call Marionette.StateProcessor in proper sequence 2', (done)->
+					# 	state3 = statesCollection.get 'stateName3'
+					# 	@promise.always ->
+					# 		s = Marionette.StateProcessor::initialize.calls.argsFor(1)
+					# 		expect(s).toEqual [
+					# 				state : state3
+					# 				regionContainer : jasmine.any Marionette.View
+					# 				stateParams : []
+					# 			]
+					# 		done()
+
+					# xit 'must call Marionette.StateProcessor in proper sequence 3', (done)->
+					# 	state4 = statesCollection.get 'stateName4'
+					# 	@promise.always ->
+					# 		s = Marionette.StateProcessor::initialize.calls.argsFor(2)
+					# 		expect(s).toEqual [
+					# 				state : state4
+					# 				regionContainer : jasmine.any Marionette.View
+					# 				stateParams : [3]
+					# 			]
+					# 		done()
+
+
+
+
+
+
 

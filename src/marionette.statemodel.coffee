@@ -41,3 +41,7 @@ class Marionette.State extends Backbone.Model
 
 	isChildState : ->
 		@get('parent') isnt false
+
+	hasParams : ->
+		url = @get 'url'
+		url.indexOf('/:') isnt -1

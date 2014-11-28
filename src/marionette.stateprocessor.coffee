@@ -3,13 +3,13 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	initialize : (options = {})->
 		@_state = stateModel = @getOption 'state'
-		@_app = app = @getOption 'app'
+		@_regionContainer = _regionContainer = @getOption 'regionContainer'
 
 		if _.isUndefined(stateModel) or (stateModel instanceof Marionette.State isnt true)
 			throw new Marionette.Error 'State model needed'
 
-		if _.isUndefined(app) or (app instanceof Marionette.Application isnt true)
-			throw new Marionette.Error 'application instance needed'
+		if _.isUndefined(_regionContainer) or (_regionContainer instanceof Marionette.Application isnt true and _regionContainer instanceof Marionette.View isnt true)
+			throw new Marionette.Error 'regionContainer needed. This can be Application object or layoutview object'
 
 		@_stateParams = if options.stateParams then options.stateParams else []
 
@@ -17,15 +17,15 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	process : ->
 		_ctrlClassName = @_state.get 'ctrl'
-		@_region = _region = @_app.dynamicRegion
+		@_region = _region = @_regionContainer.dynamicRegion
 
 		#get current cotrl
-		currentCtrlClass = _region._ctrlClass
-		ctrlStateParams = _region._ctrlStateParams
+		currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
+		ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 		arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
 		if currentCtrlClass is _ctrlClassName and arrayCompare
 			currentCtrlInstance = @_region._ctrlInstance
-			currentCtrlInstance.trigger 'view:rendered'
+			@_deferred.resolve currentCtrlInstance
 			return @_deferred.promise()
 
 		@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
@@ -46,7 +46,7 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	_onViewRendered : =>
 		@_state.set 'status', 'resolved'
-		@_deferred.resolve true
+		@_deferred.resolve @_ctrlInstance
 
 
 

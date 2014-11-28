@@ -18,5 +18,8 @@ class Marionette.RegionController extends Marionette.Controller
 				message: 'View instance is not valid Backbone.View'
 
 		@_view = view
-		@listenTo @_view, 'show', => @trigger 'view:rendered', @_view
+		@listenTo @_view, 'show', =>
+					_.delay =>
+						@trigger 'view:rendered', @_view
+					, 100
 		@_region.show view

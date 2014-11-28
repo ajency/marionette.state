@@ -86,6 +86,19 @@ describe 'Marionette.State', ->
 			arr = ['/parentState1','/parentState2','/stateName']
 			expect(@state.get 'url_to_array').toEqual arr
 
+	describe 'when url has params', ->
+
+		beforeEach ->
+			@state = new Marionette.State
+								'name' : 'stateName'
+								'url' : '/customUrl/:someparam'
+
+		it 'hasParams() must return true', ->
+			expect(@state.hasParams()).toBe true
+
+
+
+
 
 
 

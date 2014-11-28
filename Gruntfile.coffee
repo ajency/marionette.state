@@ -64,7 +64,7 @@ module.exports = (grunt) ->
 	grunt.registerTask "dist", "Create distribution build", [
 		"preprocess"
 		"coffee:compile"
-		"jasmine:test"
+		#"jasmine:test"
 		"coffee:distribution"
 	]
 

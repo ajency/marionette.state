@@ -162,7 +162,9 @@ var __hasProp = {}.hasOwnProperty,
       this._view = view;
       this.listenTo(this._view, 'show', (function(_this) {
         return function() {
-          return _this.trigger('view:rendered', _this._view);
+          return _.delay(function() {
+            return _this.trigger('view:rendered', _this._view);
+          }, 100);
         };
       })(this));
       return this._region.show(view);
@@ -237,6 +239,12 @@ var __hasProp = {}.hasOwnProperty,
       return this.get('parent') !== false;
     };
 
+    State.prototype.hasParams = function() {
+      var url;
+      url = this.get('url');
+      return url.indexOf('/:') !== -1;
+    };
+
     return State;
 
   })(Backbone.Model);
@@ -274,17 +282,17 @@ var __hasProp = {}.hasOwnProperty,
     }
 
     StateProcessor.prototype.initialize = function(options) {
-      var app, stateModel;
+      var stateModel, _regionContainer;
       if (options == null) {
         options = {};
       }
       this._state = stateModel = this.getOption('state');
-      this._app = app = this.getOption('app');
+      this._regionContainer = _regionContainer = this.getOption('regionContainer');
       if (_.isUndefined(stateModel) || (stateModel instanceof Marionette.State !== true)) {
         throw new Marionette.Error('State model needed');
       }
-      if (_.isUndefined(app) || (app instanceof Marionette.Application !== true)) {
-        throw new Marionette.Error('application instance needed');
+      if (_.isUndefined(_regionContainer) || (_regionContainer instanceof Marionette.Application !== true && _regionContainer instanceof Marionette.View !== true)) {
+        throw new Marionette.Error('regionContainer needed. This can be Application object or layoutview object');
       }
       this._stateParams = options.stateParams ? options.stateParams : [];
       return this._deferred = new Marionette.Deferred();
@@ -293,13 +301,13 @@ var __hasProp = {}.hasOwnProperty,
     StateProcessor.prototype.process = function() {
       var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      this._region = _region = this._app.dynamicRegion;
-      currentCtrlClass = _region._ctrlClass;
-      ctrlStateParams = _region._ctrlStateParams;
+      this._region = _region = this._regionContainer.dynamicRegion;
+      currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
+      ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
       if (currentCtrlClass === _ctrlClassName && arrayCompare) {
         currentCtrlInstance = this._region._ctrlInstance;
-        currentCtrlInstance.trigger('view:rendered');
+        this._deferred.resolve(currentCtrlInstance);
         return this._deferred.promise();
       }
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
@@ -320,7 +328,7 @@ var __hasProp = {}.hasOwnProperty,
 
     StateProcessor.prototype._onViewRendered = function() {
       this._state.set('status', 'resolved');
-      return this._deferred.resolve(true);
+      return this._deferred.resolve(this._ctrlInstance);
     };
 
     return StateProcessor;
@@ -342,8 +350,8 @@ var __hasProp = {}.hasOwnProperty,
       }
       this._app = options.app;
       this._statesCollection = window.statesCollection;
-      this._registerStates();
       this.on('route', this._processStateOnRoute, this);
+      this._registerStates();
     }
 
     AppStates.prototype._registerStates = function() {
@@ -391,18 +399,64 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {
-      var processor, stateModel;
+      var currentStateProcessor, data, k, parentStates, processState, stateModel, statesToProcess;
       if (args == null) {
         args = [];
       }
       stateModel = this._statesCollection.get(name);
-      processor = new Marionette.StateProcessor({
+      statesToProcess = [];
+      data = {
         state: stateModel,
-        app: this._app,
-        stateParams: args
-      });
-      processor.process();
-      return processor;
+        params: []
+      };
+      if (stateModel.hasParams()) {
+        data.params = _.flatten([args[args.length - 1]]);
+      }
+      if (!stateModel.isChildState()) {
+        data.regionContainer = this._app;
+      }
+      statesToProcess.push(data);
+      if (stateModel.isChildState()) {
+        parentStates = stateModel.get('parentStates');
+        k = 0;
+        _.each(parentStates, (function(_this) {
+          return function(state, i) {
+            data = {};
+            data.state = state;
+            data.params = [];
+            if (stateModel.hasParams()) {
+              data.params = _.flatten([args[k]]);
+              k++;
+            }
+            if (!stateModel.isChildState()) {
+              data.regionContainer = _this._app;
+            }
+            return statesToProcess.unshift(data);
+          };
+        })(this));
+      }
+      currentStateProcessor = Marionette.Deferred();
+      processState = function(index, regionContainer) {
+        var processor, promise, stateData;
+        stateData = statesToProcess[index];
+        processor = new Marionette.StateProcessor({
+          state: stateData.state,
+          regionContainer: regionContainer,
+          stateParams: stateData.params
+        });
+        promise = processor.process();
+        return promise.done(function(ctrl) {
+          if (index === statesToProcess.length - 1) {
+            currentStateProcessor.resolve(processor);
+          }
+          if (index < statesToProcess.length - 1) {
+            index++;
+            return processState(index, ctrl._view);
+          }
+        });
+      };
+      processState(0, this._app);
+      return currentStateProcessor.promise();
     };
 
     return AppStates;
