@@ -196,8 +196,13 @@ describe('Marionette.RegionController', function() {
         return expect(this._region.show).toHaveBeenCalledWith(this.view);
       });
       return describe('when the view is rendered on screen', function() {
-        return it('ctrl must tigger "view:rendered" event', function() {
-          return expect(this.regionCtrl.trigger).toHaveBeenCalledWith('view:rendered', this.view);
+        return it('ctrl must tigger "view:rendered" event', function(done) {
+          return _.delay((function(_this) {
+            return function() {
+              expect(_this.regionCtrl.trigger).toHaveBeenCalledWith('view:rendered', _this.view);
+              return done();
+            };
+          })(this), 101);
         });
       });
     });

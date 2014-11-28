@@ -24,8 +24,8 @@ class Marionette.StateProcessor extends Marionette.Object
 		ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 		arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
 		if currentCtrlClass is _ctrlClassName and arrayCompare
-			currentCtrlInstance = @_region._ctrlInstance
-			@_deferred.resolve currentCtrlInstance
+			@_ctrlInstance = @_region._ctrlInstance
+			@_ctrlInstance.trigger "view:rendered"
 			return @_deferred.promise()
 
 		@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName

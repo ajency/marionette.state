@@ -299,15 +299,15 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, currentCtrlInstance, _ctrlClassName, _region;
+      var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
       this._region = _region = this._regionContainer.dynamicRegion;
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
       if (currentCtrlClass === _ctrlClassName && arrayCompare) {
-        currentCtrlInstance = this._region._ctrlInstance;
-        this._deferred.resolve(currentCtrlInstance);
+        this._ctrlInstance = this._region._ctrlInstance;
+        this._ctrlInstance.trigger("view:rendered");
         return this._deferred.promise();
       }
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);

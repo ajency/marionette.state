@@ -50,6 +50,9 @@ describe 'Marionette.RegionController', ->
 
 			describe 'when the view is rendered on screen', ->
 
-				it 'ctrl must tigger "view:rendered" event', ->
-					expect(@regionCtrl.trigger).toHaveBeenCalledWith 'view:rendered', @view
+				it 'ctrl must tigger "view:rendered" event', (done)->
+					_.delay =>
+						expect(@regionCtrl.trigger).toHaveBeenCalledWith 'view:rendered', @view
+						done()
+					, 101
 
