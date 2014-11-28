@@ -31,7 +31,67 @@
         <h3>
 <a id="state-based-routing-for-marionettejs-applications" class="anchor" href="#state-based-routing-for-marionettejs-applications" aria-hidden="true"><span class="octicon octicon-link"></span></a>State based routing for MarionetteJS applications</h3>
 
-<pre><code>Documentation coming sooon...
+<pre><code>class AbcStates extends Marionette.AppStates
+
+    appStates :
+        'login' : true
+        'noAccess' :
+            url : '/noaccess'
+        'access' :
+            url : '/access/:id'
+        'child1' :
+            parent : 'access'
+        'child2' :
+            parent : 'access'
+
+
+class LoginView extends Marionette.ItemView
+    template : '#login-template'
+
+class window.LoginCtrl extends Marionette.RegionController
+    initialize : -&gt;
+        @show new LoginView
+
+class NoAccessView extends Marionette.ItemView
+    template : '#no-access-template'
+
+class window.NoAccessCtrl extends Marionette.RegionController
+    initialize : -&gt;
+        @show new NoAccessView
+
+class AccessView extends Marionette.LayoutView
+    template : '#access-template'
+
+class window.AccessCtrl extends Marionette.RegionController
+    initialize : (options)-&gt;
+        @show new AccessView
+
+class ChildView1 extends Marionette.ItemView
+    template : '&lt;h1&gt;Child1 view here&lt;/h1&gt;
+                &lt;a href="/#/access/23/child2"&gt;Goto Child 2&lt;/a&gt;
+                &lt;a href="#/login" class="btn btn-success"&gt;Login  &lt;/a&gt;'
+
+class window.Child1Ctrl extends Marionette.RegionController
+    initialize : -&gt;
+        @show new ChildView1
+
+class ChildView2 extends Marionette.ItemView
+    template : '&lt;h1&gt;Child2 view here&lt;/h1&gt;
+                &lt;a href="/#/access/24/child1"&gt;Goto Child 1&lt;/a&gt;
+                &lt;a href="#/login" class="btn btn-success"&gt;Login  &lt;/a&gt;'
+
+class window.Child2Ctrl extends Marionette.RegionController
+    initialize : -&gt;
+        @show new ChildView2
+
+window.App =  new Marionette.Application
+
+App.addInitializer -&gt;
+    router = new AbcStates app : App
+    Backbone.history.start()
+    router.navigate '#/access/23/child2', true
+
+App.start()
 </code></pre>
       </section>
       <footer>
