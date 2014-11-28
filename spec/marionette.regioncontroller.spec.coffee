@@ -56,3 +56,22 @@ describe 'Marionette.RegionController', ->
 						done()
 					, 101
 
+	describe 'When the view inside is destroyed', ->
+
+		beforeEach ->
+			@view  = new Marionette.ItemView()
+			setFixtures sandbox()
+			@_region = new Marionette.Region el : '#sandbox'
+			@regionCtrl = new Marionette.RegionController region : @_region
+			@regionCtrl.show @view
+			@view.destroy()
+
+
+
+
+
+
+
+
+
+

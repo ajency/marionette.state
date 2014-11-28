@@ -162,7 +162,7 @@ describe('Marionette.RegionController', function() {
       });
     });
   });
-  return describe('when showing the view inside the region', function() {
+  describe('when showing the view inside the region', function() {
     beforeEach(function() {
       setFixtures(sandbox());
       this._region = new Marionette.Region({
@@ -205,6 +205,20 @@ describe('Marionette.RegionController', function() {
           })(this), 101);
         });
       });
+    });
+  });
+  return describe('When the view inside is destroyed', function() {
+    return beforeEach(function() {
+      this.view = new Marionette.ItemView();
+      setFixtures(sandbox());
+      this._region = new Marionette.Region({
+        el: '#sandbox'
+      });
+      this.regionCtrl = new Marionette.RegionController({
+        region: this._region
+      });
+      this.regionCtrl.show(this.view);
+      return this.view.destroy();
     });
   });
 });
@@ -637,58 +651,10 @@ describe('Maroinette.AppStates', function() {
             return expect(this.parentStates.length).toEqual(2);
           });
         });
-        describe('Registering states with backbone router', function() {
+        return describe('Registering states with backbone router', function() {
           return it('must call .route() with path and state name', function() {
             expect(this.routeSpy).toHaveBeenCalledWith('statenameurl/:id', 'stateName2', jasmine.any(Function));
             return expect(this.routeSpy).toHaveBeenCalledWith('someurl', 'stateName', jasmine.any(Function));
-          });
-        });
-        xdescribe('When processing state', function() {
-          beforeEach(function() {
-            statesCollection.addState('stateName');
-            spyOn(Marionette.StateProcessor.prototype, 'initialize');
-            this.promise = this.myStates._processStateOnRoute('stateName', [23]);
-            return console.log(this.promise);
-          });
-          it('must call state processor with state model and regionContainer object', function(done) {
-            return this.promise.done(function(stateProcessor) {
-              expect(stateProcessor.initialize).toHaveBeenCalledWith({
-                state: jasmine.any(Marionette.State),
-                regionContainer: jasmine.any(Marionette.Application),
-                stateParams: [23]
-              });
-              return done();
-            });
-          });
-          return xit('must call process function', function() {
-            return this.promise.done((function(_this) {
-              return function(stateProcessor) {
-                return expect(_this.p).toHaveBeenCalled();
-              };
-            })(this));
-          });
-        });
-        return describe('When processing a child state', function() {
-          beforeEach(function() {
-            var MyStates;
-            MyStates = Marionette.AppStates.extend({
-              appStates: this.validStates
-            });
-            this.myStates = new MyStates({
-              app: this.app
-            });
-            spyOn(Marionette.StateProcessor.prototype, 'initialize').and.callThrough();
-            spyOn(Marionette.StateProcessor.prototype, 'process').and.callFake(function() {
-              var a;
-              a = Marionette.Deferred();
-              a.resolve(new Marionette.Object);
-              return a.promise();
-            });
-            this.promise = this.myStates._processStateOnRoute('stateName3', [1, 3]);
-            return console.log(this.promise);
-          });
-          return it('must call Marionette.StateProcessor 3 times', function() {
-            return expect(Marionette.StateProcessor.prototype.initialize.calls.count()).toBe(2);
           });
         });
       });
