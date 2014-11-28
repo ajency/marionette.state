@@ -306,8 +306,9 @@ var __hasProp = {}.hasOwnProperty,
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
       if (currentCtrlClass === _ctrlClassName && arrayCompare) {
-        this._ctrlInstance = this._region._ctrlInstance;
-        this._ctrlInstance.trigger("view:rendered");
+        this._ctrlInstance = ctrlInstance = this._region._ctrlInstance;
+        this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
+        ctrlInstance.trigger("view:rendered", ctrlInstance._view);
         return this._deferred.promise();
       }
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
