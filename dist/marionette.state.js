@@ -63,7 +63,7 @@ var __hasProp = {}.hasOwnProperty,
       })(this));
       if (_.isUndefined(this.dynamicRegion)) {
         throw new Marionette.Error({
-          message: 'Need atleast one dynamic region'
+          message: 'Need atleast one dynamic region( [ui-region] )'
         });
       }
     }
@@ -314,7 +314,8 @@ var __hasProp = {}.hasOwnProperty,
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
-        stateParams: this._stateParams
+        stateParams: this._stateParams,
+        stateName: this._state.get('name')
       });
       this._region.setController(_ctrlClassName);
       this._region.setControllerStateParams(this._stateParams);
@@ -339,17 +340,19 @@ var __hasProp = {}.hasOwnProperty,
     __extends(AppStates, _super);
 
     function AppStates(options) {
+      var app;
       if (options == null) {
         options = {};
       }
       this._getParentStates = __bind(this._getParentStates, this);
       AppStates.__super__.constructor.call(this, options);
-      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
+      app = options.app;
+      if (app instanceof Marionette.Application !== true) {
         throw new Marionette.Error({
           message: 'Application instance needed'
         });
       }
-      this._app = options.app;
+      this._app = app;
       this._statesCollection = window.statesCollection;
       this.on('route', this._processStateOnRoute, this);
       this._registerStates();
