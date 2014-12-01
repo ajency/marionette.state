@@ -63,7 +63,7 @@ var __hasProp = {}.hasOwnProperty,
       })(this));
       if (_.isUndefined(this.dynamicRegion)) {
         throw new Marionette.Error({
-          message: 'Need atleast one dynamic region'
+          message: 'Need atleast one dynamic region( [ui-region] )'
         });
       }
     }
@@ -314,7 +314,8 @@ var __hasProp = {}.hasOwnProperty,
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
-        stateParams: this._stateParams
+        stateParams: this._stateParams,
+        stateName: this._state.get('name')
       });
       this._region.setController(_ctrlClassName);
       this._region.setControllerStateParams(this._stateParams);

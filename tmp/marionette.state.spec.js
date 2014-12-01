@@ -483,7 +483,8 @@ describe('Marionette.StateProcessor', function() {
       it('must run controller with state params', function() {
         return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
           region: this.app.dynamicRegion,
-          stateParams: []
+          stateParams: [],
+          stateName: this.state.get('name')
         });
       });
       it('must return the promise', function() {
@@ -520,7 +521,8 @@ describe('Marionette.StateProcessor', function() {
         return it('must run controller with state params', function() {
           return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
             region: jasmine.any(Marionette.Region),
-            stateParams: [12]
+            stateParams: [12],
+            stateName: this.state.get('name')
           });
         });
       });

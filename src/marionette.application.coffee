@@ -1,5 +1,5 @@
 _.extend Marionette.Application::,
-	
+
 	start : (options = {})->
 		@_detectRegions()
 		@triggerMethod 'before:start', options
@@ -7,7 +7,7 @@ _.extend Marionette.Application::,
 		@triggerMethod 'start', options
 
 	_detectRegions : ->
-		_possibleRegions = 
+		_possibleRegions =
 		$('[ui-region]').each (index, region)=>
 			regionName = $(region).attr 'ui-region'
 			if _.isEmpty regionName
@@ -18,5 +18,5 @@ _.extend Marionette.Application::,
 			@_regionManager.addRegion regionName, selector : $(region)
 
 		if _.isUndefined @dynamicRegion
-			throw new Marionette.Error 
-							message : 'Need atleast one dynamic region'
+			throw new Marionette.Error
+							message : 'Need atleast one dynamic region( [ui-region] )'

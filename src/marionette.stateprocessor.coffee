@@ -34,6 +34,7 @@ class Marionette.StateProcessor extends Marionette.Object
 		@_ctrlInstance = ctrlInstance = new CtrlClass
 											region : _region
 											stateParams : @_stateParams
+											stateName : @_state.get 'name'
 
 		@_region.setController _ctrlClassName
 		@_region.setControllerStateParams @_stateParams

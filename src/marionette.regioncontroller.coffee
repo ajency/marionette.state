@@ -12,7 +12,6 @@ class Marionette.RegionController extends Marionette.Controller
 		super options
 
 	show : (view)->
-
 		if view instanceof Backbone.View isnt true
 			throw new Marionette.Error
 				message: 'View instance is not valid Backbone.View'

@@ -38,7 +38,7 @@
 	"use strict"
 
 	_.extend Marionette.Application::,
-		
+	
 		start : (options = {})->
 			@_detectRegions()
 			@triggerMethod 'before:start', options
@@ -46,7 +46,7 @@
 			@triggerMethod 'start', options
 	
 		_detectRegions : ->
-			_possibleRegions = 
+			_possibleRegions =
 			$('[ui-region]').each (index, region)=>
 				regionName = $(region).attr 'ui-region'
 				if _.isEmpty regionName
@@ -57,8 +57,9 @@
 				@_regionManager.addRegion regionName, selector : $(region)
 	
 			if _.isUndefined @dynamicRegion
-				throw new Marionette.Error 
-								message : 'Need atleast one dynamic region'
+				throw new Marionette.Error
+								message : 'Need atleast one dynamic region( [ui-region] )'
+	
 	_.extend Marionette.LayoutView::,
 		
 		render: ->
@@ -130,7 +131,6 @@
 			super options
 	
 		show : (view)->
-	
 			if view instanceof Backbone.View isnt true
 				throw new Marionette.Error
 					message: 'View instance is not valid Backbone.View'
@@ -280,6 +280,7 @@
 			@_ctrlInstance = ctrlInstance = new CtrlClass
 												region : _region
 												stateParams : @_stateParams
+												stateName : @_state.get 'name'
 	
 			@_region.setController _ctrlClassName
 			@_region.setControllerStateParams @_stateParams

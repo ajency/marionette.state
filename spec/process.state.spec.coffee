@@ -71,6 +71,7 @@ describe 'Marionette.StateProcessor', ->
 				expect(@StateCtrl::initialize).toHaveBeenCalledWith
 														region : @app.dynamicRegion
 														stateParams : []
+														stateName : @state.get 'name'
 
 			it 'must return the promise', ->
 				expect(@promise.done).toEqual jasmine.any Function
@@ -106,6 +107,7 @@ describe 'Marionette.StateProcessor', ->
 					expect(@StateCtrl::initialize).toHaveBeenCalledWith
 															region : jasmine.any Marionette.Region
 															stateParams : [12]
+															stateName : @state.get 'name'
 
 		describe 'when the same controller is run again', ->
 			beforeEach ->
