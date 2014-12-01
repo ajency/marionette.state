@@ -1,14 +1,15 @@
 class Marionette.AppStates extends Backbone.Router
 
 	constructor : (options = {})->
-
 		super options
 
-		if not options.app or ( options.app instanceof Marionette.Application isnt true)
+		app = options.app
+
+		if app instanceof Marionette.Application isnt true
 			throw new Marionette.Error
 					message : 'Application instance needed'
 
-		@_app  = options.app
+		@_app  = app
 		@_statesCollection = window.statesCollection
 
 		# listen to route event of the router

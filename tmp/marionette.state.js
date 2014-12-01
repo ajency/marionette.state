@@ -339,17 +339,19 @@ var __hasProp = {}.hasOwnProperty,
     __extends(AppStates, _super);
 
     function AppStates(options) {
+      var app;
       if (options == null) {
         options = {};
       }
       this._getParentStates = __bind(this._getParentStates, this);
       AppStates.__super__.constructor.call(this, options);
-      if (!options.app || (options.app instanceof Marionette.Application !== true)) {
+      app = options.app;
+      if (app instanceof Marionette.Application !== true) {
         throw new Marionette.Error({
           message: 'Application instance needed'
         });
       }
-      this._app = options.app;
+      this._app = app;
       this._statesCollection = window.statesCollection;
       this.on('route', this._processStateOnRoute, this);
       this._registerStates();
