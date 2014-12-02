@@ -428,11 +428,11 @@ var __hasProp = {}.hasOwnProperty,
             data = {};
             data.state = state;
             data.params = [];
-            if (stateModel.hasParams()) {
+            if (state.hasParams()) {
               data.params = _.flatten([args[k]]);
               k++;
             }
-            if (!stateModel.isChildState()) {
+            if (!state.isChildState()) {
               data.regionContainer = _this._app;
             }
             return statesToProcess.unshift(data);

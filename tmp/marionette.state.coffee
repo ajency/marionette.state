@@ -376,10 +376,10 @@
 					data = {}
 					data.state = state
 					data.params = []
-					if stateModel.hasParams()
+					if state.hasParams()
 						data.params = _.flatten [args[k]]
 						k++
-					if not stateModel.isChildState()
+					if not state.isChildState()
 						data.regionContainer = @_app
 	
 					statesToProcess.unshift data
