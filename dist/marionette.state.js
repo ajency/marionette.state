@@ -407,6 +407,7 @@ var __hasProp = {}.hasOwnProperty,
       if (args == null) {
         args = [];
       }
+      args.pop();
       stateModel = this._statesCollection.get(name);
       statesToProcess = [];
       data = {

@@ -52,7 +52,7 @@ class Marionette.AppStates extends Backbone.Router
 
 
 	_processStateOnRoute : (name, args = [])->
-
+		args.pop()
 		stateModel = @_statesCollection.get name
 		statesToProcess = []
 

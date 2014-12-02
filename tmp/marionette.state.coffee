@@ -353,7 +353,7 @@
 	
 	
 		_processStateOnRoute : (name, args = [])->
-	
+			args.pop()
 			stateModel = @_statesCollection.get name
 			statesToProcess = []
 	
