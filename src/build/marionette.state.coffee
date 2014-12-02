@@ -7,7 +7,7 @@
 # --------------------------------------------------
 # Version: v0.1.0
 #
-# Copyright (c) 2014 Suraj Air
+# Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license
 #
 
