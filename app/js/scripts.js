@@ -1,4 +1,4 @@
-var HeaderCtrl, LeftNavCtrl, LoginCtrl, RootCtrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
+var HeaderCtrl, LeftNavCtrl, LoginCtrl, RootCtrl, SocitiesListCtrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -30,7 +30,7 @@ LoginCtrl = (function(_super) {
 
   LoginCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div><a href="#/root/universities">Go</a></div>'
+      template: '<div><a href="#/universities">Go</a></div>'
     }));
   };
 
@@ -81,11 +81,28 @@ UniversitieslistCtrl = (function(_super) {
 
   UniversitieslistCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div>Awesome UniversitieslistCtrl <a href="#/root/universities/23">Go</a></div>'
+      template: '<div>Awesome UniversitieslistCtrl <a href="#/universities/23">Go</a> <a href="#/socities">socities</a></div>'
     }));
   };
 
   return UniversitieslistCtrl;
+
+})(Marionette.RegionController);
+
+SocitiesListCtrl = (function(_super) {
+  __extends(SocitiesListCtrl, _super);
+
+  function SocitiesListCtrl() {
+    return SocitiesListCtrl.__super__.constructor.apply(this, arguments);
+  }
+
+  SocitiesListCtrl.prototype.initialize = function() {
+    return this.show(new Marionette.ItemView({
+      template: '<div>Awesome SocitiesListCtrl <a href="#/universities/23">Go</a></div>'
+    }));
+  };
+
+  return SocitiesListCtrl;
 
 })(Marionette.RegionController);
 
@@ -98,7 +115,7 @@ UniversitiesSingleCtrl = (function(_super) {
 
   UniversitiesSingleCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div>Awesome UniversitiesSingleCtrl <a href="#/root/universities">Go</a></div>'
+      template: '<div>Awesome UniversitiesSingleCtrl <a href="#/universities">Go</a></div>'
     }));
   };
 
@@ -120,7 +137,7 @@ jQuery(document).ready(function($) {
         url: '/login'
       },
       'root': {
-        url: '/root',
+        url: '/',
         sections: {
           'header': {
             ctrl: 'HeaderCtrl'
@@ -137,6 +154,10 @@ jQuery(document).ready(function($) {
       'universitiesSingle': {
         parent: 'root',
         url: '/universities/:id'
+      },
+      'socitiesList': {
+        parent: 'root',
+        url: '/socities'
       }
     };
 

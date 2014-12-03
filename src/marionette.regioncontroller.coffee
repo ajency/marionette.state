@@ -20,5 +20,5 @@ class Marionette.RegionController extends Marionette.Controller
 		@listenTo @_view, 'show', =>
 					_.delay =>
 						@trigger 'view:rendered', @_view
-					, 100
+					, 10
 		@_region.show view

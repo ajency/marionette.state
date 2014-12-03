@@ -30,6 +30,8 @@ class Marionette.State extends Backbone.Model
 
 		_.each parentStates, (pState)=>
 			computedUrl = "#{pState.get('computed_url')}/#{computedUrl}"
+			if computedUrl.charAt(0) is '/'
+				computedUrl = computedUrl.substring 1
 			urlToArray.unshift pState.get('url_to_array')[0]
 
 		state.set "computed_url", computedUrl

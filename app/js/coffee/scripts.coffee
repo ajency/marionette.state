@@ -8,7 +8,7 @@ class RootCtrl extends Marionette.RegionController
 
 class LoginCtrl extends Marionette.RegionController
 	initialize : ->
-		@show new Marionette.ItemView template : '<div><a href="#/root/universities">Go</a></div>'
+		@show new Marionette.ItemView template : '<div><a href="#/universities">Go</a></div>'
 
 class HeaderCtrl extends Marionette.RegionController
 	initialize : ->
@@ -21,11 +21,17 @@ class LeftNavCtrl extends Marionette.RegionController
 class UniversitieslistCtrl extends Marionette.RegionController
 	initialize : ->
 		@show new Marionette.ItemView template : '<div>Awesome UniversitieslistCtrl
-												<a href="#/root/universities/23">Go</a></div>'
+												<a href="#/universities/23">Go</a>
+												<a href="#/socities">socities</a></div>'
+
+class SocitiesListCtrl extends Marionette.RegionController
+	initialize : ->
+		@show new Marionette.ItemView template : '<div>Awesome SocitiesListCtrl
+												<a href="#/universities/23">Go</a></div>'
 
 class UniversitiesSingleCtrl extends Marionette.RegionController
 	initialize : ->
-		@show new Marionette.ItemView template : '<div>Awesome UniversitiesSingleCtrl <a href="#/root/universities">Go</a></div>'
+		@show new Marionette.ItemView template : '<div>Awesome UniversitiesSingleCtrl <a href="#/universities">Go</a></div>'
 
 
 jQuery(document).ready ($)->
@@ -36,7 +42,7 @@ jQuery(document).ready ($)->
 		appStates :
 			'login' : url : '/login'
 			'root' :
-				url : '/root'
+				url : '/'
 				sections :
 					'header' :
 						ctrl : 'HeaderCtrl'
@@ -48,6 +54,9 @@ jQuery(document).ready ($)->
 			'universitiesSingle' :
 				parent : 'root'
 				url : '/universities/:id'
+			'socitiesList' :
+				parent : 'root'
+				url : '/socities'
 
 	App.addInitializer ->
 		a = new AppStates app : App

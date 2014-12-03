@@ -141,7 +141,7 @@
 			@listenTo @_view, 'show', =>
 						_.delay =>
 							@trigger 'view:rendered', @_view
-						, 100
+						, 10
 			@_region.show view
 	
 	
@@ -176,6 +176,8 @@
 	
 			_.each parentStates, (pState)=>
 				computedUrl = "#{pState.get('computed_url')}/#{computedUrl}"
+				if computedUrl.charAt(0) is '/'
+					computedUrl = computedUrl.substring 1
 				urlToArray.unshift pState.get('url_to_array')[0]
 	
 			state.set "computed_url", computedUrl
@@ -249,7 +251,6 @@
 	
 		_runCtrl : (_ctrlClassName, _region)->
 			deferred = Marionette.Deferred()
-			console.info _ctrlClassName, @_stateParams
 			currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
 			ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
@@ -274,11 +275,6 @@
 	
 		getStatus : ->
 			@_deferred.state()
-	
-		_onViewRendered : =>
-	
-	
-	
 	
 	class Marionette.AppStates extends Backbone.Router
 	
@@ -365,7 +361,6 @@
 	
 					statesToProcess.unshift data
 	
-			console.log statesToProcess
 			currentStateProcessor = Marionette.Deferred()
 			processState = (index, regionContainer)->
 				stateData = statesToProcess[index]

@@ -14,6 +14,7 @@
  */
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 (function(root, factory) {
@@ -36,6 +37,7 @@ var __hasProp = {}.hasOwnProperty,
 })(this, function(root, Backbone, _, Marionette) {
   "use strict";
   _.extend(Marionette.Application.prototype, {
+    navigate: Backbone.Router.prototype.navigate,
     start: function(options) {
       if (options == null) {
         options = {};
@@ -164,7 +166,7 @@ var __hasProp = {}.hasOwnProperty,
         return function() {
           return _.delay(function() {
             return _this.trigger('view:rendered', _this._view);
-          }, 100);
+          }, 10);
         };
       })(this));
       return this._region.show(view);
@@ -222,6 +224,9 @@ var __hasProp = {}.hasOwnProperty,
       _.each(parentStates, (function(_this) {
         return function(pState) {
           computedUrl = "" + (pState.get('computed_url')) + "/" + computedUrl;
+          if (computedUrl.charAt(0) === '/') {
+            computedUrl = computedUrl.substring(1);
+          }
           return urlToArray.unshift(pState.get('url_to_array')[0]);
         };
       })(this));
@@ -277,7 +282,6 @@ var __hasProp = {}.hasOwnProperty,
     __extends(StateProcessor, _super);
 
     function StateProcessor() {
-      this._onViewRendered = __bind(this._onViewRendered, this);
       return StateProcessor.__super__.constructor.apply(this, arguments);
     }
 
@@ -299,17 +303,51 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, _ctrlClassName, _region;
+      var promise, sections, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      this._region = _region = this._regionContainer.dynamicRegion;
+      sections = _region = this._regionContainer.dynamicRegion;
+      promise = this._runCtrl(_ctrlClassName, _region);
+      promise.done((function(_this) {
+        return function(ctrl) {
+          var promises, _regionContainer;
+          promises = [];
+          _regionContainer = ctrl._region.currentView;
+          if (_this._state.has('sections')) {
+            sections = _this._state.get('sections');
+            _.each(sections, function(section, regionName) {
+              _ctrlClassName = section['ctrl'];
+              if (regionName === '@') {
+                _region = _regionContainer.dynamicRegion;
+              } else {
+                _region = _regionContainer["" + regionName + "Region"];
+              }
+              return promises.push(_this._runCtrl(_ctrlClassName, _region));
+            });
+          }
+          return $.when.apply($, promises).done(function() {
+            var ctrls;
+            ctrls = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+            _this._state.set('status', 'resolved');
+            return _this._deferred.resolve(ctrl);
+          });
+        };
+      })(this));
+      return this._deferred.promise();
+    };
+
+    StateProcessor.prototype._runCtrl = function(_ctrlClassName, _region) {
+      var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, deferred;
+      deferred = Marionette.Deferred();
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
       if (currentCtrlClass === _ctrlClassName && arrayCompare) {
-        this._ctrlInstance = ctrlInstance = this._region._ctrlInstance;
-        this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
+        this._ctrlInstance = ctrlInstance = _region._ctrlInstance;
+        this.listenTo(ctrlInstance, 'view:rendered', function() {
+          return deferred.resolve(ctrlInstance);
+        });
         ctrlInstance.trigger("view:rendered", ctrlInstance._view);
-        return this._deferred.promise();
+        return deferred.promise();
       }
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
@@ -317,20 +355,17 @@ var __hasProp = {}.hasOwnProperty,
         stateParams: this._stateParams,
         stateName: this._state.get('name')
       });
-      this._region.setController(_ctrlClassName);
-      this._region.setControllerStateParams(this._stateParams);
-      this._region.setControllerInstance(ctrlInstance);
-      this.listenTo(ctrlInstance, 'view:rendered', this._onViewRendered);
-      return this._deferred.promise();
+      _region.setController(_ctrlClassName);
+      _region.setControllerStateParams(this._stateParams);
+      _region.setControllerInstance(ctrlInstance);
+      this.listenTo(ctrlInstance, 'view:rendered', function() {
+        return deferred.resolve(ctrlInstance);
+      });
+      return deferred.promise();
     };
 
     StateProcessor.prototype.getStatus = function() {
       return this._deferred.state();
-    };
-
-    StateProcessor.prototype._onViewRendered = function() {
-      this._state.set('status', 'resolved');
-      return this._deferred.resolve(this._ctrlInstance);
     };
 
     return StateProcessor;

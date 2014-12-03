@@ -14,8 +14,8 @@
  */
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __slice = [].slice;
+  __slice = [].slice,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 (function(root, factory) {
   var Backbone, Marionette, _;
@@ -166,7 +166,7 @@ var __hasProp = {}.hasOwnProperty,
         return function() {
           return _.delay(function() {
             return _this.trigger('view:rendered', _this._view);
-          }, 100);
+          }, 10);
         };
       })(this));
       return this._region.show(view);
@@ -224,6 +224,9 @@ var __hasProp = {}.hasOwnProperty,
       _.each(parentStates, (function(_this) {
         return function(pState) {
           computedUrl = "" + (pState.get('computed_url')) + "/" + computedUrl;
+          if (computedUrl.charAt(0) === '/') {
+            computedUrl = computedUrl.substring(1);
+          }
           return urlToArray.unshift(pState.get('url_to_array')[0]);
         };
       })(this));
@@ -279,7 +282,6 @@ var __hasProp = {}.hasOwnProperty,
     __extends(StateProcessor, _super);
 
     function StateProcessor() {
-      this._onViewRendered = __bind(this._onViewRendered, this);
       return StateProcessor.__super__.constructor.apply(this, arguments);
     }
 
@@ -336,7 +338,6 @@ var __hasProp = {}.hasOwnProperty,
     StateProcessor.prototype._runCtrl = function(_ctrlClassName, _region) {
       var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, deferred;
       deferred = Marionette.Deferred();
-      console.info(_ctrlClassName, this._stateParams);
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
@@ -366,8 +367,6 @@ var __hasProp = {}.hasOwnProperty,
     StateProcessor.prototype.getStatus = function() {
       return this._deferred.state();
     };
-
-    StateProcessor.prototype._onViewRendered = function() {};
 
     return StateProcessor;
 
@@ -476,7 +475,6 @@ var __hasProp = {}.hasOwnProperty,
           };
         })(this));
       }
-      console.log(statesToProcess);
       currentStateProcessor = Marionette.Deferred();
       processState = function(index, regionContainer) {
         var processor, promise, stateData;

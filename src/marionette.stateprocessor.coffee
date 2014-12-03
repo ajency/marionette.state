@@ -43,7 +43,6 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	_runCtrl : (_ctrlClassName, _region)->
 		deferred = Marionette.Deferred()
-		console.info _ctrlClassName, @_stateParams
 		currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
 		ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 		arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
@@ -68,8 +67,3 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	getStatus : ->
 		@_deferred.state()
-
-	_onViewRendered : =>
-
-
-

@@ -83,7 +83,6 @@ class Marionette.AppStates extends Backbone.Router
 
 				statesToProcess.unshift data
 
-		console.log statesToProcess
 		currentStateProcessor = Marionette.Deferred()
 		processState = (index, regionContainer)->
 			stateData = statesToProcess[index]
