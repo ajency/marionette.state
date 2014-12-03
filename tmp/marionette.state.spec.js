@@ -439,7 +439,7 @@ describe('Marionette.StateProcessor', function() {
         return expect(this.stateProcessor._regionContainer).toEqual(this.app);
       });
     });
-    describe('When processing a state', function() {
+    return describe('When processing a state', function() {
       beforeEach(function() {
         this.StateCtrl = (function(_super) {
           __extends(StateCtrl, _super);
@@ -471,83 +471,8 @@ describe('Marionette.StateProcessor', function() {
         spyOn(this.stateProcessor, 'listenTo').and.callThrough();
         return this.promise = this.stateProcessor.process();
       });
-      it('must have _ctrlClass defined', function() {
+      return it('must have _ctrlClass defined', function() {
         return expect(this.stateProcessor._ctrlClass).toEqual(this.StateCtrl);
-      });
-      it('must listen to "view:rendered" event of ctrl instance', function() {
-        return expect(this.stateProcessor.listenTo).toHaveBeenCalledWith(jasmine.any(Marionette.RegionController), 'view:rendered', this.stateProcessor._onViewRendered);
-      });
-      it('must have _region defined', function() {
-        return expect(this.stateProcessor._region).toEqual(this.app.dynamicRegion);
-      });
-      it('must run controller with state params', function() {
-        return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
-          region: this.app.dynamicRegion,
-          stateParams: [],
-          stateName: this.state.get('name')
-        });
-      });
-      it('must return the promise', function() {
-        return expect(this.promise.done).toEqual(jasmine.any(Function));
-      });
-      it('region must store the name of ctrl with params', function() {
-        expect(this.setCtrlSpy).toHaveBeenCalledWith('StateOneCtrl');
-        return expect(this.setCtrlParamSpy).toHaveBeenCalledWith([]);
-      });
-      describe('when view is rendered in region', function() {
-        beforeEach(function() {
-          return this.stateProcessor._ctrlInstance.trigger('view:rendered', new Marionette.ItemView);
-        });
-        return it('must resovle with controller instance', function(done) {
-          return this.promise.done(function(ctrl) {
-            return expect(ctrl).toEqual(jasmine.any(Marionette.RegionController));
-          }).always(function() {
-            return done();
-          });
-        });
-      });
-      return describe('when processing state with params', function() {
-        beforeEach(function() {
-          this.paramStateProcessor = new Marionette.StateProcessor({
-            state: this.state,
-            regionContainer: this.app,
-            stateParams: [12]
-          });
-          return this.paramStateProcessor.process();
-        });
-        it('must store the state params', function() {
-          return expect(this.paramStateProcessor._stateParams).toEqual([12]);
-        });
-        return it('must run controller with state params', function() {
-          return expect(this.StateCtrl.prototype.initialize).toHaveBeenCalledWith({
-            region: jasmine.any(Marionette.Region),
-            stateParams: [12],
-            stateName: this.state.get('name')
-          });
-        });
-      });
-    });
-    return describe('when the same controller is run again', function() {
-      beforeEach(function() {
-        this.app.dynamicRegion = new Marionette.Region({
-          el: $('[ui-region]')
-        });
-        this.paramStateProcessor = new Marionette.StateProcessor({
-          state: this.state,
-          regionContainer: this.app,
-          stateParams: [12]
-        });
-        spyOn(Marionette.RegionControllers.prototype, 'getRegionController').and.callThrough();
-        this.paramStateProcessor.process();
-        this.ctrl = this.app.dynamicRegion._ctrlInstance;
-        spyOn(this.ctrl, 'trigger').and.callThrough();
-        return this.paramStateProcessor.process();
-      });
-      it('must be called only once', function() {
-        return expect(Marionette.RegionControllers.prototype.getRegionController.calls.count()).toEqual(1);
-      });
-      return it('must trigger the view:rendered event on ctlr', function() {
-        return expect(this.ctrl.trigger).toHaveBeenCalled();
       });
     });
   });

@@ -51,13 +51,13 @@ module.exports = (grunt) ->
 					"src/**/*.coffee"
 					"spec/**/*.coffee"
 				]
-				tasks: ["preprocess:build","preprocess:specs","coffee:compile", "jasmine:test"]
+				tasks: ["preprocess:build","coffee:compile"]
 
 
 	grunt.registerTask "dev","Start development", [
 		"preprocess"
 		"coffee:compile"
-		"jasmine:test"
+		#"jasmine:test"
 		"watch"
 	]
 

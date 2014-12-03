@@ -1,5 +1,7 @@
 _.extend Marionette.Application::,
 
+	navigate : Backbone.Router::navigate
+
 	start : (options = {})->
 		@_detectRegions()
 		@triggerMethod 'before:start', options
