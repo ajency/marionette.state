@@ -39,6 +39,8 @@
 
 	_.extend Marionette.Application::,
 	
+		navigate : Backbone.Router::navigate
+	
 		start : (options = {})->
 			@_detectRegions()
 			@triggerMethod 'before:start', options
@@ -200,48 +202,6 @@
 			@add data
 	
 	
-		# addState : (name, definition = {})->
-		# 	data = name : name
-		# 	_.defaults  data, definition
-		# 	@add data
-		# 	stateModel = @get name
-	
-		# 	# controller
-		# 	if _.isEmpty stateModel.get 'ctrl'
-		# 		stateModel.set 'ctrl', "#{@sentenceCase name}Ctrl"
-	
-		# 	# state computed URL
-		# 	computedUrl = stateModel.get 'url'
-		# 	computeUrl = (state)=>
-		# 		parent = state.get 'parent'
-		# 		parentState = @get parent
-		# 		computedUrl = "#{parentState.get 'url'}#{computedUrl}"
-		# 		if false isnt parentState.get 'parent'
-		# 			computeUrl parentState
-	
-		# 	if false isnt stateModel.get 'parent'
-		# 		computeUrl stateModel
-	
-		# 	stateModel.set 'computed_url', computedUrl.substring 1 # remove first '/'
-	
-		# 	# state URL array
-		# 	urlArray = []
-		# 	urlArray.push stateModel.get 'url'
-		# 	urlToArray = (state)=>
-		# 		parent = state.get 'parent'
-		# 		parentState = @get parent
-		# 		urlArray.push parentState.get 'url'
-		# 		if false isnt parentState.get 'parent'
-		# 			urlToArray parentState
-	
-		# 	if false isnt stateModel.get 'parent'
-		# 		urlToArray stateModel
-	
-		# 	stateModel.set 'url_array', urlArray.reverse()
-	
-		# 	stateModel
-	
-	
 	window.statesCollection = new Marionette.StateCollection
 	
 	
@@ -263,17 +223,41 @@
 	
 		process : ->
 			_ctrlClassName = @_state.get 'ctrl'
-			@_region = _region = @_regionContainer.dynamicRegion
+			sections =
 	
-			#get current cotrl
+			_region = @_regionContainer.dynamicRegion
+	
+			promise =  @_runCtrl _ctrlClassName, _region
+			promise.done (ctrl)=>
+				promises = []
+				_regionContainer = ctrl._region.currentView
+				if @_state.has('sections')
+					sections = @_state.get('sections')
+					_.each sections, (section, regionName)=>
+						_ctrlClassName = section['ctrl']
+						if regionName is '@'
+							@_region = _region = _regionContainer.dynamicRegion
+						else
+							@_region = _region = _regionContainer["#{regionName}Region"]
+						promises.push @_runCtrl _ctrlClassName, _region
+	
+				$.when(promises...).done (ctrls...)=>
+					@_state.set 'status', 'resolved'
+					@_deferred.resolve ctrl
+	
+			@_deferred.promise()
+	
+		_runCtrl : (_ctrlClassName, _region)->
+			deferred = Marionette.Deferred()
+			console.info _ctrlClassName, @_stateParams
 			currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
 			ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
 			if currentCtrlClass is _ctrlClassName and arrayCompare
 				@_ctrlInstance = ctrlInstance = @_region._ctrlInstance
-				@listenTo ctrlInstance, 'view:rendered', @_onViewRendered
+				@listenTo ctrlInstance, 'view:rendered', -> deferred.resolve ctrlInstance
 				ctrlInstance.trigger "view:rendered", ctrlInstance._view
-				return @_deferred.promise()
+				return deferred.promise()
 	
 			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 	
@@ -282,19 +266,16 @@
 												stateParams : @_stateParams
 												stateName : @_state.get 'name'
 	
-			@_region.setController _ctrlClassName
-			@_region.setControllerStateParams @_stateParams
-			@_region.setControllerInstance ctrlInstance
-			@listenTo ctrlInstance, 'view:rendered', @_onViewRendered
-	
-			@_deferred.promise()
+			_region.setController _ctrlClassName
+			_region.setControllerStateParams @_stateParams
+			_region.setControllerInstance ctrlInstance
+			@listenTo ctrlInstance, 'view:rendered', -> deferred.resolve ctrlInstance
+			return deferred.promise()
 	
 		getStatus : ->
 			@_deferred.state()
 	
 		_onViewRendered : =>
-			@_state.set 'status', 'resolved'
-			@_deferred.resolve @_ctrlInstance
 	
 	
 	
@@ -353,7 +334,7 @@
 	
 	
 		_processStateOnRoute : (name, args = [])->
-	
+			args.pop()
 			stateModel = @_statesCollection.get name
 			statesToProcess = []
 	
@@ -376,14 +357,15 @@
 					data = {}
 					data.state = state
 					data.params = []
-					if stateModel.hasParams()
+					if state.hasParams()
 						data.params = _.flatten [args[k]]
 						k++
-					if not stateModel.isChildState()
+					if not state.isChildState()
 						data.regionContainer = @_app
 	
 					statesToProcess.unshift data
 	
+			console.log statesToProcess
 			currentStateProcessor = Marionette.Deferred()
 			processState = (index, regionContainer)->
 				stateData = statesToProcess[index]
