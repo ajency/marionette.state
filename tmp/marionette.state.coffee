@@ -365,9 +365,9 @@
 			processState = (index, regionContainer)->
 				stateData = statesToProcess[index]
 				processor = new Marionette.StateProcessor
-								state : stateData.state
-								regionContainer : regionContainer
-								stateParams : stateData.params
+									state : stateData.state
+									regionContainer : regionContainer
+									stateParams : stateData.params
 				promise = processor.process()
 				promise.done (ctrl)->
 					if index is statesToProcess.length - 1

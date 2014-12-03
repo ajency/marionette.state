@@ -1,4 +1,4 @@
-var HeaderCtrl, LeftNavCtrl, LoginCtrl, RootCtrl, SocitiesListCtrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
+var HeaderCtrl, LeftNavCtrl, LoginCtrl, RootCtrl, SocialSingle, SocitiesListCtrl, SocitiesSingleCtrl, SocitiesTab1Ctrl, SocitiesTab2Ctrl, SocitiesTab3Ctrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -30,7 +30,7 @@ LoginCtrl = (function(_super) {
 
   LoginCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div><a href="#/universities">Go</a></div>'
+      template: '#login-template'
     }));
   };
 
@@ -47,7 +47,7 @@ HeaderCtrl = (function(_super) {
 
   HeaderCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div>Awesome HeaderCtrl</div>'
+      template: '<div><nav role="navigation" class="navbar navbar-default navbar-static-top"> <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. --> <div class="container-fluid"> <div class="navbar-header"> <button data-target="#bs-example-navbar-collapse-8" data-toggle="collapse" class="navbar-toggle collapsed" type="button"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button> <a href="#" class="navbar-brand">Brand</a> </div> <!-- Collect the nav links, forms, and other content for toggling --> <div id="bs-example-navbar-collapse-8" class="collapse navbar-collapse"> <ul class="nav navbar-nav"> <li class="active"><a href="#">Home</a></li> <li><a href="#">Link</a></li> <li><a href="#">Link</a></li> </ul> </div><!-- /.navbar-collapse --> </div> </nav></div>'
     }));
   };
 
@@ -64,7 +64,7 @@ LeftNavCtrl = (function(_super) {
 
   LeftNavCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
-      template: '<div>Awesome LeftNav ctrl</div>'
+      template: '<div><ul style="max-width: 300px;" class="nav nav-pills nav-stacked"> <li class="active" role="presentation"><a href="#/universities/23">universities</a></li> <li role="presentation"><a href="#/socities">socities</a></li> <li role="presentation"><a href="#/socities/23">socities one</a></li> </ul></div>'
     }));
   };
 
@@ -97,12 +97,98 @@ SocitiesListCtrl = (function(_super) {
   }
 
   SocitiesListCtrl.prototype.initialize = function() {
+    this.abc = '123';
     return this.show(new Marionette.ItemView({
       template: '<div>Awesome SocitiesListCtrl <a href="#/universities/23">Go</a></div>'
     }));
   };
 
   return SocitiesListCtrl;
+
+})(Marionette.RegionController);
+
+SocialSingle = (function(_super) {
+  __extends(SocialSingle, _super);
+
+  function SocialSingle() {
+    return SocialSingle.__super__.constructor.apply(this, arguments);
+  }
+
+  SocialSingle.prototype.template = '#socity-single-template';
+
+  SocialSingle.prototype.onShow = function() {
+    return this.$el.find('.nav-pills li a').first().trigger('click');
+  };
+
+  return SocialSingle;
+
+})(Marionette.LayoutView);
+
+SocitiesSingleCtrl = (function(_super) {
+  __extends(SocitiesSingleCtrl, _super);
+
+  function SocitiesSingleCtrl() {
+    return SocitiesSingleCtrl.__super__.constructor.apply(this, arguments);
+  }
+
+  SocitiesSingleCtrl.prototype.initialize = function() {
+    var view;
+    view = new SocialSingle();
+    return this.show(view);
+  };
+
+  return SocitiesSingleCtrl;
+
+})(Marionette.RegionController);
+
+SocitiesTab1Ctrl = (function(_super) {
+  __extends(SocitiesTab1Ctrl, _super);
+
+  function SocitiesTab1Ctrl() {
+    return SocitiesTab1Ctrl.__super__.constructor.apply(this, arguments);
+  }
+
+  SocitiesTab1Ctrl.prototype.initialize = function() {
+    return this.show(new Marionette.ItemView({
+      template: '<div>Awesome SocitiesTab1Ctrl</div>'
+    }));
+  };
+
+  return SocitiesTab1Ctrl;
+
+})(Marionette.RegionController);
+
+SocitiesTab2Ctrl = (function(_super) {
+  __extends(SocitiesTab2Ctrl, _super);
+
+  function SocitiesTab2Ctrl() {
+    return SocitiesTab2Ctrl.__super__.constructor.apply(this, arguments);
+  }
+
+  SocitiesTab2Ctrl.prototype.initialize = function() {
+    return this.show(new Marionette.ItemView({
+      template: '<div>Awesome SocitiesTab2Ctrl</div>'
+    }));
+  };
+
+  return SocitiesTab2Ctrl;
+
+})(Marionette.RegionController);
+
+SocitiesTab3Ctrl = (function(_super) {
+  __extends(SocitiesTab3Ctrl, _super);
+
+  function SocitiesTab3Ctrl() {
+    return SocitiesTab3Ctrl.__super__.constructor.apply(this, arguments);
+  }
+
+  SocitiesTab3Ctrl.prototype.initialize = function() {
+    return this.show(new Marionette.ItemView({
+      template: '<div>Awesome SocitiesTab3Ctrl</div>'
+    }));
+  };
+
+  return SocitiesTab3Ctrl;
 
 })(Marionette.RegionController);
 
@@ -158,6 +244,22 @@ jQuery(document).ready(function($) {
       'socitiesList': {
         parent: 'root',
         url: '/socities'
+      },
+      'socitiesSingle': {
+        parent: 'root',
+        url: '/socities/:id'
+      },
+      'socitiesTab1': {
+        parent: 'socitiesSingle',
+        url: '/tab1'
+      },
+      'socitiesTab2': {
+        parent: 'socitiesSingle',
+        url: '/tab2'
+      },
+      'socitiesTab3': {
+        parent: 'socitiesSingle',
+        url: '/tab3'
       }
     };
 
@@ -165,11 +267,11 @@ jQuery(document).ready(function($) {
 
   })(Marionette.AppStates);
   App.addInitializer(function() {
-    var a;
-    a = new AppStates({
+    new AppStates({
       app: App
     });
-    return Backbone.history.start();
+    Backbone.history.start();
+    return App.navigate('/socities/23/tab3', true);
   });
   return App.start();
 });
