@@ -236,9 +236,9 @@
 					_.each sections, (section, regionName)=>
 						_ctrlClassName = section['ctrl']
 						if regionName is '@'
-							@_region = _region = _regionContainer.dynamicRegion
+							_region = _regionContainer.dynamicRegion
 						else
-							@_region = _region = _regionContainer["#{regionName}Region"]
+							_region = _regionContainer["#{regionName}Region"]
 						promises.push @_runCtrl _ctrlClassName, _region
 	
 				$.when(promises...).done (ctrls...)=>
@@ -254,7 +254,7 @@
 			ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
 			if currentCtrlClass is _ctrlClassName and arrayCompare
-				@_ctrlInstance = ctrlInstance = @_region._ctrlInstance
+				@_ctrlInstance = ctrlInstance = _region._ctrlInstance
 				@listenTo ctrlInstance, 'view:rendered', -> deferred.resolve ctrlInstance
 				ctrlInstance.trigger "view:rendered", ctrlInstance._view
 				return deferred.promise()

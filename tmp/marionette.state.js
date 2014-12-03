@@ -315,9 +315,9 @@ var __hasProp = {}.hasOwnProperty,
             _.each(sections, function(section, regionName) {
               _ctrlClassName = section['ctrl'];
               if (regionName === '@') {
-                _this._region = _region = _regionContainer.dynamicRegion;
+                _region = _regionContainer.dynamicRegion;
               } else {
-                _this._region = _region = _regionContainer["" + regionName + "Region"];
+                _region = _regionContainer["" + regionName + "Region"];
               }
               return promises.push(_this._runCtrl(_ctrlClassName, _region));
             });
@@ -341,7 +341,7 @@ var __hasProp = {}.hasOwnProperty,
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
       if (currentCtrlClass === _ctrlClassName && arrayCompare) {
-        this._ctrlInstance = ctrlInstance = this._region._ctrlInstance;
+        this._ctrlInstance = ctrlInstance = _region._ctrlInstance;
         this.listenTo(ctrlInstance, 'view:rendered', function() {
           return deferred.resolve(ctrlInstance);
         });
