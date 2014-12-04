@@ -1,6 +1,83 @@
-var HeaderCtrl, LeftNavCtrl, LoginCtrl, RootCtrl, SocialSingle, SocitiesListCtrl, SocitiesSingleCtrl, SocitiesTab1Ctrl, SocitiesTab2Ctrl, SocitiesTab3Ctrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
+var HeaderCtrl, HeaderView, LeftNavCtrl, LoginCtrl, RootCtrl, SocialSingle, SocitiesListCtrl, SocitiesSingleCtrl, SocitiesTab1Ctrl, SocitiesTab2Ctrl, SocitiesTab3Ctrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+window.userData = {
+  "ID": "1",
+  "user_login": "admin",
+  "user_nicename": "admin nicename",
+  "user_email": "suraj@mailinator.com",
+  "user_url": "",
+  "user_registered": "2014-11-25 06:21:19",
+  "user_activation_key": "",
+  "user_status": "0",
+  "display_name": "admin displayname",
+  "caps": {
+    "switch_themes": true
+  },
+  "edit_themes": true,
+  "activate_plugins": true,
+  "edit_plugins": true,
+  "edit_users": true,
+  "edit_files": true,
+  "manage_options": true,
+  "moderate_comments": true,
+  "manage_categories": true,
+  "manage_links": true,
+  "upload_files": true,
+  "import": true,
+  "unfiltered_html": true,
+  "edit_posts": true,
+  "edit_others_posts": true,
+  "edit_published_posts": true,
+  "publish_posts": true,
+  "edit_pages": true,
+  "read": true,
+  "level_10": true,
+  "level_9": true,
+  "level_8": true,
+  "level_7": true,
+  "level_6": true,
+  "level_5": true,
+  "level_4": true,
+  "level_3": true,
+  "level_2": true,
+  "level_1": true,
+  "level_0": true,
+  "edit_others_pages": true,
+  "edit_published_pages": true,
+  "publish_pages": true,
+  "delete_pages": true,
+  "delete_others_pages": true,
+  "delete_published_pages": true,
+  "delete_posts": true,
+  "delete_others_posts": true,
+  "delete_published_posts": true,
+  "delete_private_posts": true,
+  "edit_private_posts": true,
+  "read_private_posts": true,
+  "delete_private_pages": true,
+  "edit_private_pages": true,
+  "read_private_pages": true,
+  "delete_users": true,
+  "create_users": true,
+  "unfiltered_upload": true,
+  "edit_dashboard": true,
+  "update_plugins": true,
+  "delete_plugins": true,
+  "install_plugins": true,
+  "update_themes": true,
+  "install_themes": true,
+  "update_core": true,
+  "list_users": true,
+  "remove_users": true,
+  "add_users": true,
+  "promote_users": true,
+  "edit_theme_options": true,
+  "delete_themes": true,
+  "export": true,
+  "administrator": true
+};
 
 Marionette.RegionControllers.prototype.controllers = window;
 
@@ -38,6 +115,19 @@ LoginCtrl = (function(_super) {
 
 })(Marionette.RegionController);
 
+HeaderView = (function(_super) {
+  __extends(HeaderView, _super);
+
+  function HeaderView() {
+    return HeaderView.__super__.constructor.apply(this, arguments);
+  }
+
+  HeaderView.prototype.template = '<div><nav role="navigation" class="navbar navbar-default navbar-static-top"> <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. --> <div class="container-fluid"> <div class="navbar-header"> <button data-target="#bs-example-navbar-collapse-8" data-toggle="collapse" class="navbar-toggle collapsed" type="button"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button> <a href="#" class="navbar-brand">Brand</a> </div> <div class="pull-right"> <div></div> </div> <!-- Collect the nav links, forms, and other content for toggling --> <div id="bs-example-navbar-collapse-8" class="collapse navbar-collapse"> <ul class="nav navbar-nav"> <li class="active"><a href="#">Home</a></li> <li><a href="#">Link</a></li> <li><a href="#">Link</a></li> </ul> </div><!-- /.navbar-collapse --> </div> </nav></div>';
+
+  return HeaderView;
+
+})(Marionette.ItemView);
+
 HeaderCtrl = (function(_super) {
   __extends(HeaderCtrl, _super);
 
@@ -46,8 +136,8 @@ HeaderCtrl = (function(_super) {
   }
 
   HeaderCtrl.prototype.initialize = function() {
-    return this.show(new Marionette.ItemView({
-      template: '<div><nav role="navigation" class="navbar navbar-default navbar-static-top"> <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. --> <div class="container-fluid"> <div class="navbar-header"> <button data-target="#bs-example-navbar-collapse-8" data-toggle="collapse" class="navbar-toggle collapsed" type="button"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button> <a href="#" class="navbar-brand">Brand</a> </div> <!-- Collect the nav links, forms, and other content for toggling --> <div id="bs-example-navbar-collapse-8" class="collapse navbar-collapse"> <ul class="nav navbar-nav"> <li class="active"><a href="#">Home</a></li> <li><a href="#">Link</a></li> <li><a href="#">Link</a></li> </ul> </div><!-- /.navbar-collapse --> </div> </nav></div>'
+    return this.show(new HeaderView({
+      model: App.currentUser
     }));
   };
 
@@ -219,9 +309,7 @@ jQuery(document).ready(function($) {
     }
 
     AppStates.prototype.appStates = {
-      'login': {
-        url: '/login'
-      },
+      'login': true,
       'root': {
         url: '/',
         sections: {

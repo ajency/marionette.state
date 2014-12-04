@@ -227,10 +227,17 @@
 			_ctrlClassName = @_state.get 'ctrl'
 			sections =
 	
+	
 			_region = @_regionContainer.dynamicRegion
 	
 			promise =  @_runCtrl _ctrlClassName, _region
 			promise.done (ctrl)=>
+	
+				if ctrl instanceof Marionette.RegionController isnt true
+					@_state.set 'status', 'resolved'
+					@_deferred.resolve ctrl
+					return
+	
 				promises = []
 				_regionContainer = ctrl._region.currentView
 				if @_state.has('sections')
@@ -251,6 +258,11 @@
 	
 		_runCtrl : (_ctrlClassName, _region)->
 			deferred = Marionette.Deferred()
+	
+			if _region instanceof Marionette.Region isnt true
+				deferred.resolve false
+				return deferred.promise()
+	
 			currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
 			ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 			arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
@@ -331,7 +343,41 @@
 	
 		_processStateOnRoute : (name, args = [])->
 			args.pop()
+			_app = @_app
+			@_app.triggerMethod 'change:state', name, args
+	
 			stateModel = @_statesCollection.get name
+			statesToProcess = @_getStatesToProcess stateModel, args
+	
+			currentStateProcessor = Marionette.Deferred()
+			processState = (index, regionContainer)->
+				stateData = statesToProcess[index]
+				_app.triggerMethod 'before:state:process', stateData.state
+				processor = new Marionette.StateProcessor
+									state : stateData.state
+									regionContainer : regionContainer
+									stateParams : stateData.params
+				promise = processor.process()
+				promise.done (ctrl)->
+					console.log ctrl
+					_app.triggerMethod 'after:state:process', stateData.state
+					if ctrl instanceof Marionette.RegionController isnt true
+						currentStateProcessor.resolve processor
+						return
+	
+					if index is statesToProcess.length - 1
+						currentStateProcessor.resolve processor
+	
+	
+					if index < statesToProcess.length - 1
+						index++
+						processState index, ctrl._view
+	
+			processState 0, @_app
+	
+			currentStateProcessor.promise()
+	
+		_getStatesToProcess : (stateModel, args)->
 			statesToProcess = []
 	
 			data =
@@ -361,25 +407,7 @@
 	
 					statesToProcess.unshift data
 	
-			currentStateProcessor = Marionette.Deferred()
-			processState = (index, regionContainer)->
-				stateData = statesToProcess[index]
-				processor = new Marionette.StateProcessor
-									state : stateData.state
-									regionContainer : regionContainer
-									stateParams : stateData.params
-				promise = processor.process()
-				promise.done (ctrl)->
-					if index is statesToProcess.length - 1
-						currentStateProcessor.resolve processor
-	
-					if index < statesToProcess.length - 1
-						index++
-						processState index, ctrl._view
-	
-			processState 0, @_app
-	
-			currentStateProcessor.promise()
+			statesToProcess
 	
 	
 	

@@ -53,7 +53,41 @@ class Marionette.AppStates extends Backbone.Router
 
 	_processStateOnRoute : (name, args = [])->
 		args.pop()
+		_app = @_app
+		@_app.triggerMethod 'change:state', name, args
+
 		stateModel = @_statesCollection.get name
+		statesToProcess = @_getStatesToProcess stateModel, args
+
+		currentStateProcessor = Marionette.Deferred()
+		processState = (index, regionContainer)->
+			stateData = statesToProcess[index]
+			_app.triggerMethod 'before:state:process', stateData.state
+			processor = new Marionette.StateProcessor
+								state : stateData.state
+								regionContainer : regionContainer
+								stateParams : stateData.params
+			promise = processor.process()
+			promise.done (ctrl)->
+				console.log ctrl
+				_app.triggerMethod 'after:state:process', stateData.state
+				if ctrl instanceof Marionette.RegionController isnt true
+					currentStateProcessor.resolve processor
+					return
+
+				if index is statesToProcess.length - 1
+					currentStateProcessor.resolve processor
+
+
+				if index < statesToProcess.length - 1
+					index++
+					processState index, ctrl._view
+
+		processState 0, @_app
+
+		currentStateProcessor.promise()
+
+	_getStatesToProcess : (stateModel, args)->
 		statesToProcess = []
 
 		data =
@@ -83,25 +117,7 @@ class Marionette.AppStates extends Backbone.Router
 
 				statesToProcess.unshift data
 
-		currentStateProcessor = Marionette.Deferred()
-		processState = (index, regionContainer)->
-			stateData = statesToProcess[index]
-			processor = new Marionette.StateProcessor
-								state : stateData.state
-								regionContainer : regionContainer
-								stateParams : stateData.params
-			promise = processor.process()
-			promise.done (ctrl)->
-				if index is statesToProcess.length - 1
-					currentStateProcessor.resolve processor
-
-				if index < statesToProcess.length - 1
-					index++
-					processState index, ctrl._view
-
-		processState 0, @_app
-
-		currentStateProcessor.promise()
+		statesToProcess
 
 
 

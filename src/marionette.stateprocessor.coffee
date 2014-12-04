@@ -19,10 +19,17 @@ class Marionette.StateProcessor extends Marionette.Object
 		_ctrlClassName = @_state.get 'ctrl'
 		sections =
 
+
 		_region = @_regionContainer.dynamicRegion
 
 		promise =  @_runCtrl _ctrlClassName, _region
 		promise.done (ctrl)=>
+
+			if ctrl instanceof Marionette.RegionController isnt true
+				@_state.set 'status', 'resolved'
+				@_deferred.resolve ctrl
+				return
+
 			promises = []
 			_regionContainer = ctrl._region.currentView
 			if @_state.has('sections')
@@ -43,6 +50,11 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	_runCtrl : (_ctrlClassName, _region)->
 		deferred = Marionette.Deferred()
+
+		if _region instanceof Marionette.Region isnt true
+			deferred.resolve false
+			return deferred.promise()
+
 		currentCtrlClass = if _region._ctrlClass then _region._ctrlClass else false
 		ctrlStateParams = if _region._ctrlStateParams then _region._ctrlStateParams else false
 		arrayCompare = JSON.stringify(ctrlStateParams) is JSON.stringify(@_stateParams)
