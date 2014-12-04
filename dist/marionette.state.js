@@ -6,7 +6,7 @@
  * Much like angular's ui-router
  * http://surajair.github.io/marionette.state
  * --------------------------------------------------
- * Version: v0.1.0
+ * Version: v0.1.1
  *
  * Copyright (c) 2014 Suraj Air, Ajency.in
  * Distributed under MIT license
@@ -310,6 +310,11 @@ var __hasProp = {}.hasOwnProperty,
       promise.done((function(_this) {
         return function(ctrl) {
           var promises, _regionContainer;
+          if (ctrl instanceof Marionette.RegionController !== true) {
+            _this._state.set('status', 'resolved');
+            _this._deferred.resolve(ctrl);
+            return;
+          }
           promises = [];
           _regionContainer = ctrl._region.currentView;
           if (_this._state.has('sections')) {
@@ -338,6 +343,10 @@ var __hasProp = {}.hasOwnProperty,
     StateProcessor.prototype._runCtrl = function(_ctrlClassName, _region) {
       var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, deferred;
       deferred = Marionette.Deferred();
+      if (_region instanceof Marionette.Region !== true) {
+        deferred.resolve(false);
+        return deferred.promise();
+      }
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
@@ -438,12 +447,48 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {
-      var currentStateProcessor, data, k, parentStates, processState, stateModel, statesToProcess;
+      var currentStateProcessor, processState, stateModel, statesToProcess, _app;
       if (args == null) {
         args = [];
       }
       args.pop();
+      _app = this._app;
+      this._app.triggerMethod('change:state', name, args);
       stateModel = this._statesCollection.get(name);
+      statesToProcess = this._getStatesToProcess(stateModel, args);
+      currentStateProcessor = Marionette.Deferred();
+      processState = function(index, regionContainer) {
+        var processor, promise, stateData;
+        stateData = statesToProcess[index];
+        _app.triggerMethod('before:state:process', stateData.state);
+        processor = new Marionette.StateProcessor({
+          state: stateData.state,
+          regionContainer: regionContainer,
+          stateParams: stateData.params
+        });
+        promise = processor.process();
+        return promise.done(function(ctrl) {
+          console.log(ctrl);
+          _app.triggerMethod('after:state:process', stateData.state);
+          if (ctrl instanceof Marionette.RegionController !== true) {
+            currentStateProcessor.resolve(processor);
+            return;
+          }
+          if (index === statesToProcess.length - 1) {
+            currentStateProcessor.resolve(processor);
+          }
+          if (index < statesToProcess.length - 1) {
+            index++;
+            return processState(index, ctrl._view);
+          }
+        });
+      };
+      processState(0, this._app);
+      return currentStateProcessor.promise();
+    };
+
+    AppStates.prototype._getStatesToProcess = function(stateModel, args) {
+      var data, k, parentStates, statesToProcess;
       statesToProcess = [];
       data = {
         state: stateModel,
@@ -475,28 +520,7 @@ var __hasProp = {}.hasOwnProperty,
           };
         })(this));
       }
-      currentStateProcessor = Marionette.Deferred();
-      processState = function(index, regionContainer) {
-        var processor, promise, stateData;
-        stateData = statesToProcess[index];
-        processor = new Marionette.StateProcessor({
-          state: stateData.state,
-          regionContainer: regionContainer,
-          stateParams: stateData.params
-        });
-        promise = processor.process();
-        return promise.done(function(ctrl) {
-          if (index === statesToProcess.length - 1) {
-            currentStateProcessor.resolve(processor);
-          }
-          if (index < statesToProcess.length - 1) {
-            index++;
-            return processState(index, ctrl._view);
-          }
-        });
-      };
-      processState(0, this._app);
-      return currentStateProcessor.promise();
+      return statesToProcess;
     };
 
     return AppStates;
