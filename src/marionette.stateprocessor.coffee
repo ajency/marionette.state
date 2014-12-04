@@ -12,7 +12,7 @@ class Marionette.StateProcessor extends Marionette.Object
 			throw new Marionette.Error 'regionContainer needed. This can be Application object or layoutview object'
 
 		@_stateParams = if options.stateParams then options.stateParams else []
-
+		@_parentCtrl = options.parentCtrl
 		@_deferred = new Marionette.Deferred()
 
 	process : ->
@@ -22,7 +22,7 @@ class Marionette.StateProcessor extends Marionette.Object
 
 		_region = @_regionContainer.dynamicRegion
 
-		promise =  @_runCtrl _ctrlClassName, _region
+		promise =  @_runCtrl _ctrlClassName, _region, @_parentCtrl
 		promise.done (ctrl)=>
 
 			if ctrl instanceof Marionette.RegionController isnt true
@@ -40,7 +40,7 @@ class Marionette.StateProcessor extends Marionette.Object
 						_region = _regionContainer.dynamicRegion
 					else
 						_region = _regionContainer["#{regionName}Region"]
-					promises.push @_runCtrl _ctrlClassName, _region
+					promises.push @_runCtrl _ctrlClassName, _region, ctrl
 
 			$.when(promises...).done (ctrls...)=>
 				@_state.set 'status', 'resolved'
@@ -48,7 +48,7 @@ class Marionette.StateProcessor extends Marionette.Object
 
 		@_deferred.promise()
 
-	_runCtrl : (_ctrlClassName, _region)->
+	_runCtrl : (_ctrlClassName, _region, _parentCtrl)->
 		deferred = Marionette.Deferred()
 
 		if _region instanceof Marionette.Region isnt true
@@ -70,6 +70,7 @@ class Marionette.StateProcessor extends Marionette.Object
 											region : _region
 											stateParams : @_stateParams
 											stateName : @_state.get 'name'
+											parentCtrl : _parentCtrl
 
 		_region.setController _ctrlClassName
 		_region.setControllerStateParams @_stateParams

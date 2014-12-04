@@ -5,7 +5,7 @@
 # Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.1
+# Version: v0.1.2
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license

@@ -7,8 +7,10 @@ class Marionette.RegionController extends Marionette.Controller
 			throw new Marionette.Error
 				message: 'Region instance is not passed'
 
+		@_parentCtrl = options.parentCtrl
 		@_ctrlID = _.uniqueId 'ctrl-'
 		@_region = options.region
+		@_stateParams = options.stateParams ? []
 		super options
 
 	show : (view)->
@@ -22,3 +24,11 @@ class Marionette.RegionController extends Marionette.Controller
 						@trigger 'view:rendered', @_view
 					, 10
 		@_region.show view
+
+	parent : ->
+		@_parentCtrl
+
+	getParams : ->
+		@_stateParams
+
+

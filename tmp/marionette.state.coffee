@@ -5,7 +5,7 @@
 # Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.1
+# Version: v0.1.2
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license
@@ -128,8 +128,10 @@
 				throw new Marionette.Error
 					message: 'Region instance is not passed'
 	
+			@_parentCtrl = options.parentCtrl
 			@_ctrlID = _.uniqueId 'ctrl-'
 			@_region = options.region
+			@_stateParams = options.stateParams ? []
 			super options
 	
 		show : (view)->
@@ -143,6 +145,14 @@
 							@trigger 'view:rendered', @_view
 						, 10
 			@_region.show view
+	
+		parent : ->
+			@_parentCtrl
+	
+		getParams : ->
+			@_stateParams
+	
+	
 	
 	
 	class Marionette.State extends Backbone.Model
@@ -220,7 +230,7 @@
 				throw new Marionette.Error 'regionContainer needed. This can be Application object or layoutview object'
 	
 			@_stateParams = if options.stateParams then options.stateParams else []
-	
+			@_parentCtrl = options.parentCtrl
 			@_deferred = new Marionette.Deferred()
 	
 		process : ->
@@ -230,7 +240,7 @@
 	
 			_region = @_regionContainer.dynamicRegion
 	
-			promise =  @_runCtrl _ctrlClassName, _region
+			promise =  @_runCtrl _ctrlClassName, _region, @_parentCtrl
 			promise.done (ctrl)=>
 	
 				if ctrl instanceof Marionette.RegionController isnt true
@@ -248,7 +258,7 @@
 							_region = _regionContainer.dynamicRegion
 						else
 							_region = _regionContainer["#{regionName}Region"]
-						promises.push @_runCtrl _ctrlClassName, _region
+						promises.push @_runCtrl _ctrlClassName, _region, ctrl
 	
 				$.when(promises...).done (ctrls...)=>
 					@_state.set 'status', 'resolved'
@@ -256,7 +266,7 @@
 	
 			@_deferred.promise()
 	
-		_runCtrl : (_ctrlClassName, _region)->
+		_runCtrl : (_ctrlClassName, _region, _parentCtrl)->
 			deferred = Marionette.Deferred()
 	
 			if _region instanceof Marionette.Region isnt true
@@ -278,6 +288,7 @@
 												region : _region
 												stateParams : @_stateParams
 												stateName : @_state.get 'name'
+												parentCtrl : _parentCtrl
 	
 			_region.setController _ctrlClassName
 			_region.setControllerStateParams @_stateParams
@@ -351,12 +362,22 @@
 	
 			currentStateProcessor = Marionette.Deferred()
 			processState = (index, regionContainer)->
+	
+				if regionContainer instanceof Marionette.Application is true
+					_regionHolder = regionContainer
+					_parentCtrl = false
+				else
+					_regionHolder = regionContainer._view
+					_parentCtrl = regionContainer
+	
 				stateData = statesToProcess[index]
 				_app.triggerMethod 'before:state:process', stateData.state
 				processor = new Marionette.StateProcessor
 									state : stateData.state
-									regionContainer : regionContainer
+									regionContainer : _regionHolder
 									stateParams : stateData.params
+									parentCtrl : _parentCtrl
+	
 				promise = processor.process()
 				promise.done (ctrl)->
 					_app.triggerMethod 'after:state:process', stateData.state
@@ -367,10 +388,9 @@
 					if index is statesToProcess.length - 1
 						currentStateProcessor.resolve processor
 	
-	
 					if index < statesToProcess.length - 1
 						index++
-						processState index, ctrl._view
+						processState index, ctrl
 	
 			processState 0, @_app
 	

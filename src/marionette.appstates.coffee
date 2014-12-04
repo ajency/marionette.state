@@ -61,12 +61,22 @@ class Marionette.AppStates extends Backbone.Router
 
 		currentStateProcessor = Marionette.Deferred()
 		processState = (index, regionContainer)->
+
+			if regionContainer instanceof Marionette.Application is true
+				_regionHolder = regionContainer
+				_parentCtrl = false
+			else
+				_regionHolder = regionContainer._view
+				_parentCtrl = regionContainer
+
 			stateData = statesToProcess[index]
 			_app.triggerMethod 'before:state:process', stateData.state
 			processor = new Marionette.StateProcessor
 								state : stateData.state
-								regionContainer : regionContainer
+								regionContainer : _regionHolder
 								stateParams : stateData.params
+								parentCtrl : _parentCtrl
+
 			promise = processor.process()
 			promise.done (ctrl)->
 				_app.triggerMethod 'after:state:process', stateData.state
@@ -77,10 +87,9 @@ class Marionette.AppStates extends Backbone.Router
 				if index is statesToProcess.length - 1
 					currentStateProcessor.resolve processor
 
-
 				if index < statesToProcess.length - 1
 					index++
-					processState index, ctrl._view
+					processState index, ctrl
 
 		processState 0, @_app
 
