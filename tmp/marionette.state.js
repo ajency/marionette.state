@@ -468,7 +468,6 @@ var __hasProp = {}.hasOwnProperty,
         });
         promise = processor.process();
         return promise.done(function(ctrl) {
-          console.log(ctrl);
           _app.triggerMethod('after:state:process', stateData.state);
           if (ctrl instanceof Marionette.RegionController !== true) {
             currentStateProcessor.resolve(processor);

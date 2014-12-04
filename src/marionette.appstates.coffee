@@ -69,7 +69,6 @@ class Marionette.AppStates extends Backbone.Router
 								stateParams : stateData.params
 			promise = processor.process()
 			promise.done (ctrl)->
-				console.log ctrl
 				_app.triggerMethod 'after:state:process', stateData.state
 				if ctrl instanceof Marionette.RegionController isnt true
 					currentStateProcessor.resolve processor
