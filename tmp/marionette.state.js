@@ -3,10 +3,9 @@
  *
  * Marionette States (Marionette.State)
  * State Based Routing for MarionetteJS applications.
- * Much like angular's ui-router
  * http://surajair.github.io/marionette.state
  * --------------------------------------------------
- * Version: v0.1.2
+ * Version: v0.1.3
  *
  * Copyright (c) 2014 Suraj Air, Ajency.in
  * Distributed under MIT license
@@ -36,6 +35,7 @@ var __hasProp = {}.hasOwnProperty,
   }
 })(this, function(root, Backbone, _, Marionette) {
   "use strict";
+  var StateCollection, statesCollection;
   _.extend(Marionette.Application.prototype, {
     navigate: Backbone.Router.prototype.navigate,
     start: function(options) {
@@ -264,7 +264,7 @@ var __hasProp = {}.hasOwnProperty,
     return State;
 
   })(Backbone.Model);
-  Marionette.StateCollection = (function(_super) {
+  StateCollection = (function(_super) {
     __extends(StateCollection, _super);
 
     function StateCollection() {
@@ -288,7 +288,7 @@ var __hasProp = {}.hasOwnProperty,
     return StateCollection;
 
   })(Backbone.Collection);
-  window.statesCollection = new Marionette.StateCollection;
+  statesCollection = new StateCollection;
   Marionette.StateProcessor = (function(_super) {
     __extends(StateProcessor, _super);
 
@@ -410,7 +410,7 @@ var __hasProp = {}.hasOwnProperty,
         });
       }
       this._app = app;
-      this._statesCollection = window.statesCollection;
+      this._statesCollection = statesCollection;
       this.on('route', this._processStateOnRoute, this);
       this._registerStates();
     }
@@ -444,17 +444,19 @@ var __hasProp = {}.hasOwnProperty,
     AppStates.prototype._getParentStates = function(childState) {
       var getParentState, parentStates;
       parentStates = [];
-      getParentState = function(state) {
-        var parentState;
-        if (state instanceof Marionette.State !== true) {
-          throw Error('Not a valid state');
-        }
-        parentState = window.statesCollection.get(state.get('parent'));
-        parentStates.push(parentState);
-        if (parentState.isChildState()) {
-          return getParentState(parentState);
-        }
-      };
+      getParentState = (function(_this) {
+        return function(state) {
+          var parentState;
+          if (state instanceof Marionette.State !== true) {
+            throw Error('Not a valid state');
+          }
+          parentState = _this._statesCollection.get(state.get('parent'));
+          parentStates.push(parentState);
+          if (parentState.isChildState()) {
+            return getParentState(parentState);
+          }
+        };
+      })(this);
       getParentState(childState);
       return parentStates;
     };

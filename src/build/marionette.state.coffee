@@ -2,10 +2,9 @@
 #
 # Marionette States (Marionette.State)
 # State Based Routing for MarionetteJS applications.
-# Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.2
+# Version: v0.1.3
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license

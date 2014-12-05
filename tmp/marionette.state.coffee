@@ -2,10 +2,9 @@
 #
 # Marionette States (Marionette.State)
 # State Based Routing for MarionetteJS applications.
-# Much like angular's ui-router
 # http://surajair.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.2
+# Version: v0.1.3
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license
@@ -204,7 +203,7 @@
 			url = @get 'url'
 			url.indexOf('/:') isnt -1
 	
-	class Marionette.StateCollection extends Backbone.Collection
+	class StateCollection extends Backbone.Collection
 	
 		model : Marionette.State
 	
@@ -214,7 +213,7 @@
 			@add data
 	
 	
-	window.statesCollection = new Marionette.StateCollection
+	statesCollection = new StateCollection
 	
 	
 	class Marionette.StateProcessor extends Marionette.Object
@@ -311,7 +310,7 @@
 						message : 'Application instance needed'
 	
 			@_app  = app
-			@_statesCollection = window.statesCollection
+			@_statesCollection = statesCollection
 	
 			# listen to route event of the router
 			@on 'route', @_processStateOnRoute, @
@@ -338,11 +337,11 @@
 	
 		_getParentStates : (childState)=>
 			parentStates = []
-			getParentState = (state)->
+			getParentState = (state)=>
 				if state instanceof Marionette.State isnt true
 					throw Error 'Not a valid state'
 	
-				parentState	= window.statesCollection.get state.get 'parent'
+				parentState	= @_statesCollection.get state.get 'parent'
 				parentStates.push parentState
 				if parentState.isChildState()
 					getParentState parentState

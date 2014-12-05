@@ -1,4 +1,4 @@
-class Marionette.StateCollection extends Backbone.Collection
+class StateCollection extends Backbone.Collection
 
 	model : Marionette.State
 
@@ -8,4 +8,4 @@ class Marionette.StateCollection extends Backbone.Collection
 		@add data
 
 
-window.statesCollection = new Marionette.StateCollection
+statesCollection = new StateCollection

@@ -9,7 +9,7 @@ window.userData =
     "user_status": "0"
     "display_name": "admin displayname"
     "caps":
-         "switch_themes": true
+        "switch_themes": true
         "edit_themes": true
         "activate_plugins": true
         "edit_plugins": true

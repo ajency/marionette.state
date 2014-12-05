@@ -10,7 +10,7 @@ class Marionette.AppStates extends Backbone.Router
 					message : 'Application instance needed'
 
 		@_app  = app
-		@_statesCollection = window.statesCollection
+		@_statesCollection = statesCollection
 
 		# listen to route event of the router
 		@on 'route', @_processStateOnRoute, @
@@ -37,11 +37,11 @@ class Marionette.AppStates extends Backbone.Router
 
 	_getParentStates : (childState)=>
 		parentStates = []
-		getParentState = (state)->
+		getParentState = (state)=>
 			if state instanceof Marionette.State isnt true
 				throw Error 'Not a valid state'
 
-			parentState	= window.statesCollection.get state.get 'parent'
+			parentState	= @_statesCollection.get state.get 'parent'
 			parentStates.push parentState
 			if parentState.isChildState()
 				getParentState parentState
