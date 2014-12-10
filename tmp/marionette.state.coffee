@@ -2,14 +2,13 @@
 #
 # Marionette States (Marionette.State)
 # State Based Routing for MarionetteJS applications.
-# http://surajair.github.io/marionette.state
+# http://ajency.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.3
+# Version: v0.1.4
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license
 #
-
 ###
 
 
@@ -280,6 +279,9 @@
 				@listenTo ctrlInstance, 'view:rendered', -> deferred.resolve ctrlInstance
 				ctrlInstance.trigger "view:rendered", ctrlInstance._view
 				return deferred.promise()
+	
+			# first empty the region for new controller
+			_region.empty()
 	
 			@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 	

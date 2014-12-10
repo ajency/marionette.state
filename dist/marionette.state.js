@@ -3,9 +3,9 @@
  *
  * Marionette States (Marionette.State)
  * State Based Routing for MarionetteJS applications.
- * http://surajair.github.io/marionette.state
+ * http://ajency.github.io/marionette.state
  * --------------------------------------------------
- * Version: v0.1.3
+ * Version: v0.1.4
  *
  * Copyright (c) 2014 Suraj Air, Ajency.in
  * Distributed under MIT license
@@ -370,6 +370,7 @@ var __hasProp = {}.hasOwnProperty,
         ctrlInstance.trigger("view:rendered", ctrlInstance._view);
         return deferred.promise();
       }
+      _region.empty();
       this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,

@@ -64,6 +64,9 @@ class Marionette.StateProcessor extends Marionette.Object
 			ctrlInstance.trigger "view:rendered", ctrlInstance._view
 			return deferred.promise()
 
+		# first empty the region for new controller
+		_region.empty()
+
 		@_ctrlClass = CtrlClass = Marionette.RegionControllers::getRegionController _ctrlClassName
 
 		@_ctrlInstance = ctrlInstance = new CtrlClass
