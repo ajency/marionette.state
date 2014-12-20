@@ -207,5 +207,10 @@ jQuery(document).ready ($)->
 		Backbone.history.start()
 		App.navigate '/socities/23/tab3', true
 
+	App.on 'state:transition:start', (evt, stateName, params)->
+		if 'socitiesTab3' is stateName
+			evt.preventDefault()
+			App.navigate '/socities/23/tab2', true
+
 	App.start()
 

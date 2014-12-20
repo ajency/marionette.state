@@ -17,9 +17,6 @@ class Marionette.StateProcessor extends Marionette.Object
 
 	process : ->
 		_ctrlClassName = @_state.get 'ctrl'
-		sections =
-
-
 		_region = @_regionContainer.dynamicRegion
 
 		promise =  @_runCtrl _ctrlClassName, _region, @_parentCtrl

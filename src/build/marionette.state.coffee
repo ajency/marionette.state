@@ -4,7 +4,7 @@
 # State Based Routing for MarionetteJS applications.
 # http://ajency.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.1.4
+# Version: v0.2.0
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license

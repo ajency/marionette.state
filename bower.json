@@ -1,9 +1,9 @@
 {
   "name": "marionette.state",
-  "version": "0.1.0",
-  "homepage": "https://github.com/surajair/marionette-state",
+  "version": "0.2.0",
+  "homepage": "https://github.com/ajency/marionette-state",
   "authors": [
-    "Suraj Air <surajair@live.com>"
+    "Suraj Air <surajair@ajency.in>"
   ],
   "description": "State based routing for marionette js applications",
   "main": "dist/marionette.state.js",
@@ -16,10 +16,8 @@
   "keywords": [
     "MarionetteJS",
     "ui-router",
-    "state",
-    "routing",
-    "state",
-    "machine"
+    "state routing",
+    "state machine"
   ],
   "license": "MIT",
   "ignore": [
@@ -27,6 +25,8 @@
     "node_modules",
     "bower_components",
     "spec",
+    "app",
+    "tmp",
     "tests"
   ],
   "dependencies": {

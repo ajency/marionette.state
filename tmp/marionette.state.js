@@ -5,7 +5,7 @@
  * State Based Routing for MarionetteJS applications.
  * http://ajency.github.io/marionette.state
  * --------------------------------------------------
- * Version: v0.1.4
+ * Version: v0.2.0
  *
  * Copyright (c) 2014 Suraj Air, Ajency.in
  * Distributed under MIT license
@@ -35,7 +35,7 @@ var __hasProp = {}.hasOwnProperty,
   }
 })(this, function(root, Backbone, _, Marionette) {
   "use strict";
-  var StateCollection, statesCollection;
+  var StateChangeEvent, StateCollection, statesCollection;
   _.extend(Marionette.Application.prototype, {
     navigate: Backbone.Router.prototype.navigate,
     start: function(options) {
@@ -315,13 +315,13 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var promise, sections, _ctrlClassName, _region;
+      var promise, _ctrlClassName, _region;
       _ctrlClassName = this._state.get('ctrl');
-      sections = _region = this._regionContainer.dynamicRegion;
+      _region = this._regionContainer.dynamicRegion;
       promise = this._runCtrl(_ctrlClassName, _region, this._parentCtrl);
       promise.done((function(_this) {
         return function(ctrl) {
-          var promises, _regionContainer;
+          var promises, sections, _regionContainer;
           if (ctrl instanceof Marionette.RegionController !== true) {
             _this._state.set('status', 'resolved');
             _this._deferred.resolve(ctrl);
@@ -394,6 +394,33 @@ var __hasProp = {}.hasOwnProperty,
     return StateProcessor;
 
   })(Marionette.Object);
+  StateChangeEvent = (function(_super) {
+    __extends(StateChangeEvent, _super);
+
+    function StateChangeEvent() {
+      return StateChangeEvent.__super__.constructor.apply(this, arguments);
+    }
+
+    StateChangeEvent.prototype.initialize = function(options) {
+      var app;
+      if (options == null) {
+        options = {};
+      }
+      app = options.app;
+      return this._stopTransition = false;
+    };
+
+    StateChangeEvent.prototype.preventDefault = function() {
+      return this._stopTransition = true;
+    };
+
+    StateChangeEvent.prototype._shouldStop = function() {
+      return this._stopTransition === true;
+    };
+
+    return StateChangeEvent;
+
+  })(Marionette.Object);
   Marionette.AppStates = (function(_super) {
     __extends(AppStates, _super);
 
@@ -463,16 +490,31 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {
-      var currentStateProcessor, processState, stateModel, statesToProcess, _app;
+      var currentStateProcessor, event, processState, stateModel, statesToProcess, _app;
       if (args == null) {
         args = [];
       }
       args.pop();
       _app = this._app;
-      this._app.triggerMethod('change:state', name, args);
+      event = new StateChangeEvent({
+        app: this._app
+      });
+      this._app.triggerMethod('state:transition:start', event, name, args);
+      if (event._shouldStop()) {
+        return false;
+      }
       stateModel = this._statesCollection.get(name);
       statesToProcess = this._getStatesToProcess(stateModel, args);
       currentStateProcessor = Marionette.Deferred();
+      currentStateProcessor.done((function(_this) {
+        return function(processor) {
+          return _this._app.triggerMethod('state:transition:complete', processor);
+        };
+      })(this)).fail((function(_this) {
+        return function(error) {
+          return _this._app.triggerMethod('state:transition:error', error);
+        };
+      })(this));
       processState = function(index, regionContainer) {
         var processor, promise, stateData, _parentCtrl, _regionHolder;
         if (regionContainer instanceof Marionette.Application === true) {
@@ -483,7 +525,6 @@ var __hasProp = {}.hasOwnProperty,
           _parentCtrl = regionContainer;
         }
         stateData = statesToProcess[index];
-        _app.triggerMethod('before:state:process', stateData.state);
         processor = new Marionette.StateProcessor({
           state: stateData.state,
           regionContainer: _regionHolder,
@@ -492,7 +533,6 @@ var __hasProp = {}.hasOwnProperty,
         });
         promise = processor.process();
         return promise.done(function(ctrl) {
-          _app.triggerMethod('after:state:process', stateData.state);
           if (ctrl instanceof Marionette.RegionController !== true) {
             currentStateProcessor.resolve(processor);
             return;

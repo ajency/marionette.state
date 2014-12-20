@@ -361,5 +361,11 @@ jQuery(document).ready(function($) {
     Backbone.history.start();
     return App.navigate('/socities/23/tab3', true);
   });
+  App.on('state:transition:start', function(evt, stateName, params) {
+    if ('socitiesTab3' === stateName) {
+      evt.preventDefault();
+      return App.navigate('/socities/23/tab2', true);
+    }
+  });
   return App.start();
 });

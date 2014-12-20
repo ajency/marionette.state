@@ -1,3 +1,15 @@
+class StateChangeEvent extends Marionette.Object
+
+	initialize : (options = {})->
+		{app} = options
+		@_stopTransition = false
+
+	preventDefault : ()->
+		@_stopTransition = true
+
+	_shouldStop : ->
+		@_stopTransition is true
+
 class Marionette.AppStates extends Backbone.Router
 
 	constructor : (options = {})->
@@ -54,12 +66,23 @@ class Marionette.AppStates extends Backbone.Router
 	_processStateOnRoute : (name, args = [])->
 		args.pop()
 		_app = @_app
-		@_app.triggerMethod 'change:state', name, args
+
+		# create new StateChangeEvent
+		event = new StateChangeEvent app : @_app
+		@_app.triggerMethod 'state:transition:start', event, name, args
+
+		if event._shouldStop()
+			return false
 
 		stateModel = @_statesCollection.get name
 		statesToProcess = @_getStatesToProcess stateModel, args
 
 		currentStateProcessor = Marionette.Deferred()
+		currentStateProcessor.done (processor)=>
+			@_app.triggerMethod 'state:transition:complete', processor
+		.fail (error)=>
+			@_app.triggerMethod 'state:transition:error', error
+
 		processState = (index, regionContainer)->
 
 			if regionContainer instanceof Marionette.Application is true
@@ -70,7 +93,7 @@ class Marionette.AppStates extends Backbone.Router
 				_parentCtrl = regionContainer
 
 			stateData = statesToProcess[index]
-			_app.triggerMethod 'before:state:process', stateData.state
+
 			processor = new Marionette.StateProcessor
 								state : stateData.state
 								regionContainer : _regionHolder
@@ -79,7 +102,6 @@ class Marionette.AppStates extends Backbone.Router
 
 			promise = processor.process()
 			promise.done (ctrl)->
-				_app.triggerMethod 'after:state:process', stateData.state
 				if ctrl instanceof Marionette.RegionController isnt true
 					currentStateProcessor.resolve processor
 					return

@@ -1,10 +1,43 @@
 {
-	"name": "sdsd",
-	"version": "0.1.0",
-	"dependencies": {
-		"jquery": "~2.1.1",
-		"respond" : "~1.4.2",
-		"html5shiv" : "~3.7.2",
-		"bootstrap": "~3.3.1"
-	}
+  "name": "marionette.state",
+  "version": "0.1.0",
+  "homepage": "https://github.com/surajair/marionette-state",
+  "authors": [
+    "Suraj Air <surajair@live.com>"
+  ],
+  "description": "State based routing for marionette js applications",
+  "main": "dist/marionette.state.js",
+  "moduleType": [
+    "amd",
+    "es6",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "MarionetteJS",
+    "ui-router",
+    "state",
+    "routing",
+    "state",
+    "machine"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "spec",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.7.0",
+    "jquery": "~2.1.1",
+    "backbone": "~1.1.2",
+    "backbone.marionette": "~2.2.2",
+    "handlebars": "~2.0.0"
+  },
+  "devDependencies": {
+    "jasmine-jquery": "~2.0.5",
+    "jasmine-ajax": "~2.99.0"
+  }
 }
