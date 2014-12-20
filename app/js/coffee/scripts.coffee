@@ -152,7 +152,7 @@ class SocitiesTab1Ctrl extends Marionette.RegionController
 	initialize : ->
 		@show new Marionette.ItemView template : '<div>Awesome SocitiesTab1Ctrl</div>'
 
-class SocitiesTab2Ctrl extends Marionette.RegionController
+class SocitiesTab2AbcCtrl extends Marionette.RegionController
 	initialize : ->
 		@show new Marionette.ItemView template : '<div>Awesome SocitiesTab2Ctrl</div>'
 
@@ -197,6 +197,7 @@ jQuery(document).ready ($)->
 			'socitiesTab2' :
 				parent : 'socitiesSingle'
 				url : '/tab2'
+				ctrl : SocitiesTab2AbcCtrl
 			'socitiesTab3' :
 				parent : 'socitiesSingle'
 				url : '/tab3'

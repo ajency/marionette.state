@@ -5,7 +5,7 @@
  * State Based Routing for MarionetteJS applications.
  * http://ajency.github.io/marionette.state
  * --------------------------------------------------
- * Version: v0.1.4
+ * Version: v0.2.0
  *
  * Copyright (c) 2014 Suraj Air, Ajency.in
  * Distributed under MIT license
@@ -35,7 +35,7 @@ var __hasProp = {}.hasOwnProperty,
   }
 })(this, function(root, Backbone, _, Marionette) {
   "use strict";
-  var StateCollection, statesCollection;
+  var StateChangeEvent, StateCollection, statesCollection;
   _.extend(Marionette.Application.prototype, {
     navigate: Backbone.Router.prototype.navigate,
     start: function(options) {
@@ -315,13 +315,13 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var promise, sections, _ctrlClassName, _region;
-      _ctrlClassName = this._state.get('ctrl');
-      sections = _region = this._regionContainer.dynamicRegion;
-      promise = this._runCtrl(_ctrlClassName, _region, this._parentCtrl);
+      var promise, _ctrlOption, _region;
+      _ctrlOption = this._state.get('ctrl');
+      _region = this._regionContainer.dynamicRegion;
+      promise = this._runCtrl(_ctrlOption, _region, this._parentCtrl);
       promise.done((function(_this) {
         return function(ctrl) {
-          var promises, _regionContainer;
+          var promises, sections, _regionContainer;
           if (ctrl instanceof Marionette.RegionController !== true) {
             _this._state.set('status', 'resolved');
             _this._deferred.resolve(ctrl);
@@ -332,13 +332,14 @@ var __hasProp = {}.hasOwnProperty,
           if (_this._state.has('sections')) {
             sections = _this._state.get('sections');
             _.each(sections, function(section, regionName) {
-              _ctrlClassName = section['ctrl'];
+              var _sectionCtrlOption;
+              _sectionCtrlOption = section['ctrl'];
               if (regionName === '@') {
                 _region = _regionContainer.dynamicRegion;
               } else {
                 _region = _regionContainer["" + regionName + "Region"];
               }
-              return promises.push(_this._runCtrl(_ctrlClassName, _region, ctrl));
+              return promises.push(_this._runCtrl(_sectionCtrlOption, _region, ctrl));
             });
           }
           return $.when.apply($, promises).done(function() {
@@ -352,7 +353,7 @@ var __hasProp = {}.hasOwnProperty,
       return this._deferred.promise();
     };
 
-    StateProcessor.prototype._runCtrl = function(_ctrlClassName, _region, _parentCtrl) {
+    StateProcessor.prototype._runCtrl = function(_ctrlOption, _region, _parentCtrl) {
       var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, deferred;
       deferred = Marionette.Deferred();
       if (_region instanceof Marionette.Region !== true) {
@@ -362,7 +363,7 @@ var __hasProp = {}.hasOwnProperty,
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
-      if (currentCtrlClass === _ctrlClassName && arrayCompare) {
+      if (currentCtrlClass === _ctrlOption && arrayCompare) {
         this._ctrlInstance = ctrlInstance = _region._ctrlInstance;
         this.listenTo(ctrlInstance, 'view:rendered', function() {
           return deferred.resolve(ctrlInstance);
@@ -371,14 +372,18 @@ var __hasProp = {}.hasOwnProperty,
         return deferred.promise();
       }
       _region.empty();
-      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
+      if (_.isFunction(_ctrlOption)) {
+        this._ctrlClass = CtrlClass = _ctrlOption;
+      } else {
+        this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlOption);
+      }
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
         stateParams: this._stateParams,
         stateName: this._state.get('name'),
         parentCtrl: _parentCtrl
       });
-      _region.setController(_ctrlClassName);
+      _region.setController(_ctrlOption);
       _region.setControllerStateParams(this._stateParams);
       _region.setControllerInstance(ctrlInstance);
       this.listenTo(ctrlInstance, 'view:rendered', function() {
@@ -392,6 +397,33 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     return StateProcessor;
+
+  })(Marionette.Object);
+  StateChangeEvent = (function(_super) {
+    __extends(StateChangeEvent, _super);
+
+    function StateChangeEvent() {
+      return StateChangeEvent.__super__.constructor.apply(this, arguments);
+    }
+
+    StateChangeEvent.prototype.initialize = function(options) {
+      var app;
+      if (options == null) {
+        options = {};
+      }
+      app = options.app;
+      return this._stopTransition = false;
+    };
+
+    StateChangeEvent.prototype.preventDefault = function() {
+      return this._stopTransition = true;
+    };
+
+    StateChangeEvent.prototype._shouldStop = function() {
+      return this._stopTransition === true;
+    };
+
+    return StateChangeEvent;
 
   })(Marionette.Object);
   Marionette.AppStates = (function(_super) {
@@ -463,16 +495,31 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     AppStates.prototype._processStateOnRoute = function(name, args) {
-      var currentStateProcessor, processState, stateModel, statesToProcess, _app;
+      var currentStateProcessor, event, processState, stateModel, statesToProcess, _app;
       if (args == null) {
         args = [];
       }
       args.pop();
       _app = this._app;
-      this._app.triggerMethod('change:state', name, args);
+      event = new StateChangeEvent({
+        app: this._app
+      });
+      this._app.triggerMethod('state:transition:start', event, name, args);
+      if (event._shouldStop()) {
+        return false;
+      }
       stateModel = this._statesCollection.get(name);
       statesToProcess = this._getStatesToProcess(stateModel, args);
       currentStateProcessor = Marionette.Deferred();
+      currentStateProcessor.done((function(_this) {
+        return function(processor) {
+          return _this._app.triggerMethod('state:transition:complete', processor);
+        };
+      })(this)).fail((function(_this) {
+        return function(error) {
+          return _this._app.triggerMethod('state:transition:error', error);
+        };
+      })(this));
       processState = function(index, regionContainer) {
         var processor, promise, stateData, _parentCtrl, _regionHolder;
         if (regionContainer instanceof Marionette.Application === true) {
@@ -483,7 +530,6 @@ var __hasProp = {}.hasOwnProperty,
           _parentCtrl = regionContainer;
         }
         stateData = statesToProcess[index];
-        _app.triggerMethod('before:state:process', stateData.state);
         processor = new Marionette.StateProcessor({
           state: stateData.state,
           regionContainer: _regionHolder,
@@ -492,7 +538,6 @@ var __hasProp = {}.hasOwnProperty,
         });
         promise = processor.process();
         return promise.done(function(ctrl) {
-          _app.triggerMethod('after:state:process', stateData.state);
           if (ctrl instanceof Marionette.RegionController !== true) {
             currentStateProcessor.resolve(processor);
             return;

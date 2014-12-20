@@ -17,7 +17,8 @@ class Marionette.State extends Backbone.Model
 		options.url = "/#{stateName}" if not options.url
 		options.computed_url = options.url.substring 1
 		options.url_to_array = [options.url]
-		options.ctrl = @_ctrlName stateName if not options.ctrl
+		if not options.ctrl
+			options.ctrl = @_ctrlName(stateName)
 
 		@on 'change:parentStates', @_processParentStates
 

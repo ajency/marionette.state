@@ -1,4 +1,4 @@
-var HeaderCtrl, HeaderView, LeftNavCtrl, LoginCtrl, RootCtrl, SocialSingle, SocitiesListCtrl, SocitiesSingleCtrl, SocitiesTab1Ctrl, SocitiesTab2Ctrl, SocitiesTab3Ctrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
+var HeaderCtrl, HeaderView, LeftNavCtrl, LoginCtrl, RootCtrl, SocialSingle, SocitiesListCtrl, SocitiesSingleCtrl, SocitiesTab1Ctrl, SocitiesTab2AbcCtrl, SocitiesTab3Ctrl, UniversitiesSingleCtrl, UniversitieslistCtrl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -248,20 +248,20 @@ SocitiesTab1Ctrl = (function(_super) {
 
 })(Marionette.RegionController);
 
-SocitiesTab2Ctrl = (function(_super) {
-  __extends(SocitiesTab2Ctrl, _super);
+SocitiesTab2AbcCtrl = (function(_super) {
+  __extends(SocitiesTab2AbcCtrl, _super);
 
-  function SocitiesTab2Ctrl() {
-    return SocitiesTab2Ctrl.__super__.constructor.apply(this, arguments);
+  function SocitiesTab2AbcCtrl() {
+    return SocitiesTab2AbcCtrl.__super__.constructor.apply(this, arguments);
   }
 
-  SocitiesTab2Ctrl.prototype.initialize = function() {
+  SocitiesTab2AbcCtrl.prototype.initialize = function() {
     return this.show(new Marionette.ItemView({
       template: '<div>Awesome SocitiesTab2Ctrl</div>'
     }));
   };
 
-  return SocitiesTab2Ctrl;
+  return SocitiesTab2AbcCtrl;
 
 })(Marionette.RegionController);
 
@@ -343,7 +343,8 @@ jQuery(document).ready(function($) {
       },
       'socitiesTab2': {
         parent: 'socitiesSingle',
-        url: '/tab2'
+        url: '/tab2',
+        ctrl: SocitiesTab2AbcCtrl
       },
       'socitiesTab3': {
         parent: 'socitiesSingle',

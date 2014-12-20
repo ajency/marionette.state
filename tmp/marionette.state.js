@@ -315,10 +315,10 @@ var __hasProp = {}.hasOwnProperty,
     };
 
     StateProcessor.prototype.process = function() {
-      var promise, _ctrlClassName, _region;
-      _ctrlClassName = this._state.get('ctrl');
+      var promise, _ctrlOption, _region;
+      _ctrlOption = this._state.get('ctrl');
       _region = this._regionContainer.dynamicRegion;
-      promise = this._runCtrl(_ctrlClassName, _region, this._parentCtrl);
+      promise = this._runCtrl(_ctrlOption, _region, this._parentCtrl);
       promise.done((function(_this) {
         return function(ctrl) {
           var promises, sections, _regionContainer;
@@ -332,13 +332,14 @@ var __hasProp = {}.hasOwnProperty,
           if (_this._state.has('sections')) {
             sections = _this._state.get('sections');
             _.each(sections, function(section, regionName) {
-              _ctrlClassName = section['ctrl'];
+              var _sectionCtrlOption;
+              _sectionCtrlOption = section['ctrl'];
               if (regionName === '@') {
                 _region = _regionContainer.dynamicRegion;
               } else {
                 _region = _regionContainer["" + regionName + "Region"];
               }
-              return promises.push(_this._runCtrl(_ctrlClassName, _region, ctrl));
+              return promises.push(_this._runCtrl(_sectionCtrlOption, _region, ctrl));
             });
           }
           return $.when.apply($, promises).done(function() {
@@ -352,7 +353,7 @@ var __hasProp = {}.hasOwnProperty,
       return this._deferred.promise();
     };
 
-    StateProcessor.prototype._runCtrl = function(_ctrlClassName, _region, _parentCtrl) {
+    StateProcessor.prototype._runCtrl = function(_ctrlOption, _region, _parentCtrl) {
       var CtrlClass, arrayCompare, ctrlInstance, ctrlStateParams, currentCtrlClass, deferred;
       deferred = Marionette.Deferred();
       if (_region instanceof Marionette.Region !== true) {
@@ -362,7 +363,7 @@ var __hasProp = {}.hasOwnProperty,
       currentCtrlClass = _region._ctrlClass ? _region._ctrlClass : false;
       ctrlStateParams = _region._ctrlStateParams ? _region._ctrlStateParams : false;
       arrayCompare = JSON.stringify(ctrlStateParams) === JSON.stringify(this._stateParams);
-      if (currentCtrlClass === _ctrlClassName && arrayCompare) {
+      if (currentCtrlClass === _ctrlOption && arrayCompare) {
         this._ctrlInstance = ctrlInstance = _region._ctrlInstance;
         this.listenTo(ctrlInstance, 'view:rendered', function() {
           return deferred.resolve(ctrlInstance);
@@ -371,14 +372,18 @@ var __hasProp = {}.hasOwnProperty,
         return deferred.promise();
       }
       _region.empty();
-      this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlClassName);
+      if (_.isFunction(_ctrlOption)) {
+        this._ctrlClass = CtrlClass = _ctrlOption;
+      } else {
+        this._ctrlClass = CtrlClass = Marionette.RegionControllers.prototype.getRegionController(_ctrlOption);
+      }
       this._ctrlInstance = ctrlInstance = new CtrlClass({
         region: _region,
         stateParams: this._stateParams,
         stateName: this._state.get('name'),
         parentCtrl: _parentCtrl
       });
-      _region.setController(_ctrlClassName);
+      _region.setController(_ctrlOption);
       _region.setControllerStateParams(this._stateParams);
       _region.setControllerInstance(ctrlInstance);
       this.listenTo(ctrlInstance, 'view:rendered', function() {
