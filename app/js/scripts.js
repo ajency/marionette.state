@@ -289,7 +289,11 @@ UniversitiesSingleCtrl = (function(_super) {
     return UniversitiesSingleCtrl.__super__.constructor.apply(this, arguments);
   }
 
-  UniversitiesSingleCtrl.prototype.initialize = function() {
+  UniversitiesSingleCtrl.prototype.initialize = function(options) {
+    if (options == null) {
+      options = {};
+    }
+    console.log(this.getParams());
     return this.show(new Marionette.ItemView({
       template: '<div>Awesome UniversitiesSingleCtrl <a href="#/universities">Go</a></div>'
     }));
@@ -327,7 +331,7 @@ jQuery(document).ready(function($) {
       },
       'universitiesSingle': {
         parent: 'root',
-        url: '/universities/:id'
+        url: '/universities/:id/aa/:one'
       },
       'socitiesList': {
         parent: 'root',
@@ -359,8 +363,7 @@ jQuery(document).ready(function($) {
     new AppStates({
       app: App
     });
-    Backbone.history.start();
-    return App.navigate('/socities/23/tab3', true);
+    return Backbone.history.start();
   });
   App.on('state:transition:start', function(evt, stateName, params) {
     if ('socitiesTab3' === stateName) {

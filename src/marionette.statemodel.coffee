@@ -48,3 +48,9 @@ class Marionette.State extends Backbone.Model
 	hasParams : ->
 		url = @get 'url'
 		url.indexOf('/:') isnt -1
+
+	paramsCount : ->
+		url = @get 'url'
+		(url.match(/\/:/g) || []).length
+
+

@@ -161,7 +161,8 @@ class SocitiesTab3Ctrl extends Marionette.RegionController
 		@show new Marionette.ItemView template : '<div>Awesome SocitiesTab3Ctrl</div>'
 
 class UniversitiesSingleCtrl extends Marionette.RegionController
-	initialize : ->
+	initialize : (options = {})->
+		console.log @getParams()
 		@show new Marionette.ItemView template : '<div>Awesome UniversitiesSingleCtrl <a href="#/universities">Go</a></div>'
 
 
@@ -184,7 +185,7 @@ jQuery(document).ready ($)->
 				url : '/universities'
 			'universitiesSingle' :
 				parent : 'root'
-				url : '/universities/:id'
+				url : '/universities/:id/aa/:one'
 			'socitiesList' :
 				parent : 'root'
 				url : '/socities'
@@ -206,7 +207,7 @@ jQuery(document).ready ($)->
 	App.addInitializer ->
 		new AppStates app : App
 		Backbone.history.start()
-		App.navigate '/socities/23/tab3', true
+		#App.navigate 'universities/23/aa/233', true
 
 	App.on 'state:transition:start', (evt, stateName, params)->
 		if 'socitiesTab3' is stateName
