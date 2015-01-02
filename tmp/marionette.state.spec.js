@@ -67,7 +67,7 @@ describe('Marionette.RegionController', function() {
       return expect(this.ctrl.getParams()).toEqual(this.stateParams);
     });
   });
-  return describe('when showing the view inside region', function() {
+  describe('when showing the view inside region', function() {
     beforeEach(function() {
       this.view = new Marionette.ItemView({
         template: '<p>template</p>'
@@ -83,6 +83,24 @@ describe('Marionette.RegionController', function() {
     });
     return it('must trigger \'view:show\' event on view show ', function() {
       return expect(this.spy).toHaveBeenCalledWith('view:show', this.view);
+    });
+  });
+  return describe('when destroying the controller', function() {
+    beforeEach(function() {
+      this.view = new Marionette.ItemView({
+        template: '<p>template</p>'
+      });
+      this.ctrl = new Marionette.RegionController({
+        region: this.region
+      });
+      this.ctrl.show(this.view);
+      return this.ctrl.destroy();
+    });
+    return it('must not have _region, _stateParams, _currentView, _parent', function() {
+      expect(this.ctrl._region).toBeUndefined();
+      expect(this.ctrl._parent).toBeUndefined();
+      expect(this.ctrl._stateParams).toBeUndefined();
+      return expect(this.ctrl._currentView).toBeUndefined();
     });
   });
 });

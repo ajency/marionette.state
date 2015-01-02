@@ -12,7 +12,8 @@
  *
  */
 var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 (function(root, factory) {
   var Backbone, Marionette, _;
@@ -49,6 +50,13 @@ var __hasProp = {}.hasOwnProperty,
    */
   Marionette.RegionController = (function(_super) {
     __extends(RegionController, _super);
+
+
+    /*
+    		 * Constructor function of the controller
+    		 * sets the region, parent controller, state parameters
+    		 * and call the parent constructor
+     */
 
     function RegionController(options) {
       var _ref, _ref1;
@@ -95,6 +103,9 @@ var __hasProp = {}.hasOwnProperty,
      */
 
     RegionController.prototype.getParams = function() {
+      if (!this._stateParams) {
+        return this._stateParams;
+      }
       return this._stateParams;
     };
 
@@ -106,15 +117,42 @@ var __hasProp = {}.hasOwnProperty,
     RegionController.prototype.show = function(view) {
       view.once('show', (function(_this) {
         return function() {
+          _this._currentView = view;
           return _this.triggerMethod('view:show', view);
         };
       })(this));
-      this._currentView = view;
-      return this.getRegion().show(view);
+      if (this.getRegion() !== false) {
+        return this.getRegion().show(view);
+      }
     };
 
+
+    /*
+    		 * Returns the current view rendered inside the region
+     */
+
     RegionController.prototype.getCurrentView = function() {
+      if (!this._currentView) {
+        return false;
+      }
       return this._currentView;
+    };
+
+
+    /*
+    		 * Overridden destroy method
+    		 * removes the reference to external object
+    		 * for memory cleanup
+     */
+
+    RegionController.prototype.destroy = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      delete this._region;
+      delete this._stateParams;
+      delete this._parent;
+      delete this._currentView;
+      return RegionController.__super__.destroy.apply(this, args);
     };
 
     return RegionController;

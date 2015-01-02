@@ -70,6 +70,21 @@ describe 'Marionette.RegionController', ->
 		it 'must trigger \'view:show\' event on view show ', ->
 			expect(@spy).toHaveBeenCalledWith 'view:show', @view
 
+	describe 'when destroying the controller', ->
+		
+		beforeEach ->
+			@view = new Marionette.ItemView template : '<p>template</p>'
+			@ctrl = new Marionette.RegionController region : @region
+			@ctrl.show @view
+			@ctrl.destroy()
+
+		it 'must not have _region, _stateParams, _currentView, _parent', ->
+			expect(@ctrl._region).toBeUndefined()
+			expect(@ctrl._parent).toBeUndefined()
+			expect(@ctrl._stateParams).toBeUndefined()
+			expect(@ctrl._currentView).toBeUndefined()
+	  
+
 		  
 	  
 		  
