@@ -50,9 +50,72 @@ var __hasProp = {}.hasOwnProperty,
   Marionette.RegionController = (function(_super) {
     __extends(RegionController, _super);
 
-    function RegionController() {
-      return RegionController.__super__.constructor.apply(this, arguments);
+    function RegionController(options) {
+      var _ref, _ref1;
+      if (options == null) {
+        options = {};
+      }
+      if (!options.region) {
+        throw new Marionette.Error('region param missing');
+      }
+      this._region = options.region;
+      this._parent = (_ref = options.parent) != null ? _ref : false;
+      this._stateParams = (_ref1 = options.stateParams) != null ? _ref1 : [];
+      RegionController.__super__.constructor.call(this, options);
     }
+
+
+    /*
+    		 * Return the region of the controlller
+     */
+
+    RegionController.prototype.getRegion = function() {
+      if (!this._region) {
+        return false;
+      }
+      return this._region;
+    };
+
+
+    /*
+    		 * Return the parent controller
+    		 * returns false if not called with parent controller
+     */
+
+    RegionController.prototype.parent = function() {
+      if (!this._parent) {
+        return false;
+      }
+      return this._parent;
+    };
+
+
+    /*
+    		 * Returns the parameters passed to the controller
+     */
+
+    RegionController.prototype.getParams = function() {
+      return this._stateParams;
+    };
+
+
+    /*
+    		 * renders the view inside the region
+     */
+
+    RegionController.prototype.show = function(view) {
+      view.once('show', (function(_this) {
+        return function() {
+          return _this.triggerMethod('view:show', view);
+        };
+      })(this));
+      this._currentView = view;
+      return this.getRegion().show(view);
+    };
+
+    RegionController.prototype.getCurrentView = function() {
+      return this._currentView;
+    };
 
     return RegionController;
 
