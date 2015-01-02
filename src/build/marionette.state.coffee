@@ -4,7 +4,7 @@
 # State Based Routing for MarionetteJS applications.
 # http://ajency.github.io/marionette.state
 # --------------------------------------------------
-# Version: v0.2.1
+# Version: v0.3.0
 #
 # Copyright (c) 2014 Suraj Air, Ajency.in
 # Distributed under MIT license
@@ -35,14 +35,6 @@
 ) this, (root, Backbone, _, Marionette) ->
 	"use strict"
 
-	# @include ../marionette.application.coffee
-	# @include ../marionette.layoutview.coffee
-	# @include ../marionette.region.coffee
-	# @include ../marionette.regioncontrollers.coffee
 	# @include ../marionette.regioncontroller.coffee
-	# @include ../marionette.statemodel.coffee
-	# @include ../marionette.statecollection.coffee
-	# @include ../marionette.stateprocessor.coffee
-	# @include ../marionette.appstates.coffee
 
-	Marionette.State
+	Marionette
